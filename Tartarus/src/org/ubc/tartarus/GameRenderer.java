@@ -19,8 +19,6 @@ public class GameRenderer implements Renderer {
 	private float[] mProjectionMatrix;
 	private float[] mViewMatrix;
 	private float[] mModelViewMatrix;
-	private float[] mRotationMatrix; 
-	
 	
 	private Context mContext;
 		
@@ -80,7 +78,6 @@ public class GameRenderer implements Renderer {
 		mProjectionMatrix = new float[MATRIX_SIZE*MATRIX_SIZE];
 		mViewMatrix = new float[MATRIX_SIZE*MATRIX_SIZE];
 		mModelViewMatrix = new float[MATRIX_SIZE*MATRIX_SIZE]; 
-		mRotationMatrix = new float[MATRIX_SIZE*MATRIX_SIZE];
 		fingerX = fingerY = 0.0f;
 		
 		p = new Particle(mContext, R.drawable.particle, 0, 0, 0,

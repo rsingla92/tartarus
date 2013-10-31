@@ -103,16 +103,7 @@ public class BitmapImg {
 		mTexCoordinates = tlb.asFloatBuffer();
 		mTexCoordinates.put(mTexCoordinateData);
 		mTexCoordinates.position(0);
-		
-		// Load shaders
-/*		int vertexShader = OrpheusRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-	    int fragmentShader = OrpheusRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
-	    mProgram = GLES20.glCreateProgram();             // create empty OpenGL ES Program
-	    GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
-	    GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
-	    GLES20.glLinkProgram(mProgram);                  // creates OpenGL ES program executables
-	    */
 	    loadImage(context, resId);
 	}
 	
