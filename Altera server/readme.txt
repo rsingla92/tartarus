@@ -1,1 +1,1 @@
-Android Java code goes here!
+Altera DE2 Code goes here!
