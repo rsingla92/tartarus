@@ -99,9 +99,13 @@ void setCapturedFlags(MoveMsg m, byte flagsCaptured);
 void setCapturedFlag(MoveMsg m, int flagID);
 
 /* TO DO : Implement */
-// Helper function to 
+// Helper function to determine Android message type
 int determineMsgType();
 int makeLoadMsg();
 int makeGameMsg();
 int makeMoveMsg();
 int makePowerUpMsg();
+
+void readMsg();
+void makeMsg();
+void sendMsg();

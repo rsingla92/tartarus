@@ -195,3 +195,35 @@ void setCapturedFlag(MoveMsg m, int flagID)
 }
 
 
+int determineMsgType()
+{
+}
+
+int makeLoadMsg()
+{
+}
+
+int makeGameMsg()
+{
+}
+
+int makeMoveMsg()
+{
+}
+
+int makePowerUpMsg()
+{
+}
+
+void readMsg()
+{
+}
+
+void makeMsg()
+{
+}
+
+void sendMsg()
+{
+}
+
