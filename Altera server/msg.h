@@ -15,7 +15,7 @@
 #define THREE_READY 0x01110111
 #define FOUR_READY 0x11111111
 
-enum MSG_TYPE { GAME, MOVE, POWER_UP };
+enum MSG_TYPE { LOAD, GAME, MOVE, POWER_UP };
 enum GAME_STATE { NO_GAME, INITAL, WAITING, READY, PLAYING, WIN, LOSE };
 enum POWER_UP_TYPE {FREEZE_ALL, FREEZE_ONE, SLOW_ALL, SLOW_ONE, FAST_ONE, RESTART_ONE, RESTART_ALL};
 
@@ -53,6 +53,24 @@ typedef struct PowerUpMsg{
 } PowerUpMsg;
 
 
+typedef struct MoveMsg{
+    // PLAYER X IS IN PLAYER Y'S VIEWPORT
+    
+    // MOVEMENT REQUEST
+    
+    // X & Y
+    int x_;
+    int y_;
+
+    // CAPTURED FLAG
+    // In the form where the first four bits are T/F
+    // The upper four bits indicate which flag is captured
+    byte flagsCaptured_;
+
+} MoveMsg;
+
+/* TO DO: Load Msg Struct */
+
 GAME_STATE getGameState(GameMsg g);
 void setGameState(GameMsg g, GAME_STATE gs);
 byte getID(GameMsg g);
@@ -70,3 +88,20 @@ POWER_UP_TYPE getPowerUpType(PowerUpMsg p);
 void setPowerUpType(PowerUpMsg p, POWER_UP_TYPE type);
 byte getAffectedPlayers(PowerUpMsg p);
 void setAffectedPlayers(PowerUpMsg p, int numPlayers);
+
+int getPositionX(MoveMsg m);
+int getPositionY(MoveMsg m);
+byte getCapturedFlags(MoveMsg m);
+
+void setPositionX(MoveMsg m,  int x);
+void setPositionY(MoveMsg m,  int y);
+void setCapturedFlags(MoveMsg m, byte flagsCaptured);
+void setCapturedFlag(MoveMsg m, int flagID);
+
+/* TO DO : Implement */
+// Helper function to 
+int determineMsgType();
+int makeLoadMsg();
+int makeGameMsg();
+int makeMoveMsg();
+int makePowerUpMsg();

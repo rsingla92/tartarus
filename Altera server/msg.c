@@ -4,23 +4,6 @@
 /* Number of Players specified */
 extern int numPlayers = 0;
 
-typedef struct MoveMsg{
-    // PLAYER X IS IN PLAYER Y'S VIEWPORT
-    
-    // MOVEMENT REQUEST
-    
-    // X & Y
-    unsigned char x_;
-    unsigned char y_;
-
-    // CAPTURED FLAG
-    // In the form where the first four bits are T/F
-    // The upper four bits indicate which flag is captured
-    unsigned char flagCaptured_;
-
-} MoveMsg;
-
-
 GAME_STATE getGameState(GameMsg g)
 {
     return g.gameState_;
@@ -156,6 +139,7 @@ byte areAllPlayersReady(GameMsg g)
     return (g.lobbyState_ == checkVal);
 }
 
+// Determine power up type
 POWER_UP_TYPE getPowerUpType(PowerUpMsg p)
 {
     return p.type_;
@@ -170,4 +154,44 @@ byte getAffectedPlayers(PowerUpMsg p)
 {
     return p.players_;
 }
+
+
+int getPositionX(MoveMsg m)
+{
+    return m.x_;
+}
+
+int getPositionY(MoveMsg m)
+{
+    return m.y_;
+}
+
+byte getCapturedFlags(MoveMsg m)
+{
+    return m.flagsCaptured_;
+}
+
+void setPositionX(MoveMsg m,  int x)
+{
+    m.x_ = x;
+}
+
+void setPositionY(MoveMsg m,  int y)
+{
+    m.y_ = y;
+}
+
+void setCapturedFlags(MoveMsg m, byte flagsCaptured)
+{
+    m._flagsCaptured_ = flagsCaptured;
+}
+
+void setCapturedFlag(MoveMsg m, int flagID)
+{
+    // Set the bit for the specified flag
+    if( flagID > 3 || flagID < 1 ) return;
+
+    m_flagsCaptured |= 1 << flagID;
+}
+
 
