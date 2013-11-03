@@ -8,18 +8,19 @@ import android.opengl.Matrix;
 public class Particle {
 	public static final int NUM_COLS = 4;
 	
-	float mDecay; 
-	float mScaleFactor;
-	float mColour[]; 
-	float mX, mY, mZ;
-	float mXSpeed, mYSpeed, mZSpeed;
-	float mWidth, mHeight;
-	boolean mDead; 
-	Random mRandomGenerator; 
-	BitmapImg particleImg;
-	float[] mMVPMat;
-	float[] modelMat;
-	float[] scaleMat;
+	private float mDecay; 
+	private float mScaleFactor;
+	private float mColour[]; 
+	private float mX, mY, mZ;
+	private float mXSpeed, mYSpeed, mZSpeed;
+	private float mWidth, mHeight;
+	private boolean mDead; 
+	private Random mRandomGenerator; 
+	private static BitmapImg particleImg;
+	private static boolean loadedParticleImg = false;
+	private float[] mMVPMat;
+	private float[] modelMat;
+	private float[] scaleMat;
 	
 	// Spinner parameters:
 	private boolean mSpinner; 
@@ -42,7 +43,6 @@ public class Particle {
 		mMVPMat = new float[16];
 		modelMat = new float[16];
 		scaleMat = new float[16];
-		particleImg = new BitmapImg(context, resId, r, g, b, a);
 		
 		if (decay < 0) {
 			mDecay = (mRandomGenerator.nextFloat() * 0.009f) + 0.001f; 
@@ -68,6 +68,20 @@ public class Particle {
 		mRadSpeed = 0;
 		mAngleSpeed = 0;
 		mOriginX = mOriginY = mCurrentRad = mCurrentAngle = 0;
+	}
+	
+	// Allows for sharing of image between particles (saves a lot of memory)
+	public static void loadParticleImg(final Context context, int resId) {
+		particleImg = new BitmapImg(context, resId);
+		loadedParticleImg = true;
+	}
+	
+	public static boolean getParticleImgLoaded() {
+		return loadedParticleImg;
+	}
+	
+	public static void setParticleImgLoaded(boolean loaded) {
+		loadedParticleImg = loaded;
 	}
 	
 	void makeSpinner(float radiusSpeed, float angleSpeed, float originX, float originY) {
@@ -132,6 +146,10 @@ public class Particle {
 		}
 	}
 	
+	void setDead(boolean dead) {
+		mDead = dead;
+	}
+	
 	void updateParticle(float aspect) {
 		if (!mDead) {
 			mScaleFactor -= mDecay;
@@ -164,6 +182,7 @@ public class Particle {
 			Matrix.scaleM(scaleMat, 0, mWidth*mScaleFactor, mHeight*mScaleFactor, 1);
 			Matrix.multiplyMM(modelMat, 0, modelMat.clone(), 0, scaleMat, 0);
 			Matrix.multiplyMM(mMVPMat, 0, modelViewMatrix, 0, modelMat, 0);
+			particleImg.setColour(mColour[0], mColour[1], mColour[2], mColour[3]);
 			particleImg.draw(mMVPMat);
 		}
 	}

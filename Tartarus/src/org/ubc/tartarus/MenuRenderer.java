@@ -3,31 +3,22 @@ package org.ubc.tartarus;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.ubc.tartarus.ParticleSystem.Type;
-
 import android.content.Context;
+import android.opengl.Matrix;
 
-public class GameRenderer extends CustomRenderer {
+public class MenuRenderer extends CustomRenderer {
 
 	public static final int MATRIX_SIZE = 4;
 	
 	public volatile float mAngle;
 	
-	private ParticleSystem mParticleSystem;
+	private BitmapImg menuBackground;
 
-	private float stagnantColourList[][] = {
-			{1.0f, 1.0f, 1.0f, 1.0f},
-			{0.8f, 0.8f, 0.9f, 1.0f},
-			{0.8f, 0.7f, 0.9f, 1.0f},
-			{0.9f, 0.9f, 0.7f, 1.0f},
-			{0.8f, 0.8f, 0.7f, 1.0f},
-			{1.0f, 1.0f, 0.0f, 1.0f},
-			{0.8f, 0.7f, 0.2f, 1.0f},
-		};
+	private ParticleSystem mParticleSystem;
 	
-	private Player mPlayer;
+	private Particle mCursor;
 	
-	public GameRenderer(Context context) {
+	public MenuRenderer(Context context) {
 		super(context);
 	}
 	
@@ -35,9 +26,14 @@ public class GameRenderer extends CustomRenderer {
 	public void onDrawFrame(GL10 arg0) {
 		super.onDrawFrame(arg0);
 		
-		mPlayer.onUpdate();
-		mPlayer.drawPlayer(getModelViewMatrix());
+		float[] copyMat = new float[16];
+		Matrix.setIdentityM(copyMat, 0);
+		Matrix.scaleM(copyMat, 0, 2 * getAspectRatio(), 2, 2);
+		Matrix.multiplyMM(copyMat, 0, getModelViewMatrix(), 0, copyMat.clone(), 0);
+		menuBackground.draw(copyMat);
 		
+		mCursor.setParticlePosition(getFingerX(), getFingerY(), 0);
+		mCursor.drawParticle(getModelViewMatrix());
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
 	}
@@ -47,8 +43,13 @@ public class GameRenderer extends CustomRenderer {
 		// Load shaders for all BitmapImg objects.
 		super.onSurfaceCreated(arg0, arg1);
 		
-		mPlayer = new Player(getContext(), R.drawable.tmp_minotaur, 0, 0, 0.5f, 0.5f, 0.001f);
-		mParticleSystem = new ParticleSystem(getContext(), 100, R.drawable.particle, 10, Type.STAGNANT, stagnantColourList);
+		menuBackground = new BitmapImg(getContext(), R.drawable.img_tartarus_menu);
+		
+		mCursor = new Particle(getContext(), R.drawable.particle, 0, 0, 0,
+				0.85098f, 0.0f, 0.0f, 1.0f, 0.2f, 0.2f, false, 0);
+		mCursor.setParticleSpeed(0, 0, 0);
+		
+		mParticleSystem = new ParticleSystem(getContext(), 50, R.drawable.particle, 10);
 	}
 		
 	@Override
@@ -58,8 +59,6 @@ public class GameRenderer extends CustomRenderer {
 		if (mParticleSystem != null) {
 			mParticleSystem.beginSpawning();
 		}
-		
-		mPlayer.setGoal(new Point(getFingerX(), getFingerY()));
 	}
 
 	@Override
@@ -74,6 +73,5 @@ public class GameRenderer extends CustomRenderer {
 	@Override
 	public void onMoveTouch(float x, float y, float width, float height) { 
 		super.onMoveTouch(x, y, width, height);
-		mPlayer.setGoal(new Point(getFingerX(), getFingerY()));
 	}
 }

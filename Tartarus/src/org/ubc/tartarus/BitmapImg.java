@@ -3,7 +3,6 @@ package org.ubc.tartarus;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -18,13 +17,15 @@ public class BitmapImg {
 	static final int BYTES_PER_SHORT = 2;
 	static final int COORDS_PER_VERTEX = 3;
 	
-	private ShortBuffer drawOrderBuf; 
+	//private ShortBuffer drawOrderBuf; 
 	private FloatBuffer vertexBuffer; 
 	private FloatBuffer mTexCoordinates;
 	private int mPositionHandle;
 	private int mColorHandle;
 	private int mMVPMatrixHandle;
-	 
+	
+	private int mTextureWidth, mTextureHeight;
+	
 	/** This will be used to pass in the texture. */
 	private int mTexUniformHandle;
 	 
@@ -41,8 +42,6 @@ public class BitmapImg {
 								 0.5f,  0.5f, 0.0f, // Top-right corner
 								-0.5f, -0.5f, 0.0f, // Bottom-left corner of square
 								 0.5f, -0.5f, 0.0f }; // Bottom-right corner of square 
-	
-	private short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; 
 	
     private float[] mTexCoordinateData =
 		{
@@ -93,18 +92,19 @@ public class BitmapImg {
 		vertexBuffer.put(vertices);
 		vertexBuffer.position(0);
 		
-		// Now set the byte buffer for the draw list.
-		ByteBuffer dlb = ByteBuffer.allocateDirect(drawOrder.length * BYTES_PER_SHORT).order(ByteOrder.nativeOrder()); 
-		drawOrderBuf = dlb.asShortBuffer();
-		drawOrderBuf.put(drawOrder);
-		drawOrderBuf.position(0);
-		
 		ByteBuffer tlb = ByteBuffer.allocateDirect(mTexCoordinateData.length * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder());
 		mTexCoordinates = tlb.asFloatBuffer();
 		mTexCoordinates.put(mTexCoordinateData);
 		mTexCoordinates.position(0);
 
 	    loadImage(context, resId);
+	}
+	
+	public void setColour(float r, float g, float b, float a) {
+		colour[0] = r;
+		colour[1] = g;
+		colour[2] = b;
+		colour[3] = a;	
 	}
 	
 	public void setTextureCoordinates(Point bottomLeft, Point bottomRight, Point topRight, Point topLeft) {
@@ -116,16 +116,39 @@ public class BitmapImg {
 	    mTexCoordinateData[5] = topRight.y;
 	    mTexCoordinateData[6] = topLeft.x;
 	    mTexCoordinateData[7] = topLeft.y;
+	    
+		ByteBuffer tlb = ByteBuffer.allocateDirect(mTexCoordinateData.length * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder());
+		mTexCoordinates = tlb.asFloatBuffer();
+		mTexCoordinates.put(mTexCoordinateData);
+		mTexCoordinates.position(0);
 	}
 	
-	public void setTexturePortion(Point topLeft, Point bottomRight) {
+	// IN OPENGL COORDINATES! So origin is bottom-left!
+	public void setTexturePortion(Point bottomLeft, Point topRight) {
 		
+		float swapTmp = bottomLeft.y;
+		bottomLeft.y = mTextureHeight - topRight.y;
+		topRight.y =  mTextureHeight - swapTmp;
+		
+	    mTexCoordinateData[0] = topRight.x / (float) mTextureWidth; 
+	    mTexCoordinateData[1] = (bottomLeft.y / (float) mTextureHeight);
+	    mTexCoordinateData[2] = bottomLeft.x / (float) mTextureWidth;
+	    mTexCoordinateData[3] = (bottomLeft.y / (float) mTextureHeight);
+	    mTexCoordinateData[4] = topRight.x / (float) mTextureWidth;
+	    mTexCoordinateData[5] = (topRight.y / (float) mTextureHeight);
+	    mTexCoordinateData[6] = bottomLeft.x / (float) mTextureWidth;
+	    mTexCoordinateData[7] = (topRight.y / (float) mTextureHeight);
+
+		ByteBuffer tlb = ByteBuffer.allocateDirect(mTexCoordinateData.length * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder());
+		mTexCoordinates = tlb.asFloatBuffer();
+		mTexCoordinates.put(mTexCoordinateData);
+		mTexCoordinates.position(0);
 	}
 	
 	public static void loadBitmapShaders() {
 		// Load shaders
-		int vertexShader = GameRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
-	    int fragmentShader = GameRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+		int vertexShader = CustomRenderer.loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+	    int fragmentShader = CustomRenderer.loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
 
 	    mProgram = GLES20.glCreateProgram();             // create empty OpenGL ES Program
 	    GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
@@ -152,6 +175,9 @@ public class BitmapImg {
 	        if (bitmap == null) {
 	        	Log.i("BitmapImg", "Could not decode resource!");
 	        } 
+	        
+	        mTextureWidth = bitmap.getWidth();
+	        mTextureHeight = bitmap.getHeight();
 	        
 	        // Bind to the texture in OpenGL
 	        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle[0]);
