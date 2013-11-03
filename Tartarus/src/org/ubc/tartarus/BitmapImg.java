@@ -158,6 +158,14 @@ public class BitmapImg {
 	    shadersInitialized = true;
 	}
 	
+	public int getWidth() {
+		return mTextureWidth;
+	}
+	
+	public int getHeight() {
+		return mTextureHeight;
+	}
+	
 	public void loadImage(final Context context, final int resId)
 	{
 	    final int[] textureHandle = new int[1];
