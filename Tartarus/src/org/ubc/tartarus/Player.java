@@ -99,13 +99,37 @@ public class Player {
 			float dy = mGoal.y - mPosition.y;
 
 			if (dx > 0) {
-				movePlayer(eDIR.RIGHT);
+				if (mDirection == eDIR.LEFT){
+					//Overshot the goal
+					mGoal.x = -1;
+					mGoal.y = -1;
+				} else {
+					movePlayer(eDIR.RIGHT);
+				}
 			} else if (dx < 0) {
-				movePlayer(eDIR.LEFT);
+				if (mDirection == eDIR.RIGHT){
+					//Overshot the goal
+					mGoal.x = -1;
+					mGoal.y = -1;
+				} else {
+					movePlayer(eDIR.LEFT);
+				}
 			} else if (dy > 0) {
-				movePlayer(eDIR.UP);
+				if (mDirection == eDIR.DOWN){
+					//Overshot the goal
+					mGoal.x = -1;
+					mGoal.y = -1;
+				} else {
+					movePlayer(eDIR.UP);
+				}
 			} else if (dy < 0) {
-				movePlayer(eDIR.DOWN);
+				if (mDirection == eDIR.UP){
+					//Overshot the goal
+					mGoal.x = -1;
+					mGoal.y = -1;
+				} else {
+					movePlayer(eDIR.DOWN);
+				}
 			} else {
 				// Reached position
 				mGoal.x = -1;

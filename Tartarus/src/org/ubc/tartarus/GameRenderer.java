@@ -49,7 +49,7 @@ public class GameRenderer extends CustomRenderer {
 		// Load shaders for all BitmapImg objects.
 		super.onSurfaceCreated(arg0, arg1);
 
-		byte[][] tileMap = {
+		int[][] tileMap = {
 				{0, 1, 2, 3, 4, 5, 6},
 				{7, 8, 9, 10, 11, 12, 13},
 				{14, 15, 16, 17, 18, 19, 20},
@@ -58,9 +58,11 @@ public class GameRenderer extends CustomRenderer {
 				{35, 36, 37, 38, 39, 40, 41},
 		}; 
 		
-		mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 80, 48, 16, 16);
-		mWorldMap.loadTileMap(tileMap, 7, 6);
-		mPlayer = new Player(getContext(), R.drawable.tmp_minotaur, 0, 0, 0.5f, 0.5f, 0.001f);
+		MapParser.TileMap map = MapParser.readMapFromFile(getContext(), R.raw.test_level);
+		
+		mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 224, 160, 0, 0);
+		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
+		mPlayer = new Player(getContext(), R.drawable.tmp_minotaur, 0, 0, 0.5f, 0.5f, 0.01f);
 		mParticleSystem = new ParticleSystem(getContext(), 100, R.drawable.particle, 10, Type.STAGNANT, stagnantColourList);
 	}
 		
@@ -72,7 +74,9 @@ public class GameRenderer extends CustomRenderer {
 			mParticleSystem.beginSpawning();
 		}
 		
-		mPlayer.setGoal(new Point(getFingerX(), getFingerY()));
+		if (mPlayer != null) {
+			mPlayer.setGoal(new Point(getFingerX(), getFingerY()));
+		}
 	}
 
 	@Override
@@ -87,6 +91,8 @@ public class GameRenderer extends CustomRenderer {
 	@Override
 	public void onMoveTouch(float x, float y, float width, float height) { 
 		super.onMoveTouch(x, y, width, height);
-		mPlayer.setGoal(new Point(getFingerX(), getFingerY()));
+		if (mPlayer != null) {
+			mPlayer.setGoal(new Point(getFingerX(), getFingerY()));
+		}
 	}
 }

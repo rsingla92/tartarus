@@ -6,7 +6,7 @@ import android.opengl.Matrix;
 public class WorldMap {
 
 	private BitmapImg mTileset;
-	private byte[][] mTilemap;
+	private int[][] mTilemap;
 	private int mWorldHeight, mWorldWidth;
 	private int mTileWidth, mTileHeight;
 	private int mTilePadding;
@@ -47,11 +47,11 @@ public class WorldMap {
 		mViewportY = viewportY;
 	}
 	
-	public void loadTileMap(byte[][] tileMap, int worldWidth, int worldHeight) {
+	public void loadTileMap(int[][] tileMap, int worldWidth, int worldHeight) {
 		mWorldWidth = worldWidth;
 		mWorldHeight = worldHeight;
 		
-		mTilemap = new byte[worldHeight][worldWidth];
+		mTilemap = new int[worldHeight][worldWidth];
 		
 		for (int i = 0; i < worldWidth; i++) {
 			for (int j = 0; j < worldHeight; j++) {
@@ -123,7 +123,7 @@ public class WorldMap {
 		}
 	}
 	
-	private void pluckTile(byte tileId) {
+	private void pluckTile(int tileId) {
 		int row = tileId / mNumTilesPerRow;
 		int col = tileId % mNumTilesPerRow;
 		int xPadding = mTilePadding * (col + 1);
