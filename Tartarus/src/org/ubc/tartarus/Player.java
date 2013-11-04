@@ -15,13 +15,15 @@ public class Player {
 	private float[] scaleMat;
 	private float[] mMVPMat;
 	
+	private WorldMap mWorldMap;
+	
 	public enum eDIR {
 		LEFT, RIGHT, UP, DOWN
 	}
 	
 	private eDIR mDirection;
 	
-	public Player(final Context context, final int resId, float x, float y, float width, float height, float speed) {
+	public Player(final Context context, final int resId, float x, float y, float width, float height, float speed, WorldMap worldMap) {
 		mPlayerImg = new BitmapImg(context, resId);
 		mPosition = new Point(x, y);
 		modelMat = new float[16];
@@ -32,6 +34,7 @@ public class Player {
 		mGoal = new Point(-1, -1);
 		mWidth = width;
 		mHeight = height;
+		mWorldMap = worldMap;
 	}
 	
 	public void drawPlayer(float[] modelViewMatrix) {
@@ -89,22 +92,29 @@ public class Player {
 			mGoal.y = goal.y;
 			mGoal.x = mPosition.x;
 		}
-		
-		Log.i("Player", "Goal X: " + mGoal.x + ", Goal Y: " + mGoal.y);
 	}
 	
-	public void onUpdate() {
+	public void onUpdate(float viewWidth, float viewHeight) {
 		if (mGoal.x != -1 && mGoal.y != -1) {
 			float dx = mGoal.x - mPosition.x;
 			float dy = mGoal.y - mPosition.y;
 
+			float viewportXUnitsPerGL = mWorldMap.getViewportWidth() / viewWidth;
+			float viewportYUnitsPerGL = mWorldMap.getViewportHeight() / viewHeight;
+					
 			if (dx > 0) {
 				if (mDirection == eDIR.LEFT){
 					//Overshot the goal
 					mGoal.x = -1;
 					mGoal.y = -1;
 				} else {
-					movePlayer(eDIR.RIGHT);
+					if (mWorldMap.atViewportXBoundary() == -1 || mPosition.x <  viewWidth * 0.25f) {
+						movePlayer(eDIR.RIGHT);
+					} else {
+						// Move the viewport
+						mWorldMap.shiftViewport(-mSpeed*viewportXUnitsPerGL, 0);
+						mGoal.x -= mSpeed;
+					}
 				}
 			} else if (dx < 0) {
 				if (mDirection == eDIR.RIGHT){
@@ -112,7 +122,14 @@ public class Player {
 					mGoal.x = -1;
 					mGoal.y = -1;
 				} else {
-					movePlayer(eDIR.LEFT);
+					if (mWorldMap.atViewportXBoundary() == 1 || mPosition.x > -viewWidth * 0.25f) {
+						Log.i("Player", "Viewport Boundary: " + mWorldMap.atViewportXBoundary() + ", Viewport X: " + mWorldMap.getViewportX());
+						movePlayer(eDIR.LEFT);
+					} else {
+						// Move the viewport -- must shift the goal to account for this
+						mWorldMap.shiftViewport(mSpeed*viewportXUnitsPerGL, 0);
+						mGoal.x += mSpeed;
+					}
 				}
 			} else if (dy > 0) {
 				if (mDirection == eDIR.DOWN){
@@ -120,7 +137,13 @@ public class Player {
 					mGoal.x = -1;
 					mGoal.y = -1;
 				} else {
-					movePlayer(eDIR.UP);
+					if (mWorldMap.atViewportYBoundary() == -1 || mPosition.y < viewHeight * 0.1f) {
+						movePlayer(eDIR.UP);
+					} else {
+						// Move the viewport
+						mWorldMap.shiftViewport(0, -mSpeed*viewportYUnitsPerGL);
+						mGoal.y -= mSpeed;
+					}
 				}
 			} else if (dy < 0) {
 				if (mDirection == eDIR.UP){
@@ -128,7 +151,13 @@ public class Player {
 					mGoal.x = -1;
 					mGoal.y = -1;
 				} else {
-					movePlayer(eDIR.DOWN);
+					if (mWorldMap.atViewportYBoundary() == 1 || mPosition.y > -viewHeight * 0.1f) {
+						movePlayer(eDIR.DOWN);
+					} else {
+						// Move the viewport
+						mWorldMap.shiftViewport(0, mSpeed*viewportYUnitsPerGL);
+						mGoal.y += mSpeed;
+					}
 				}
 			} else {
 				// Reached position

@@ -2,6 +2,7 @@ package org.ubc.tartarus;
 
 import android.content.Context;
 import android.opengl.Matrix;
+import android.util.Log;
 
 public class WorldMap {
 
@@ -71,11 +72,57 @@ public class WorldMap {
 	// Note that this is set in pixels (just like the tile width/height)
 	// It will be mapped to the opengl coordinate system.
 	// The x and y coordinates are relative to the world (in pixels)
-	public void setViewport(int viewportWidth, int viewportHeight, float viewportX, float viewportY) {
+	public void setViewport(int viewportWidth, int viewportHeight, int viewportX, int viewportY) {
 		mViewportWidth = viewportWidth;
 		mViewportHeight = viewportHeight;	
 		mViewportTilesWidth = mViewportWidth / mTileWidth;
 		mViewportTilesHeight = mViewportHeight / mTileHeight;
+		mViewportX = viewportX;
+	}
+	
+	public void setViewportPosition(int viewportX, int viewportY) {
+		mViewportX = viewportX;
+		mViewportY = viewportY;
+	}
+	
+	public float getViewportX() {
+		return mViewportX;
+	}
+	
+	public float getViewportY() {
+		return mViewportY;
+	}
+	
+	public void shiftViewport(float shiftX, float shiftY) {
+		mViewportX += shiftX;
+		mViewportY += shiftY; 
+
+		if (mViewportX <= 0) mViewportX = 0;
+		if (mViewportY <= 0) mViewportY = 0;
+		if (mViewportX >= mWorldWidth*mTileWidth - mViewportWidth) mViewportX = mWorldWidth*mTileWidth - mViewportWidth;
+		if (mViewportY >= mWorldHeight*mTileHeight - mViewportHeight) mViewportY = mWorldHeight*mTileHeight - mViewportHeight;
+	}
+	
+	public int atViewportXBoundary() {
+		if (mViewportX <= 0) return -1;
+		if (mViewportX + mViewportWidth >= mWorldWidth * mTileWidth) return 1;
+		
+		return 0;
+	}
+
+	public int getViewportWidth() {
+		return mViewportWidth;
+	}
+	
+	public int getViewportHeight() {
+		return mViewportHeight;
+	}
+	
+	public int atViewportYBoundary() {
+		if (mViewportY <= 0) return -1;
+		if (mViewportY + mViewportHeight >= mWorldHeight * mTileHeight) return 1;
+		
+		return 0;
 	}
 	
 	public void drawViewport(float[] modelViewMatrix, float viewWidth, float viewHeight) {
@@ -97,12 +144,15 @@ public class WorldMap {
 		tileWidthInView = ((float) mTileWidth / mViewportWidth) * viewWidth;
 		tileHeightInView = ((float) mTileHeight / mViewportHeight) * viewHeight;
 		
-		for (int i = x0; i < x1; i += mTileWidth) {
-			for (int j = y0; j < y1; j += mTileHeight) {
+		for (int i = x0; i <= x1; i += mTileWidth) {
+			for (int j = y0; j <= y1; j += mTileHeight) {
 				int col = (i + mViewportX) / mTileWidth;
 				int row = (j + mViewportY) / mTileHeight;
 				float translateX, translateY; 
 
+				if (row >= mWorldWidth) continue;
+				if (col >= mWorldHeight) break;
+				
 				pluckTile(mTilemap[row][col]);
 				translateX = (viewWidth / 2) - (((float)i) / mViewportWidth) * viewWidth;
 				translateY = (viewHeight / 2) - (((float)j) / mViewportHeight) * viewHeight;

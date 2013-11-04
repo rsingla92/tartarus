@@ -12,6 +12,8 @@ import android.util.Log;
 public class CustomRenderer implements Renderer {
 	public static final int MATRIX_SIZE = 4;
 	
+	public static final int VIEW_HEIGHT = 2;
+	
 	// Matrices used by all renderers
 	private float[] mProjectionMatrix;
 	private float[] mViewMatrix;

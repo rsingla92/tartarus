@@ -36,8 +36,8 @@ public class GameRenderer extends CustomRenderer {
 	public void onDrawFrame(GL10 arg0) {
 		super.onDrawFrame(arg0);
 		
-		mWorldMap.drawViewport(getModelViewMatrix(), 2*getAspectRatio(), 2);
-		mPlayer.onUpdate();
+		mWorldMap.drawViewport(getModelViewMatrix(), VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
+		mPlayer.onUpdate(VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
 		mPlayer.drawPlayer(getModelViewMatrix());
 		
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
@@ -62,8 +62,8 @@ public class GameRenderer extends CustomRenderer {
 		
 		mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 224, 160, 0, 0);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
-		mPlayer = new Player(getContext(), R.drawable.tmp_minotaur, 0, 0, 0.5f, 0.5f, 0.01f);
-		mParticleSystem = new ParticleSystem(getContext(), 100, R.drawable.particle, 10, Type.STAGNANT, stagnantColourList);
+		mPlayer = new Player(getContext(), R.drawable.tmp_minotaur, 0, 0, 0.5f, 0.5f, 0.02f, mWorldMap);
+		mParticleSystem = new ParticleSystem(getContext(), 100, R.drawable.particle, 5, Type.STAGNANT, stagnantColourList);
 	}
 		
 	@Override
