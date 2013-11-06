@@ -4,23 +4,6 @@
 /* Number of Players specified */
 extern int numPlayers = 0;
 
-typedef struct MoveMsg{
-    // PLAYER X IS IN PLAYER Y'S VIEWPORT
-    
-    // MOVEMENT REQUEST
-    
-    // X & Y
-    unsigned char x_;
-    unsigned char y_;
-
-    // CAPTURED FLAG
-    // In the form where the first four bits are T/F
-    // The upper four bits indicate which flag is captured
-    unsigned char flagCaptured_;
-
-} MoveMsg;
-
-
 GAME_STATE getGameState(GameMsg g)
 {
     return g.gameState_;
