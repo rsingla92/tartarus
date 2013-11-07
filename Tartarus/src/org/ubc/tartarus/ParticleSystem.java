@@ -1,17 +1,15 @@
 package org.ubc.tartarus;
 
-import java.util.Iterator;
 import java.util.Random;
-import java.util.Vector;
-
 import android.content.Context;
 import android.os.SystemClock;
 import android.util.Log;
 
 public class ParticleSystem {
 	
-	private Vector<Particle> mParticles;
-	private Vector<Particle> mDeadParticles;
+	private Particle[] particles;
+	private int[] deadIndices;
+	private int deadIndexCount;
 	private boolean mSpawning; 
 	private int mMaxParticles;
 	private Context mContext; 
@@ -34,12 +32,25 @@ public class ParticleSystem {
 	public static final int NUM_COLS_PER_ENTRY = 4;
 	
 	public static final float[][] DEFAULT_COLOUR_LIST = {
-		{0.7f, 0.4f, 1.0f, 1.0f},
-		{0.7f, 0.7f, 1.0f, 1.0f},
-		{1.0f, 0.4f, 0.4f, 1.0f},
-		{0.8f, 0.8f, 0.8f, 1.0f},
-		{0.5f, 1.0f, 0.5f, 1.0f},
-		{0.3f, 1.0f, 0.7f, 1.0f}
+		{1.0f, 0.5f, 0.0f, 1.0f},
+		{0.71765f, 0.654902f, 0.317647f, 1.0f},
+		{0.309804f, 0.184314f, 0.184314f, 1.0f},
+		{1.0f, 1.0f, 0.25f, 1.0f},
+		{0.72f, 0.45f, 0.2f, 1.0f},
+		{0.71f, 0.65f, 0.26f, 1.0f},
+		{0.85f, 0.85f, 0.1f, 1.0f},
+		{0.9255f, 0.28627f, 0.027f, 1.0f},
+		{0.9529f, 0.032916f, 0.032916f, 1.0f},
+		{0.73725f, 0.07843f, 0.0784f, 1.0f},
+		{0.93725f, 0.91765f, 0.42745f, 1.0f},
+		{0.3451f, 0.34117f, 0.3098f, 1.0f},
+		{0.5804f, 0.5804f, 0.56078f, 1.0f},
+		{0.5804f, 0.5804f, 0.56078f, 1.0f},
+		{1.0f, 0.4235f, 0.0f, 1.0f},
+		{1.0f, 0.4235f, 0.0f, 1.0f},
+		{1.0f, 0.5882f, 0.0f, 1.0f},
+		{1.0f, 0.23529f, 0.0f, 1.0f},
+		{0.36078f, 0.35294f, 0.32549f, 1.0f},
 	};
 	
 	public float[][] mColourList;
@@ -50,8 +61,6 @@ public class ParticleSystem {
 	
 	public ParticleSystem(Context context, int maxParticles, int particleResId, 
 			int spawnDelay, Type type, float[][] colourList) {
-		mParticles = new Vector<Particle>(maxParticles);
-		mDeadParticles = new Vector<Particle>(maxParticles);
 		mRandGenerator = new Random();
 		mSpawning = false;
 		mMaxParticles = maxParticles;
@@ -62,13 +71,27 @@ public class ParticleSystem {
 		mType = type;
 		mBurstMinAngle = DEFAULT_BURST_MIN_ANGLE;
 		mBurstMaxAngle = DEFAULT_BURST_MAX_ANGLE;
-			
+		deadIndexCount = maxParticles;
+		
 		setColourList(colourList);
+		
+		particles = new Particle[maxParticles];
+		deadIndices = new int[maxParticles];
+		
+		for (int i = 0; i < deadIndices.length; i++) {
+			deadIndices[i] = -1;
+		}
+		
+		if (!Particle.getParticleImgLoaded()) {
+			// Load particle image
+			Particle.loadParticleImg(mContext, particleResId);
+		}
 		
 		// Create all the particles upfront. They will be reused.
 		// They are all initially dead.
 		for (int i = 0; i < maxParticles; i++) {
-			mDeadParticles.add(CreateParticle(0.0f, 0.0f, 0.0f));
+			particles[i] = CreateParticle(0.0f, 0.0f, 0.0f);
+			deadIndices[i] = i;
 		}
 	}
 	
@@ -77,11 +100,10 @@ public class ParticleSystem {
 	}
 	
 	public void makeBurstSystem(float minAngle, float maxAngle) {
-		for (int i = 0; i < mParticles.size(); i++) {
-			mDeadParticles.add(mParticles.get(i));
+		for (int i = 0; i < particles.length; i++) {
+			particles[i].setDead(true);
 		}
 		
-		mParticles.clear();
 		mType = Type.BURST;
 		
 		// Make sure the minimum < maximum. 
@@ -100,6 +122,7 @@ public class ParticleSystem {
 		
 		Particle tmpParticle = new Particle(mContext, mParticleResId, x, y,
 				z, randCol[0], randCol[1], randCol[2], randCol[3], randRadius, randRadius, true);
+		tmpParticle.setDead(true);
 		
 		return tmpParticle;
 	}
@@ -109,10 +132,12 @@ public class ParticleSystem {
 	}
 	
 	public void grabParticle(float x, float y, float z, boolean setSpeed, float xSpeed, float ySpeed, float zSpeed) {
-		if (mDeadParticles.size() > 0) {
+		if (deadIndexCount > 0) {
 			float[] randCol = mColourList[mRandGenerator.nextInt(mColourList.length)];
 			
-			Particle tmpParticle = mDeadParticles.get(0);
+			Particle tmpParticle = particles[deadIndices[deadIndexCount-1]];
+			deadIndices[deadIndexCount-1] = -1;
+			deadIndexCount--;
 			
 			tmpParticle.reGenerateParticle(x, y, z, 
 					randCol[0], randCol[1], randCol[2], randCol[3], 0.1f, 0.1f);
@@ -136,9 +161,6 @@ public class ParticleSystem {
 				tmpParticle.setDecay(mRandGenerator.nextFloat() * 0.0009f + 0.0001f);
 				tmpParticle.makeSpinner(radiusSpeed, angleSpeed, x, y);
 			}
-			
-			mParticles.add(tmpParticle);
-			mDeadParticles.remove(0);
 		}
 	}
 	
@@ -170,7 +192,7 @@ public class ParticleSystem {
 	
 	public void updateParticleSystem(float x, float y, float z, float aspect) {
 		
-		if (mSpawning == true && mParticles.size() < mMaxParticles) {
+		if (mSpawning == true && deadIndexCount > 0) {
 			
 			long currentTime = SystemClock.uptimeMillis();
 			
@@ -184,23 +206,22 @@ public class ParticleSystem {
 			} 
 		}
 		
-		Iterator<Particle> it = mParticles.iterator(); 
-		
-		while (it.hasNext()) {
-			Particle tmpParticle = it.next();
-			tmpParticle.updateParticle(aspect);
+		for (int i = 0; i < mMaxParticles; i++) {
+			if (!particles[i].isAlive()) continue;
 			
-			if (!tmpParticle.isAlive()) {
-				// Particle is now dead-- add to the dead list for recycling.
-				mDeadParticles.add(tmpParticle);
-				it.remove();
+			particles[i].updateParticle(aspect);
+			
+			if (!particles[i].isAlive()) {
+				// Particle now dead -- add to dead index list.
+				deadIndices[deadIndexCount] = i;
+				deadIndexCount++;
 			}
 		}
 	}
 	
 	public void drawParticles(float[] perspectiveViewMat) {
-		for (int i = 0; i < mParticles.size(); i++) {
-			mParticles.get(i).drawParticle(perspectiveViewMat);
+		for (int i = 0; i < particles.length; i++) {
+			particles[i].drawParticle(perspectiveViewMat);
 		}
 	}
 	

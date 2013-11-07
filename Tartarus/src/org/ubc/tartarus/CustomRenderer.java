@@ -1,0 +1,174 @@
+package org.ubc.tartarus;
+
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
+import android.content.Context;
+import android.opengl.GLES20;
+import android.opengl.Matrix;
+import android.opengl.GLSurfaceView.Renderer;
+import android.util.Log;
+
+public class CustomRenderer implements Renderer {
+	public static final int MATRIX_SIZE = 4;
+	
+	public static final int VIEW_HEIGHT = 2;
+	
+	// Matrices used by all renderers
+	private float[] mProjectionMatrix;
+	private float[] mViewMatrix;
+	private float[] mModelViewMatrix;
+	private float fingerX, fingerY;
+	
+	private Context mContext;
+	private float mAspectRatio;
+	
+	public CustomRenderer(Context context) {
+		super();
+		
+		mContext = context;
+	}
+	
+	protected float getFingerX() {
+		return fingerX;
+	}
+	
+	protected float getFingerY() {
+		return fingerY;
+	}
+	
+	protected float[] getModelViewMatrix() {
+		return mModelViewMatrix;
+	}
+	
+	protected float[] getViewMatrix() {
+		return mViewMatrix;
+	}
+	
+	protected float[] getProjectionMatrix() {
+		return mProjectionMatrix;
+	}
+	
+	protected Context getContext() {
+		return mContext;
+	}
+	
+	protected float getAspectRatio() {
+		return mAspectRatio;
+	}
+	
+	@Override
+	public void onDrawFrame(GL10 arg0) {
+		GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
+	    
+		// Set up the viewing and projection matrices
+		Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);	
+		Matrix.multiplyMM(mModelViewMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+	}
+
+	@Override
+	public void onSurfaceChanged(GL10 arg0, int width, int height) {
+		GLES20.glViewport(0, 0, width, height);
+		
+		float aspectRatio = (float) width / height;
+		mAspectRatio = aspectRatio;
+		
+		//Matrix.frustumM(mProjectionMatrix, 0, -aspectRatio, aspectRatio, -1, 1, 3, 7);
+		Matrix.orthoM(mProjectionMatrix, 0, -aspectRatio, aspectRatio, -1f, 1f,  3, 7);
+
+	}
+
+	@Override
+	public void onSurfaceCreated(GL10 arg0, EGLConfig arg1) {
+		// Load shaders for all BitmapImg objects.
+		BitmapImg.loadBitmapShaders();
+		mProjectionMatrix = new float[MATRIX_SIZE*MATRIX_SIZE];
+		mViewMatrix = new float[MATRIX_SIZE*MATRIX_SIZE];
+		mModelViewMatrix = new float[MATRIX_SIZE*MATRIX_SIZE]; 
+		
+		// Enable alpha blending and depth test.
+		GLES20.glEnable(GLES20.GL_BLEND);
+		GLES20.glDisable(GLES20.GL_DEPTH_TEST);
+		
+		GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+		GLES20.glDepthMask(false);
+		
+		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	}
+	
+	public static int loadShader(int type, String shaderCode){
+
+	    // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
+	    // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+	    int shader = GLES20.glCreateShader(type);
+
+	    // add the source code to the shader and compile it
+	    GLES20.glShaderSource(shader, shaderCode);
+	    GLES20.glCompileShader(shader);
+
+	    return shader;
+	} 
+	   
+	// Found online at:
+	// http://stackoverflow.com/questions/10985487/android-opengl-es-2-0-screen-coordinates-to-world-coordinates
+   public void addFingerCoords( float x, float y, float screenW, float screenH)
+   { 
+       // Auxiliary matrix and vectors
+       // to deal with ogl.
+       float[] invertedMatrix, transformMatrix,
+           normalizedInPoint, outPoint;
+       invertedMatrix = new float[16];
+       transformMatrix = new float[16];
+       normalizedInPoint = new float[4];
+       outPoint = new float[4];
+
+       // Invert y coordinate, as android uses
+       // top-left, and ogl bottom-left.
+       int oglTouchY = (int) (screenH - y);
+
+       /* Transform the screen point to clip
+       space in ogl (-1,1) */       
+       normalizedInPoint[0] =
+    	        (float) (x * 2.0f / screenW - 1.0);
+       normalizedInPoint[1] =
+        (float) ((oglTouchY) * 2.0f / screenH - 1.0);
+       normalizedInPoint[2] = -1.0f;
+       normalizedInPoint[3] = 1.0f;
+
+       /* Obtain the transform matrix and
+       then the inverse. */
+       
+       Matrix.multiplyMM(
+           transformMatrix, 0,
+           mProjectionMatrix, 0,
+           mViewMatrix, 0);
+       Matrix.invertM(invertedMatrix, 0,
+           transformMatrix, 0);       
+
+       /* Apply the inverse to the point
+       in clip space */
+       Matrix.multiplyMV(
+           outPoint, 0,
+           invertedMatrix, 0,
+           normalizedInPoint, 0);
+
+       if (outPoint[3] == 0.0)
+       {
+           // Avoid /0 error.
+           Log.e("World coords", "ERROR!");
+       }
+
+       fingerX = outPoint[0] / outPoint[3];
+       fingerY = outPoint[1] / outPoint[3];
+   }
+   
+	public void onDownTouch(float x, float y, float width, float height) {
+		addFingerCoords(x, y, width, height);
+	}
+
+	public void onReleaseTouch() { }
+
+	public void onMoveTouch(float x, float y, float width, float height) {
+		addFingerCoords(x, y, width, height);
+	}
+}
