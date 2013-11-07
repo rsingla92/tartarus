@@ -19,6 +19,7 @@ public class Character {
 			this.flip = false;
 			this.currentFrame = 0;
 			this.animSpeed = 1;
+            this.frameList = new Vector<Rectangle>();
 		}
 		
 		public void addFrame(Rectangle rect){
@@ -44,13 +45,17 @@ public class Character {
 	}
 	
 	// CHARACTER
-	protected int currentAnimation = 0;
+    int currentAnimation = 0;
 	Animation[] animList;
 	
 	public Character(Rectangle[] walkLeft, Rectangle[] walkRight, 
 			Rectangle[] walkUp, Rectangle[] walkDown) {
 		
-		animList = new Animation[AnimTypes.NUM_ANIM.ordinal()];
+		this.animList = new Animation[AnimTypes.NUM_ANIM.ordinal()];
+        for (int i = 0; i < animList.length; i++){
+			animList[i] = new Animation();
+		}
+		this.currentAnimation = 0;
 		populateAnimList(walkLeft, walkRight, walkUp, walkDown);
 	}
 	
