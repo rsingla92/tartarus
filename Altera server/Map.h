@@ -3,6 +3,8 @@
  *  and draws it to the screen. 
  */
 
+#include "bitmap.h"
+
 #define INT_SIZE 32
 #define TILE_WIDTH 100
 #define TILE_HEIGHT 100 
