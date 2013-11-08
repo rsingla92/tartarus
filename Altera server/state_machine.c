@@ -7,19 +7,18 @@
 
 #include "state_machine.h"
 
-
 #define NULL 0
+
+static eState current_state = MAIN_MENU;
 
 static State states[NUM_STATE_MACHINE_STATES] =
 {
 	{updateMainMenu, draw_main_menu, NULL, 0},	/* MAIN_MENU */
-	{updateLoadScreen, NULL, NULL, 0},	/* LOADING_SCREEN */
-	{update_level1, NULL, NULL, 0},	/* LEVEL1 */
+	{updateLoadScreen, NULL, NULL, 0},	/* LOBBY */
+	{update_level1, NULL, NULL, 0},	/* PLAYING */
 	{updateGameOver, draw_gameover, clear_display, 0}, /* GAME_OVER */
 	{updateWinGame, draw_wingame, clear_display, 0} /* WIN_GAME */
 };
-
-static eState current_state = MAIN_MENU;
 
 void changeState(eState new_state)
 {

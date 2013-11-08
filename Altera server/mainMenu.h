@@ -9,5 +9,6 @@
 #define MAINMENU_H_
 
 void updateMainMenu(void);
+void draw_main_menu(void);
 
 #endif /* MAINMENU_H_ */

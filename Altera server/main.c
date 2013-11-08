@@ -9,79 +9,121 @@
 #include "sys/alt_timestamp.h"
 #include "state_machine.h"
 #include "audio.h"
-#include "input.h"
+#include "msg.h"
 
-#define NUM_FILES 44s
-// Controller Out: Bits: 000000AB
-// A is the Controller P/S latch
-// B is the Controller Clock
-#define controller_out (char *) CONTROLLER_OUTPUT_BASE
-
-// Controller In: Only least significant bit matters.
-#define controller_in (volatile char *) CONTROLLER_INPUT_BASE
+#define NUM_FILES 0
 
 #define leds (volatile char *) LEDS_BASE
 
-static char* file_list[NUM_FILES] = { "4B.BMP", "B1.BMP", "B2.BMP", "B3.BMP",
-		"B4.BMP", "B5.BMP", "DK1.BMP", "DK2.BMP", "DK3.BMP", "DK4.BMP",
-		"DK5.BMP", "DK6.BMP", "DK7.BMP", "DK8.BMP", "DK9.BMP", "DK10.BMP",
-		"DK11.BMP", "FIRE.BMP", "FIRE1.BMP", "FIRE2.BMP", "FIRE3.BMP",
-		"HMR.BMP", "M1.BMP", "M2.BMP", "M3.BMP", "M4.BMP", "M5.BMP", "M6.BMP",
-		"M7.BMP", "M8.BMP", "M9.BMP", "M10.BMP", "M11.BMP", "M12.BMP",
-		"M13.BMP", "M14.BMP", "M15.BMP", "P1.BMP", "P2.BMP", "PP1.BMP",
-		"PP2.BMP", "PP3.BMP", "PURSE.BMP", "UMBRLA.BMP", "MM1.BMP", "MM2.BMP"};
+static char* file_list[NUM_FILES] = { };
 static BitmapHandle* bmp;
 static alt_u32 ticks_per_sec;
 static alt_u32 num_ticks;
 static alt_32 update(void *context);
-static void readDat();
-
-/* Global Variables */
-unsigned char button_states[4] = {1, 1, 1, 1};
-unsigned char prev_state[4] = {1, 1, 1, 1};
-controller_buttons controller_state;
-controller_buttons prev_controller_state;
 
 int* menuSoundBuf;
 int menuSoundBufLen;
 
-#define BYTETOBINARYPATTERN "%d%d%d%d%d%d%d%d"
-#define BYTETOBINARY(byte)  \
-  (byte & 0x80 ? 1 : 0), \
-  (byte & 0x40 ? 1 : 0), \
-  (byte & 0x20 ? 1 : 0), \
-  (byte & 0x10 ? 1 : 0), \
-  (byte & 0x08 ? 1 : 0), \
-  (byte & 0x04 ? 1 : 0), \
-  (byte & 0x02 ? 1 : 0), \
-  (byte & 0x01 ? 1 : 0)
+GenericMsg* msgHead = NULL;
+GenericMsg* msgTail = NULL;
 
-static void readDat(){
-	unsigned short accumulatedData = 0;
+/* Reads from the TCP/IP socket. Takes in the client ID, message length, and message type
+ * and puts them into a generic MSG struct.
+ * Puts this generic struct into a messageQueue;
+ */
+static void readSocket()
+{
+	byte clientID = 0;
+	byte msgLength = 0;
+	byte msgID = 0;
+
+	// Make element to add to queue
+	GenericMsg* newElement = (GenericMsg*) malloc(sizeof(GenericMsg));
+
+	// first byte
+
+	// second byte. adjust because we actually read the first byte.
+
+	// third byte
+
+	// store the data
+	newElement->msg_ = (byte*) malloc(sizeof(newElement->msgLength_));
+
+	// allocate the rest of it.
 	int i;
-	copyController(&prev_controller_state, controller_state);
-
-	IOWR_8DIRECT(controller_out, 0, 0x01);
-	IOWR_8DIRECT(controller_out, 0, 0x03);
-	alt_busy_sleep(12);
-	IOWR_8DIRECT(controller_out, 0, 0x01);
-	alt_busy_sleep(6);
-
-	accumulatedData = IORD_8DIRECT(controller_in, 0);
-
-	for (i = 0; i < 16; i++)
+	for( i = 0; i < newElement->msgLength_; ++i)
 	{
-		IOWR_8DIRECT(controller_out, 0, 0x00);
-		alt_busy_sleep(6);
-		accumulatedData <<= 1;
-		accumulatedData += IORD_8DIRECT(controller_in, 0);
-		IOWR_8DIRECT(controller_out, 0, 0x01); // Pulse clock
-		alt_busy_sleep(6);
+		// read
+		//msg_[i] =
+
 	}
 
-	IOWR_8DIRECT(leds, 0, accumulatedData);
+	// if it's first element then queue is not set up
+	if( !msgQueueHead )
+	{
+		// initialize the queue
+		msgHead = newElement;
+		msgTail = msgHead;
+		return;
+	}
 
-	copyController(&controller_state, getControllerButtons(accumulatedData));
+	// make current tail point to cur element if tail exists
+	if( msgQueue[msgTail])
+	{
+		msgQueue[msgTail]->next = newElement;
+	}
+
+	// new tail
+	msgTail = newElement;
+	newElement->next = NULL;
+
+	return;
+}
+
+/* Takes the next element of the messageQueue and
+ * creates the appropriate structure for it.
+ * Uses msgHead
+ */
+static void parseNextMessage()
+{
+	// if queue is empty
+	if(!msgQueue[msgHead]) return;
+
+	// do while the queue is not empty
+	// there's something in the queue
+
+	GenericMsg* tmp = NULL;
+	do {
+		switch(msgHead->msgID_)
+		{
+		case LOAD:
+			makeLoadMsg(msgHead);
+			break;
+		case GAME:
+			makeGameMsg(msgHead);
+			break;
+		case MOVE:
+			makeMoveMsg(msgHead);
+			break;
+		case POWER_UP:
+			makePowerUpMsg(msgHead);
+			break;
+		default:
+			printf("Unknown message type: %d\n", msgHead->msgID_);
+			break;
+		}
+
+		// clean up the msg struct
+		tmp = msgHead->next;
+		free(msgHead->msg_);
+		free(msgHead);
+		msgHead = tmp;
+
+	} while ( msgHead );
+
+	// queue's parse it all mang
+	// lator gator
+	return;
 }
 
 int main(void) {
@@ -95,8 +137,6 @@ int main(void) {
 	swapInSound(menuSoundBuf, menuSoundBufLen, 1);
 
 	// Set latch and clock to 0.
-	IOWR_8DIRECT(controller_out, 0, 0x00);
-
 	init_display();
 
 	clear_display();
@@ -130,7 +170,9 @@ alt_32 update(void *context) {
 	for (i = 0; i < 4; i++) prev_state[i] = button_states[i];
 	for (i = 0; i < 4; i++) button_states[i] = getButton(i);
 
-	readDat();
+	//readDat();
+	readSocket();
+	parseNextMessage();
 	runState();
 	return 1;
 

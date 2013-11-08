@@ -19,7 +19,19 @@ enum MSG_TYPE { LOAD, GAME, MOVE, POWER_UP };
 enum GAME_STATE { NO_GAME, INITAL, WAITING, READY, PLAYING, WIN, LOSE };
 enum POWER_UP_TYPE {FREEZE_ALL, FREEZE_ONE, SLOW_ALL, SLOW_ONE, FAST_ONE, RESTART_ONE, RESTART_ALL};
 
+
+
 typedef unsigned char byte;
+
+/* Generic message structure for queuing messages */
+typedef struct GenericMsg {
+	byte msgID_;
+	byte msgLength_;
+	byte clientID_;
+	byte* msg_;
+
+	GenericMsg* next;
+};
 
 typedef struct GameMsg{
     // GAME_STATE
@@ -115,11 +127,10 @@ void setCapturedFlag(MoveMsg m, int flagID);
 
 /* TO DO : Implement */
 // Helper function to determine Android message type
-int determineMsgType();
-int makeLoadMsg();
-int makeGameMsg();
-int makeMoveMsg();
-int makePowerUpMsg();
+int makeLoadMsg(GenericMsg* msg);
+int makeGameMsg(GenericMsg* msg);
+int makeMoveMsg(GenericMsg* msg);
+int makePowerUpMsg(GenericMsg* msg);
 
 void readMsg();
 void makeMsg();

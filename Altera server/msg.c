@@ -195,35 +195,56 @@ void setCapturedFlag(MoveMsg m, int flagID)
 }
 
 
-int determineMsgType()
+int makeLoadMsg(GenericMsg* msg)
+{
+
+}
+
+int makeGameMsg(GenericMsg* msg)
+{
+	GameMsg* gameMsg = (GameMsg*) malloc(sizeof(GameMsg));
+
+	if(msg->msgLength != sizeof(GameMsg))
+	{
+		printf("Msg length %d does not correspond to GameMsg size %d\n", msg->msgLength, sizeof(GameMsg));
+	}
+	gameMsg->id_ = msgHead->msg_[0];
+    // GAME_STATE
+    GAME_STATE gameState_;
+
+    // ASSIGNED ID
+    int id_;
+
+    // GAME START SIGN
+    byte gameStart_;
+
+    // Game request flag
+    byte gameRequest_;
+
+    // This variable refers to the players state
+    // while in the lobby. The bottom four bits represent
+    // if a player has joined. The upper four bits represent
+    // if a player is ready.
+    byte lobbyState_;
+}
+
+int makeMoveMsg(GenericMsg* msg)
 {
 }
 
-int makeLoadMsg()
+int makePowerUpMsg(GenericMsg* msg)
 {
 }
 
-int makeGameMsg()
+void readMsg(GenericMsg* msg)
 {
 }
 
-int makeMoveMsg()
+void makeMsg(GenericMsg* msg)
 {
 }
 
-int makePowerUpMsg()
-{
-}
-
-void readMsg()
-{
-}
-
-void makeMsg()
-{
-}
-
-void sendMsg()
+void sendMsg(GenericMsg* msg)
 {
 }
 
