@@ -9,7 +9,6 @@
 #include "sys/alt_timestamp.h"
 #include "state_machine.h"
 #include "audio.h"
-#include "input.h"
 
 #define NUM_FILES 44s
 // Controller Out: Bits: 000000AB
@@ -22,6 +21,7 @@
 
 #define leds (volatile char *) LEDS_BASE
 
+/*
 static char* file_list[NUM_FILES] = { "4B.BMP", "B1.BMP", "B2.BMP", "B3.BMP",
 		"B4.BMP", "B5.BMP", "DK1.BMP", "DK2.BMP", "DK3.BMP", "DK4.BMP",
 		"DK5.BMP", "DK6.BMP", "DK7.BMP", "DK8.BMP", "DK9.BMP", "DK10.BMP",
@@ -30,6 +30,7 @@ static char* file_list[NUM_FILES] = { "4B.BMP", "B1.BMP", "B2.BMP", "B3.BMP",
 		"M7.BMP", "M8.BMP", "M9.BMP", "M10.BMP", "M11.BMP", "M12.BMP",
 		"M13.BMP", "M14.BMP", "M15.BMP", "P1.BMP", "P2.BMP", "PP1.BMP",
 		"PP2.BMP", "PP3.BMP", "PURSE.BMP", "UMBRLA.BMP", "MM1.BMP", "MM2.BMP"};
+*/
 static BitmapHandle* bmp;
 static alt_u32 ticks_per_sec;
 static alt_u32 num_ticks;
@@ -39,8 +40,6 @@ static void readDat();
 /* Global Variables */
 unsigned char button_states[4] = {1, 1, 1, 1};
 unsigned char prev_state[4] = {1, 1, 1, 1};
-controller_buttons controller_state;
-controller_buttons prev_controller_state;
 
 int* menuSoundBuf;
 int menuSoundBufLen;
@@ -59,7 +58,6 @@ int menuSoundBufLen;
 static void readDat(){
 	unsigned short accumulatedData = 0;
 	int i;
-	copyController(&prev_controller_state, controller_state);
 
 	IOWR_8DIRECT(controller_out, 0, 0x01);
 	IOWR_8DIRECT(controller_out, 0, 0x03);
@@ -80,8 +78,6 @@ static void readDat(){
 	}
 
 	IOWR_8DIRECT(leds, 0, accumulatedData);
-
-	copyController(&controller_state, getControllerButtons(accumulatedData));
 }
 
 int main(void) {
@@ -128,7 +124,6 @@ int main(void) {
 alt_32 update(void *context) {
 	int i;
 	for (i = 0; i < 4; i++) prev_state[i] = button_states[i];
-	for (i = 0; i < 4; i++) button_states[i] = getButton(i);
 
 	readDat();
 	runState();
