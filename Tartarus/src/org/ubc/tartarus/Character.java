@@ -2,6 +2,8 @@ package org.ubc.tartarus;
 
 import java.util.Vector;
 
+import android.util.Log;
+
 public class Character {
 	
 	public enum AnimTypes{
@@ -10,20 +12,41 @@ public class Character {
 	}
 	
 	public class Animation{
-		Vector<Rectangle> frameList;
-		public float animSpeed = 1;
-		int currentFrame = 0;
-		public boolean flip = false;
+		private Vector<Rectangle> frameList;
+		private float animSpeed = 0.1f;
+		private float currentFrame = 0;
+		private boolean flip = false;
 		
 		public Animation(){
 			this.flip = false;
 			this.currentFrame = 0;
-			this.animSpeed = 1;
+			this.animSpeed = 0.1f;
             this.frameList = new Vector<Rectangle>();
 		}
 		
+		public void animate(){
+			this.currentFrame += this.animSpeed;
+			// not sure if this is wat we need to animate or if we need
+			// to set the currentFrame back to 0 
+			if (this.currentFrame >= frameList.size()-1)
+				//this.animSpeed = -this.animSpeed;
+				this.currentFrame = 0;
+			Log.i("Character", " "+currentFrame);
+		}
+		
+		public void setFlip(boolean bool){
+			this.flip = bool;
+		}
+		
+		public boolean getFlip() {
+			return flip;
+		}
+		
 		public void addFrame(Rectangle rect){
-			frameList.add(rect);
+			Rectangle tmpRect = new Rectangle(rect.bottomLeft.x, rect.bottomLeft.y, 
+					rect.topRight.x, rect.topRight.y);
+			
+			this.frameList.add(tmpRect);
 		}
 		
 		public void setFrameSpeed(int speed){
@@ -35,10 +58,11 @@ public class Character {
 		}
 		
 		public Rectangle getCurrentFrame(){
-			return this.frameList.elementAt(currentFrame);
+			Log.i("CurrentFrame", ""+frameList.elementAt((int)Math.round(currentFrame)).toString());
+			return this.frameList.elementAt((int)Math.round(currentFrame));
 		}
 		
-		public float getAnimSpeed(){
+		public double getAnimSpeed(){
 			return this.animSpeed;
 		}
 		
@@ -47,6 +71,11 @@ public class Character {
 	// CHARACTER
     int currentAnimation = 0;
 	Animation[] animList;
+	Point refFrame;
+	
+	public Animation getCurrentAnimation(){
+		return animList[currentAnimation];
+	}
 	
 	public Character(Rectangle[] walkLeft, Rectangle[] walkRight, 
 			Rectangle[] walkUp, Rectangle[] walkDown) {
@@ -56,7 +85,20 @@ public class Character {
 			animList[i] = new Animation();
 		}
 		this.currentAnimation = 0;
+		this.refFrame = new Point(0,0);
 		populateAnimList(walkLeft, walkRight, walkUp, walkDown);
+	}
+	
+	public void setCurrentAnimation (AnimTypes anim){
+		this.currentAnimation = anim.ordinal();
+	}
+	
+	public void setRefFrame(int width, int height){
+		this.refFrame = new Point(width, height); 
+	}
+	
+	public Point getRefFrame(){
+		return this.refFrame;
 	}
 	
 	public void addAnim(int anim, Rectangle[] frames) {

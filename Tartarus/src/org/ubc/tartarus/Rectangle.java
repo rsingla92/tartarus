@@ -9,4 +9,9 @@ public class Rectangle {
 		this.bottomLeft = new Point(x1,y1);
 		this.topRight = new Point(x2,y2);
 	}
+	
+	@Override
+	public String toString() {
+		return "{" + bottomLeft.toString() + ", " + topRight.toString() + "}";
+	}
 }
