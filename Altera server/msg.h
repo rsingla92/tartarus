@@ -15,11 +15,9 @@
 #define THREE_READY 0x01110111
 #define FOUR_READY 0x11111111
 
-enum MSG_TYPE { LOAD, GAME, MOVE, POWER_UP };
-enum GAME_STATE { NO_GAME, INITAL, WAITING, READY, PLAYING, WIN, LOSE };
-enum POWER_UP_TYPE {FREEZE_ALL, FREEZE_ONE, SLOW_ALL, SLOW_ONE, FAST_ONE, RESTART_ONE, RESTART_ALL};
-
-
+typedef enum { LOAD, GAME, MOVE, POWER_UP } MSG_TYPE ;
+typedef enum { NO_GAME, INITAL, WAITING, READY, PLAYING, WIN, LOSE } GAME_STATE;
+typedef enum {FREEZE_ALL, FREEZE_ONE, SLOW_ALL, SLOW_ONE, FAST_ONE, RESTART_ONE, RESTART_ALL} POWER_UP_TYPE;
 
 typedef unsigned char byte;
 
@@ -35,7 +33,7 @@ typedef struct GenericMsg {
 
 typedef struct GameMsg{
     // GAME_STATE
-    GAME_STATE gameState_;
+	GAME_STATE gameState_;
 
     // ASSIGNED ID
     int id_;
@@ -63,22 +61,6 @@ typedef struct PowerUpMsg{
     // PLAYER(S) TO AFFECT
     byte players_;
 } PowerUpMsg;
-
-typedef struct MoveMsg{
-    // PLAYER X IS IN PLAYER Y'S VIEWPORT
-    
-    // MOVEMENT REQUEST
-    
-    // X & Y
-    unsigned short x_;
-    unsigned short y_;
-
-    // CAPTURED FLAG
-    // In the form where the first four bits are T/F
-    // The upper four bits indicate which flag is captured
-    unsigned char flagCaptured_;
-
-} MoveMsg;
 
 typedef struct MoveMsg{
     // PLAYER X IS IN PLAYER Y'S VIEWPORT

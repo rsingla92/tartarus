@@ -12,8 +12,7 @@
 static BitmapHandle* background_bmp;
 static colour back_alpha = { 0x00, 0x00, 0x00 };
 extern unsigned char button_states[4];
-extern controller_buttons controller_state;
-extern controller_buttons prev_controller_state;
+
 
 void updateMainMenu(void)
 {
@@ -30,8 +29,6 @@ void updateMainMenu(void)
 //	}
 
 	printf("Updating main \n");
-
-
 }
 
 void draw_main_menu(void)
@@ -49,4 +46,3 @@ void draw_main_menu(void)
 	printf("Drawing main menu \n");
 
 }
-

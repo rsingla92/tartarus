@@ -15,7 +15,16 @@
 
 #define leds (volatile char *) LEDS_BASE
 
-static char* file_list[NUM_FILES] = { };
+/*
+static char* file_list[NUM_FILES] = { "4B.BMP", "B1.BMP", "B2.BMP", "B3.BMP",
+		"B4.BMP", "B5.BMP", "DK1.BMP", "DK2.BMP", "DK3.BMP", "DK4.BMP",
+		"DK5.BMP", "DK6.BMP", "DK7.BMP", "DK8.BMP", "DK9.BMP", "DK10.BMP",
+		"DK11.BMP", "FIRE.BMP", "FIRE1.BMP", "FIRE2.BMP", "FIRE3.BMP",
+		"HMR.BMP", "M1.BMP", "M2.BMP", "M3.BMP", "M4.BMP", "M5.BMP", "M6.BMP",
+		"M7.BMP", "M8.BMP", "M9.BMP", "M10.BMP", "M11.BMP", "M12.BMP",
+		"M13.BMP", "M14.BMP", "M15.BMP", "P1.BMP", "P2.BMP", "PP1.BMP",
+		"PP2.BMP", "PP3.BMP", "PURSE.BMP", "UMBRLA.BMP", "MM1.BMP", "MM2.BMP"};
+*/
 static BitmapHandle* bmp;
 static alt_u32 ticks_per_sec;
 static alt_u32 num_ticks;
@@ -55,7 +64,6 @@ static void readSocket()
 	{
 		// read
 		//msg_[i] =
-
 	}
 
 	// if it's first element then queue is not set up
@@ -168,7 +176,6 @@ int main(void) {
 alt_32 update(void *context) {
 	int i;
 	for (i = 0; i < 4; i++) prev_state[i] = button_states[i];
-	for (i = 0; i < 4; i++) button_states[i] = getButton(i);
 
 	//readDat();
 	readSocket();

@@ -183,7 +183,7 @@ void setPositionY(MoveMsg m,  int y)
 
 void setCapturedFlags(MoveMsg m, byte flagsCaptured)
 {
-    m._flagsCaptured_ = flagsCaptured;
+    m.flagsCaptured_ = flagsCaptured;
 }
 
 void setCapturedFlag(MoveMsg m, int flagID)
@@ -191,7 +191,7 @@ void setCapturedFlag(MoveMsg m, int flagID)
     // Set the bit for the specified flag
     if( flagID > 3 || flagID < 1 ) return;
 
-    m_flagsCaptured |= 1 << flagID;
+    m.flagsCaptured_ |= 1 << flagID;
 }
 
 
