@@ -40,20 +40,31 @@ GenericMsg* msgTail = NULL;
  * and puts them into a generic MSG struct.
  * Puts this generic struct into a messageQueue;
  */
-static void readSocket()
+static void readSocket(alt_up_rs232_dev* uart)
 {
 	byte clientID = 0;
 	byte msgLength = 0;
 	byte msgID = 0;
+	byte parity;
+
+	if (getSerialUsedSpace(uart) == 0))
+	{
+		//If nothing to read, then just return
+		return;
+	}
 
 	// Make element to add to queue
 	GenericMsg* newElement = (GenericMsg*) malloc(sizeof(GenericMsg));
 
 	// first byte
+	readSerialData(uart, &(newElement->clientID_), &parity);
 
 	// second byte. adjust because we actually read the first byte.
+	readSerialData(uart, &(newElement->msgLength_), &parity);
+	newElement->msgLength_--;
 
 	// third byte
+	readSerialData(uart, &(newElement->msgID_), &parity);
 
 	// store the data
 	newElement->msg_ = (byte*) malloc(sizeof(newElement->msgLength_));
@@ -62,12 +73,12 @@ static void readSocket()
 	int i;
 	for( i = 0; i < newElement->msgLength_; ++i)
 	{
-		// read
-		//msg_[i] =
+		// read data
+		readSerialData(uart, &(newElement->msg_[i]), &parity);
 	}
 
 	// if it's first element then queue is not set up
-	if( !msgQueueHead )
+	if( !msgHead )
 	{
 		// initialize the queue
 		msgHead = newElement;
@@ -76,9 +87,9 @@ static void readSocket()
 	}
 
 	// make current tail point to cur element if tail exists
-	if( msgQueue[msgTail])
+	if( msgTail)
 	{
-		msgQueue[msgTail]->next = newElement;
+		msgTail->next = newElement;
 	}
 
 	// new tail
@@ -95,7 +106,7 @@ static void readSocket()
 static void parseNextMessage()
 {
 	// if queue is empty
-	if(!msgQueue[msgHead]) return;
+	if(!msgHead) return;
 
 	// do while the queue is not empty
 	// there's something in the queue
@@ -137,6 +148,9 @@ static void parseNextMessage()
 int main(void) {
 	// Start the timestamp -- will be used for seeding the random number generator.
 
+	//Init RS232
+	alt_up_rs232_dev* uart = initSerialPort("/dev/rs232_0");
+
 	alt_timestamp_start();
 	sdcard_handle *sd_dev = init_sdcard();
 	initAudio();
@@ -174,11 +188,11 @@ int main(void) {
 }
 
 alt_32 update(void *context) {
-	int i;
-	for (i = 0; i < 4; i++) prev_state[i] = button_states[i];
+	//int i;
+	//for (i = 0; i < 4; i++) prev_state[i] = button_states[i];
 
 	//readDat();
-	readSocket();
+	readSocket(uart);
 	parseNextMessage();
 	runState();
 	return 1;
