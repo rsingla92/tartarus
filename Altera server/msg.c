@@ -3,23 +3,7 @@
 
 /* Number of Players specified */
 extern int numPlayers = 0;
-
-typedef struct MoveMsg{
-    // PLAYER X IS IN PLAYER Y'S VIEWPORT
-    
-    // MOVEMENT REQUEST
-    
-    // X & Y
-    unsigned char x_;
-    unsigned char y_;
-
-    // CAPTURED FLAG
-    // In the form where the first four bits are T/F
-    // The upper four bits indicate which flag is captured
-    unsigned char flagCaptured_;
-
-} MoveMsg;
-
+extern GenericMsg* msgHead;
 
 GAME_STATE getGameState(GameMsg g)
 {
@@ -31,7 +15,7 @@ void setGameState(GameMsg g, GAME_STATE gs)
     g.gameState_ = gs;
 }
 
-byte getID(GameMsg g)
+unsigned char getID(GameMsg g)
 {
     return g.id_;
 }
@@ -42,7 +26,7 @@ void setID(GameMsg g, int id)
 }
 
 // Used to decline more people from joining
-byte isGameStart(GameMsg g)
+unsigned char isGameStart(GameMsg g)
 {
     return (g.gameStart_ == GAME_STARTED);
 }
@@ -54,13 +38,13 @@ void setGameStart(GameMsg g)
 }
 
 // Determines if someone has requested a game
-byte isGameRequested(GameMsg g)
+unsigned char isGameRequested(GameMsg g)
 {
     return (g.gameRequest_ == GAME_REQUESTED);
 }
 
 // Has a player joined the game? 
-byte getPlayerJoin(GameMsg g, int player)
+unsigned char getPlayerJoin(GameMsg g, int player)
 {
     // Do some bitmasking to determine if the specified
     // player has joined.
@@ -72,7 +56,7 @@ byte getPlayerJoin(GameMsg g, int player)
 }
 
 // Has a player said they're ready?
-byte getPlayerReady(GameMsg g, int player)
+unsigned char getPlayerReady(GameMsg g, int player)
 {
     // Do smome bitmasking to determined if the specified player
     // has signalled ready.
@@ -130,7 +114,7 @@ void setPlayerReady(GameMsg g, int player)
 }
 
 // Can we begin the game?!
-byte areAllPlayersReady(GameMsg g)
+unsigned char areAllPlayersReady(GameMsg g)
 {
     if( numPlayers > 3 || numPlayers < 1 ) return 0;
 
@@ -156,6 +140,7 @@ byte areAllPlayersReady(GameMsg g)
     return (g.lobbyState_ == checkVal);
 }
 
+// Determine power up type
 POWER_UP_TYPE getPowerUpType(PowerUpMsg p)
 {
     return p.type_;
@@ -166,8 +151,102 @@ void setPowerUpType(PowerUpMsg p, POWER_UP_TYPE type)
     p.type_ = type;
 }
 
-byte getAffectedPlayers(PowerUpMsg p)
+unsigned char getAffectedPlayers(PowerUpMsg p)
 {
     return p.players_;
+}
+
+
+int getPositionX(MoveMsg m)
+{
+    return m.x_;
+}
+
+int getPositionY(MoveMsg m)
+{
+    return m.y_;
+}
+
+unsigned char getCapturedFlags(MoveMsg m)
+{
+    return m.flagsCaptured_;
+}
+
+void setPositionX(MoveMsg m,  int x)
+{
+    m.x_ = x;
+}
+
+void setPositionY(MoveMsg m,  int y)
+{
+    m.y_ = y;
+}
+
+void setCapturedFlags(MoveMsg m, unsigned char flagsCaptured)
+{
+    m.flagsCaptured_ = flagsCaptured;
+}
+
+void setCapturedFlag(MoveMsg m, int flagID)
+{
+    // Set the bit for the specified flag
+    if( flagID > 3 || flagID < 1 ) return;
+
+    m.flagsCaptured_ |= 1 << flagID;
+}
+
+
+int makeLoadMsg(GenericMsg* msg)
+{
+
+}
+
+int makeGameMsg(GenericMsg* msg)
+{
+	GameMsg* gameMsg = (GameMsg*) malloc(sizeof(GameMsg));
+
+	if(msg->msgLength_ != sizeof(GameMsg))
+	{
+		printf("Msg length %d does not correspond to GameMsg size %d\n", msg->msgLength_, sizeof(GameMsg));
+	}
+
+	gameMsg->id_ = msgHead->msg_[0];
+//    // GAME_STATE
+//    GAME_STATE gameState_;
+//
+//    // ASSIGNED ID
+//    int id_;
+//
+//    // GAME START SIGN
+//    unsigned char gameStart_;
+//
+//    // Game request flag
+//    unsigned char gameRequest_;
+//
+//    // This variable refers to the players state
+//    // while in the lobby. The bottom four bits represent
+//    // if a player has joined. The upper four bits represent
+//    // if a player is ready.
+//    unsigned char lobbyState_;
+}
+
+int makeMoveMsg(GenericMsg* msg)
+{
+}
+
+int makePowerUpMsg(GenericMsg* msg)
+{
+}
+
+void readMsg(GenericMsg* msg)
+{
+}
+
+void makeMsg(GenericMsg* msg)
+{
+}
+
+void sendMsg(GenericMsg* msg)
+{
 }
 

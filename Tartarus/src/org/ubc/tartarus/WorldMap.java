@@ -178,7 +178,7 @@ public class WorldMap {
 		int col = tileId % mNumTilesPerRow;
 		int xPadding = mTilePadding * (col + 1);
 		int yPadding = mTilePadding * (row + 1); 
-		Point bottomLeft = new Point(col * mTileWidth + xPadding + 1, row * mTileHeight + yPadding + mTileHeight + 1);
+		Point bottomLeft = new Point(col * mTileWidth + xPadding, row * mTileHeight + yPadding + mTileHeight);
 		Point topRight = new Point(bottomLeft.x + mTileWidth, bottomLeft.y - mTileHeight);
 		bottomLeft.y = mTileset.getHeight() - bottomLeft.y;
 		topRight.y = mTileset.getHeight() - topRight.y;

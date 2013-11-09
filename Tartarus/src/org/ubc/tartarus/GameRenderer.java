@@ -27,6 +27,7 @@ public class GameRenderer extends CustomRenderer {
 	
 	private Player mPlayer;
 	private WorldMap mWorldMap;
+	private CharMagus magus;
 	
 	public GameRenderer(Context context) {
 		super(context);
@@ -49,11 +50,14 @@ public class GameRenderer extends CustomRenderer {
 		// Load shaders for all BitmapImg objects.
 		super.onSurfaceCreated(arg0, arg1);
 		
-		MapParser.TileMap map = MapParser.readMapFromFile(getContext(), R.raw.test_level);
+		magus = new CharMagus();
+	
+		//mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 240, 128, 0, 0);
+		MapParser.TileMap map = MapParser.readMapFromFile(getContext(), R.raw.tartarus_map1);
 		
-		mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 240, 128, 0, 0);
+		mWorldMap = new WorldMap(getContext(), R.drawable.tileset1, 1, 36, 16, 16, 240, 128, 0, 0);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
-		mPlayer = new Player(getContext(), R.drawable.tmp_minotaur, 0, 0, 0.5f, 0.5f, 0.02f, mWorldMap);
+		mPlayer = new Player(getContext(), R.drawable.sprite_magus, 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, magus);
 		mParticleSystem = new ParticleSystem(getContext(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
 	}
 		

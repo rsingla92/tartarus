@@ -124,8 +124,10 @@ public class BitmapImg {
 	}
 	
 	// IN OPENGL COORDINATES! So origin is bottom-left!
-	public void setTexturePortion(Point bottomLeft, Point topRight) {
+	public void setTexturePortion(Point bl, Point tr) {
 		
+		Point bottomLeft = new Point(bl.x, bl.y);
+		Point topRight = new Point(tr.x, tr.y);
 		float swapTmp = bottomLeft.y;
 		bottomLeft.y = mTextureHeight - topRight.y;
 		topRight.y =  mTextureHeight - swapTmp;

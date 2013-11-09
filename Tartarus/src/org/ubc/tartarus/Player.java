@@ -1,5 +1,7 @@
 package org.ubc.tartarus;
 
+import org.ubc.tartarus.Character.AnimTypes;
+
 import android.content.Context;
 import android.opengl.Matrix;
 
@@ -21,8 +23,9 @@ public class Player {
 	}
 	
 	private eDIR mDirection;
+	private Character character;	
 	
-	public Player(final Context context, final int resId, float x, float y, float width, float height, float speed, WorldMap worldMap) {
+	public Player(final Context context, final int resId, float x, float y, float width, float height, float speed, WorldMap worldMap, Character c) {
 		mPlayerImg = new BitmapImg(context, resId);
 		mPosition = new Point(x, y);
 		modelMat = new float[16];
@@ -34,16 +37,27 @@ public class Player {
 		mWidth = width;
 		mHeight = height;
 		mWorldMap = worldMap;
+		character = c;
 	}
 	
 	public void drawPlayer(float[] modelViewMatrix) {
+		Point bottomLeft = character.getCurrentAnimation().getCurrentFrame().bottomLeft;
+		Point topRight = character.getCurrentAnimation().getCurrentFrame().topRight;
+		Point refFrame = character.getRefFrame();
+		 
+		float width = (refFrame.x/refFrame.y)*mHeight;
+		float scaleWidth = width * ((topRight.x - bottomLeft.x)/refFrame.x);
+		float scaleHeight = mHeight * ((topRight.y - bottomLeft.y)/refFrame.y);
 		Matrix.setIdentityM(modelMat, 0);
 		Matrix.setIdentityM(scaleMat, 0);
 		Matrix.translateM(modelMat, 0, mPosition.x, mPosition.y, 0);
 
-		Matrix.scaleM(scaleMat, 0, mWidth, mHeight, 1);
+		int flipVal = (character.getCurrentAnimation().getFlip()? 1 : -1);
+		Matrix.scaleM(scaleMat, 0, flipVal*scaleWidth, scaleHeight, 1);
 		Matrix.multiplyMM(modelMat, 0, modelMat.clone(), 0, scaleMat, 0);
 		Matrix.multiplyMM(mMVPMat, 0, modelViewMatrix, 0, modelMat, 0);
+		
+		mPlayerImg.setTexturePortion(character.getCurrentAnimation().getCurrentFrame().bottomLeft, character.getCurrentAnimation().getCurrentFrame().topRight);
 		mPlayerImg.draw(mMVPMat);
 	}
 	
@@ -73,21 +87,38 @@ public class Player {
 		
 		
 		if (!firstSign && secondSign) {
+			if (mDirection != eDIR.RIGHT){
+				character.getCurrentAnimation().reset();
+				character.setCurrentAnimation(AnimTypes.WALK_RIGHT);
+			}
+			
 			// In the first region, set x to goal's x. 
 			mDirection = eDIR.RIGHT;
 			mGoal.x = goal.x;
 			mGoal.y = mPosition.y;
 		} else if (firstSign && secondSign) {
+			if (mDirection != eDIR.UP){
+				character.getCurrentAnimation().reset();
+				character.setCurrentAnimation(AnimTypes.WALK_UP);
+			}
 			// In the upper region
 			mDirection = eDIR.UP;
 			mGoal.y = goal.y; 
 			mGoal.x = mPosition.x;
 		} else if (firstSign && !secondSign) {
+			if (mDirection != eDIR.LEFT){
+				character.getCurrentAnimation().reset();
+				character.setCurrentAnimation(AnimTypes.WALK_LEFT);
+			}
 			// In the left region
 			mDirection = eDIR.LEFT;
 			mGoal.x = goal.x;
 			mGoal.y = mPosition.y;
 		} else {
+			if (mDirection != eDIR.DOWN){
+				character.getCurrentAnimation().reset();
+				character.setCurrentAnimation(AnimTypes.WALK_DOWN);
+			}
 			mDirection = eDIR.DOWN;
 			mGoal.y = goal.y;
 			mGoal.x = mPosition.x;
@@ -116,6 +147,8 @@ public class Player {
 	
 	public void onUpdate(float viewWidth, float viewHeight) {
 		if (mGoal.x != -5 && mGoal.y != -5) {
+			character.getCurrentAnimation().animate();
+
 			float dx = mGoal.x - mPosition.x;
 			float dy = mGoal.y - mPosition.y;
 
