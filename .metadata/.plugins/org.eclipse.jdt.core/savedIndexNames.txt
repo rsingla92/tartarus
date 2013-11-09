@@ -1,3 +1,0 @@
-INDEX VERSION 1.126+C:\Users\singla\Desktop\Tartarus\tartarus\.metadata\.plugins\org.eclipse.jdt.core
-4225117448.index
-644793071.index
