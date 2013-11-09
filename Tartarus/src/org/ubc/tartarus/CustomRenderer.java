@@ -93,7 +93,8 @@ public class CustomRenderer implements Renderer {
 		GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA);
 		GLES20.glDepthMask(false);
 		
-		GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	//	GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	}
 	
 	public static int loadShader(int type, String shaderCode){
@@ -178,7 +179,7 @@ public class CustomRenderer implements Renderer {
 		addFingerCoords(x, y, width, height);
 	}
 	
-	public void onSwipe(float x1, float y1, float x2, float y2, float width, float height) {
+	public void onSwipe(float x1, float y1, float x2, float y2, float width, float height, float vx, float vy) {
 		addFingerCoords(x2, y2, width, height);
 	}
 

@@ -190,5 +190,21 @@ public class Particle {
 	boolean isAlive() {
 		return !mDead;
 	}
+	
+	public float getParticleXSpeed() {
+		return mXSpeed;
+	}
+	
+	public float getParticleYSpeed() {
+		return mYSpeed;
+	}
+	
+	public float getParticleXPos() {
+		return mX;
+	}
+	
+	public float getParticleYPos() {
+		return mY;
+	}
 }
 

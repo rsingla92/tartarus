@@ -40,6 +40,19 @@ public class Player {
 		character = c;
 	}
 	
+	public Point getScaleDimensions() {
+		Point bottomLeft = character.getCurrentAnimation().getCurrentFrame().bottomLeft;
+		Point topRight = character.getCurrentAnimation().getCurrentFrame().topRight;
+		Point refFrame = character.getRefFrame();
+		 
+		float width = (refFrame.x/refFrame.y)*mHeight;
+		float scaleWidth = width * ((topRight.x - bottomLeft.x)/refFrame.x);
+		float scaleHeight = mHeight * ((topRight.y - bottomLeft.y)/refFrame.y);
+		
+		Point scaleDimensions = new Point(scaleWidth, scaleHeight);
+		return scaleDimensions;
+	}
+	
 	public void drawPlayer(float[] modelViewMatrix) {
 		Point bottomLeft = character.getCurrentAnimation().getCurrentFrame().bottomLeft;
 		Point topRight = character.getCurrentAnimation().getCurrentFrame().topRight;
@@ -84,7 +97,7 @@ public class Player {
 		// determine which side of these lines the goal is on. 
 		boolean firstSign = goal.y - goal.x + mPosition.x - mPosition.y >= 0; 
 		boolean secondSign = goal.y + goal.x - mPosition.y - mPosition.x >= 0;
-		
+		float addX = 0, addY = 0;
 		
 		if (!firstSign && secondSign) {
 			if (mDirection != eDIR.RIGHT){
@@ -93,6 +106,7 @@ public class Player {
 			}
 			
 			// In the first region, set x to goal's x. 
+			addX = getScaleDimensions().x / 2.0f; 
 			mDirection = eDIR.RIGHT;
 			mGoal.x = goal.x;
 			mGoal.y = mPosition.y;
@@ -102,6 +116,7 @@ public class Player {
 				character.setCurrentAnimation(AnimTypes.WALK_UP);
 			}
 			// In the upper region
+			addY = getScaleDimensions().y / 2.0f;
 			mDirection = eDIR.UP;
 			mGoal.y = goal.y; 
 			mGoal.x = mPosition.x;
@@ -111,6 +126,7 @@ public class Player {
 				character.setCurrentAnimation(AnimTypes.WALK_LEFT);
 			}
 			// In the left region
+			addX = -getScaleDimensions().x / 2.0f;
 			mDirection = eDIR.LEFT;
 			mGoal.x = goal.x;
 			mGoal.y = mPosition.y;
@@ -119,12 +135,13 @@ public class Player {
 				character.getCurrentAnimation().reset();
 				character.setCurrentAnimation(AnimTypes.WALK_DOWN);
 			}
+			addY = -getScaleDimensions().y / 2.0f;
 			mDirection = eDIR.DOWN;
 			mGoal.y = goal.y;
 			mGoal.x = mPosition.x;
 		}
 		
-		motionParticles.setMotion(mPosition.x, mPosition.y, mGoal.x, mGoal.y, 0.1f);
+		motionParticles.setMotion(mPosition.x + addX, mPosition.y + addY, mGoal.x, mGoal.y, 0.1f);
 	}
 	
 	public void setGoal(Point endPoint, Point beginPoint, float left, float right, float top, float bottom, ParticleSystem motionParticles) {

@@ -72,8 +72,8 @@ public class GameRenderer extends CustomRenderer {
 	}
 
 	@Override
-	public void onSwipe(float x1, float y1, float x2, float y2, float width, float height) { 
-		super.onSwipe(x1, y1, x2, y2, width, height);
+	public void onSwipe(float x1, float y1, float x2, float y2, float width, float height, float vx, float vy) { 
+		super.onSwipe(x1, y1, x2, y2, width, height, vx, vy);
 		Point beginCoords = getGLCoords(x1, y1, width, height);
 		if (mPlayer != null) {
 			mPlayer.setGoal(new Point(getFingerX(), getFingerY()), beginCoords, -getAspectRatio(), getAspectRatio(), 1, -1, mParticleSystem);

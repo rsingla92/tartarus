@@ -69,14 +69,14 @@ public class GameView extends GLSurfaceView implements
 	}
 
 	@Override
-	public boolean onFling(MotionEvent e1, MotionEvent e2, float arg2,
-			float arg3) {
+	public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+			float velocityY) {
 		float x = e1.getX();
 	    float y = e1.getY();
 		float x2 = e2.getX();
 	    float y2 = e2.getY();
 	    Log.i("GameView", "In onFling");
-		mRenderer.onSwipe(x, y, x2, y2, getWidth(), getHeight());
+		mRenderer.onSwipe(x, y, x2, y2, getWidth(), getHeight(), velocityX, velocityY);
 		return true;
 	}
 
