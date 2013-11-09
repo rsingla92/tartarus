@@ -8,6 +8,9 @@
 # Java class files
 *.class
 
+#Folders 
+.metadata/
+
 # generated files
 bin/
 gen/
