@@ -152,8 +152,9 @@ public class WorldMap {
 
 				if (row >= mWorldWidth) continue;
 				if (col >= mWorldHeight) break;
-				
+
 				pluckTile(mTilemap[row][col]);
+
 				translateX = (viewWidth / 2) - (((float)i) / mViewportWidth) * viewWidth;
 				translateY = (viewHeight / 2) - (((float)j) / mViewportHeight) * viewHeight;
 				
@@ -168,7 +169,7 @@ public class WorldMap {
 				Matrix.multiplyMM(modelMat, 0, modelMat.clone(), 0, scaleMat, 0);
 				Matrix.multiplyMM(modelMat, 0, modelViewMatrix, 0, modelMat.clone(), 0);
 
-		     	mTileset.draw(modelMat);
+					mTileset.draw(modelMat);
 			}
 		}
 	}
@@ -180,6 +181,12 @@ public class WorldMap {
 		int yPadding = mTilePadding * (row + 1); 
 		Point bottomLeft = new Point(col * mTileWidth + xPadding, row * mTileHeight + yPadding + mTileHeight);
 		Point topRight = new Point(bottomLeft.x + mTileWidth, bottomLeft.y - mTileHeight);
+		/*
+		if (testing) {
+			bottomLeft.y -= 1;
+		}
+		*/
+		
 		bottomLeft.y = mTileset.getHeight() - bottomLeft.y;
 		topRight.y = mTileset.getHeight() - topRight.y;
 		

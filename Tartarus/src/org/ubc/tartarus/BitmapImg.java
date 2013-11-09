@@ -131,15 +131,17 @@ public class BitmapImg {
 		float swapTmp = bottomLeft.y;
 		bottomLeft.y = mTextureHeight - topRight.y;
 		topRight.y =  mTextureHeight - swapTmp;
+		float hHalf = 0.5f/mTextureHeight;
+		float wHalf = 0.5f/mTextureWidth;
 		
-	    mTexCoordinateData[0] = topRight.x / (float) mTextureWidth; 
-	    mTexCoordinateData[1] = (bottomLeft.y / (float) mTextureHeight);
-	    mTexCoordinateData[2] = bottomLeft.x / (float) mTextureWidth;
-	    mTexCoordinateData[3] = (bottomLeft.y / (float) mTextureHeight);
-	    mTexCoordinateData[4] = topRight.x / (float) mTextureWidth;
-	    mTexCoordinateData[5] = (topRight.y / (float) mTextureHeight);
-	    mTexCoordinateData[6] = bottomLeft.x / (float) mTextureWidth;
-	    mTexCoordinateData[7] = (topRight.y / (float) mTextureHeight);
+	    mTexCoordinateData[0] = (topRight.x / (float) mTextureWidth) - wHalf; 
+	    mTexCoordinateData[1] = (bottomLeft.y / (float) mTextureHeight) +hHalf;
+	    mTexCoordinateData[2] = (bottomLeft.x / (float) mTextureWidth) + wHalf;
+	    mTexCoordinateData[3] = (bottomLeft.y / (float) mTextureHeight) + hHalf;
+	    mTexCoordinateData[4] = (topRight.x / (float) mTextureWidth) - wHalf;
+	    mTexCoordinateData[5] = (topRight.y / (float) mTextureHeight) - hHalf;
+	    mTexCoordinateData[6] = (bottomLeft.x / (float) mTextureWidth) + wHalf;
+	    mTexCoordinateData[7] = (topRight.y / (float) mTextureHeight) - hHalf;
 
 		ByteBuffer tlb = ByteBuffer.allocateDirect(mTexCoordinateData.length * BYTES_PER_FLOAT).order(ByteOrder.nativeOrder());
 		mTexCoordinates = tlb.asFloatBuffer();
