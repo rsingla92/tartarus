@@ -61,9 +61,9 @@ public class GameRenderer extends CustomRenderer {
 		
 		magus = new CharMagus();
 		
-		MapParser.TileMap map = MapParser.readMapFromFile(getContext(), R.raw.test_level);
+		MapParser.TileMap map = MapParser.readMapFromFile(getContext(), R.raw.tartarus_map1);
 		
-		mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 224, 160, 0, 0);
+		mWorldMap = new WorldMap(getContext(), R.drawable.tileset1, 1, 36, 16, 16, 224, 160, 0, 0);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
 		mPlayer = new Player(getContext(), R.drawable.sprite_magus, 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, magus);
 		mParticleSystem = new ParticleSystem(getContext(), 100, R.drawable.particle, 5, Type.STAGNANT, stagnantColourList);

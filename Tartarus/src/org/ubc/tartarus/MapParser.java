@@ -51,7 +51,7 @@ public class MapParser {
 			while (scan.hasNext()) {
 				tiles[curRow][curCol] = Integer.parseInt(scan.next()); 
 				
-				scan.next(); //For now: Discarding the 'solid' int. 
+				//scan.next(); //For now: Discarding the 'solid' int. 
 				
 				//Log.i("MapParser", "Received: " + tiles[curRow][curCol]);
 				
