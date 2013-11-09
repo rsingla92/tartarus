@@ -2,7 +2,6 @@ package org.ubc.tartarus;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.util.Log;
 
 public class WorldMap {
 

@@ -17,6 +17,8 @@ public class ParticleSystem {
 	private Random mRandGenerator;
 	private int mSpawnDelay;
 	private long mLastTime;
+	private float startX, startY, endX, endY, diffX, diffY; 
+	private boolean xMotionGreater, yMotionGreater;
 	
 	public static final float DEFAULT_BURST_MIN_ANGLE = 0.0f;
 	public static final float DEFAULT_BURST_MAX_ANGLE = 360.0f;
@@ -24,7 +26,7 @@ public class ParticleSystem {
 	private float mBurstMinAngle, mBurstMaxAngle; 
 	
 	public enum Type {
-		STANDARD, BURST, SPIRAL, STAGNANT
+		STANDARD, BURST, SPIRAL, STAGNANT, MOTION
 	}
 	
 	private Type mType; 
@@ -72,6 +74,8 @@ public class ParticleSystem {
 		mBurstMinAngle = DEFAULT_BURST_MIN_ANGLE;
 		mBurstMaxAngle = DEFAULT_BURST_MAX_ANGLE;
 		deadIndexCount = maxParticles;
+		startX = startY = endX = endY = diffX = diffY = 0;
+		xMotionGreater = yMotionGreater = false;
 		
 		setColourList(colourList);
 		
@@ -87,7 +91,7 @@ public class ParticleSystem {
 			Particle.loadParticleImg(mContext, particleResId);
 		}
 		
-		// Create all the particles upfront. They will be reused.
+		// Create all the particles up-front. They will be reused.
 		// They are all initially dead.
 		for (int i = 0; i < maxParticles; i++) {
 			particles[i] = CreateParticle(0.0f, 0.0f, 0.0f);
@@ -172,6 +176,27 @@ public class ParticleSystem {
 		mSpawning = false;
 	}
 	
+	public void setMotion(float x1, float y1, float x2, float y2, float motionRate) {
+		startX = x1;
+		startY = y1;
+		endX = x2;
+		endY = y2;
+		diffX = endX - startX;
+		diffY = endY - startY; 
+		
+		if (diffX > 0) xMotionGreater = true;
+		else xMotionGreater = false;
+		
+		if (diffY > 0) yMotionGreater = true;
+		else yMotionGreater = false;
+		
+		// Normalize difference vector
+		float magnitude = (float) Math.sqrt(diffX*diffX + diffY*diffY);
+		diffX = (diffX / magnitude) * motionRate;
+		diffY = (diffY / magnitude) * motionRate;
+		mSpawning = true;
+	}
+	
 	public void setColourList(float[][] colourList) {
 		if (colourList == null || colourList.equals(DEFAULT_COLOUR_LIST)) {
 			mColourList = DEFAULT_COLOUR_LIST;
@@ -191,7 +216,7 @@ public class ParticleSystem {
 	}
 	
 	public void updateParticleSystem(float x, float y, float z, float aspect) {
-		
+	
 		if (mSpawning == true && deadIndexCount > 0) {
 			
 			long currentTime = SystemClock.uptimeMillis();
@@ -201,7 +226,19 @@ public class ParticleSystem {
 			} else if (currentTime - mLastTime > mSpawnDelay) {
 				// Do not create a new particle each time -- grab and reuse a particle 
 				// from the dead list. 
-				grabParticle(x, y, z);
+				if (mType == Type.MOTION) {
+					grabParticle(startX, startY, 0); 
+					startX += diffX;
+					startY += diffY; 
+					
+					if (((xMotionGreater && startX >= endX) || (!xMotionGreater && startX <= endX)) &&
+							((yMotionGreater && startY >= endY) || (!yMotionGreater && startY <= endY))) {
+						mSpawning = false;
+						startX = startY = endX = endY = diffX = diffY = 0;
+					}
+				} else {
+					grabParticle(x, y, z);
+				}
 				mLastTime = currentTime;
 			} 
 		}

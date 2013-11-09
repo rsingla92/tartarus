@@ -2,7 +2,6 @@ package org.ubc.tartarus;
 
 import android.content.Context;
 import android.opengl.Matrix;
-import android.util.Log;
 
 public class Player {
 
@@ -66,11 +65,12 @@ public class Player {
 		}
 	}
 	
-	public void setGoalPoint(Point goal) {
+	public void setGoalPoint(Point goal, ParticleSystem motionParticles) {
 		// Use implicit line equations of y - x + x_1 - y_1 and y + x - y_1 - x_1 to 
 		// determine which side of these lines the goal is on. 
 		boolean firstSign = goal.y - goal.x + mPosition.x - mPosition.y >= 0; 
 		boolean secondSign = goal.y + goal.x - mPosition.y - mPosition.x >= 0;
+		
 		
 		if (!firstSign && secondSign) {
 			// In the first region, set x to goal's x. 
@@ -92,9 +92,11 @@ public class Player {
 			mGoal.y = goal.y;
 			mGoal.x = mPosition.x;
 		}
+		
+		motionParticles.setMotion(mPosition.x, mPosition.y, mGoal.x, mGoal.y, 0.1f);
 	}
 	
-	public void setGoal(Point endPoint, Point beginPoint, float left, float right, float top, float bottom) {
+	public void setGoal(Point endPoint, Point beginPoint, float left, float right, float top, float bottom, ParticleSystem motionParticles) {
 		// Determine the goal point based on the scroll line (distance of the goal from the player is the same
 		// as the distance of the scroll line, clamped to the size of the viewport). 
 		Point goal = new Point(endPoint.x - beginPoint.x + mPosition.x, endPoint.y - beginPoint.y + mPosition.y); 
@@ -105,7 +107,11 @@ public class Player {
 		if (goal.y > top) goal.y = top;
 		else if (goal.y < bottom) goal.y = bottom;
 	
-		setGoalPoint(goal);
+		setGoalPoint(goal, motionParticles);
+	}
+	
+	public Point getPosition() {
+		return new Point(mPosition.x, mPosition.y);
 	}
 	
 	public void onUpdate(float viewWidth, float viewHeight) {

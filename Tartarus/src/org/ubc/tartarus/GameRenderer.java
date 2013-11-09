@@ -48,40 +48,23 @@ public class GameRenderer extends CustomRenderer {
 	public void onSurfaceCreated(GL10 arg0, EGLConfig arg1) {
 		// Load shaders for all BitmapImg objects.
 		super.onSurfaceCreated(arg0, arg1);
-
-		int[][] tileMap = {
-				{0, 1, 2, 3, 4, 5, 6},
-				{7, 8, 9, 10, 11, 12, 13},
-				{14, 15, 16, 17, 18, 19, 20},
-				{21, 22, 23, 24, 25, 26, 27},
-				{28, 29, 30, 31, 32, 33, 34},
-				{35, 36, 37, 38, 39, 40, 41},
-		}; 
 		
 		MapParser.TileMap map = MapParser.readMapFromFile(getContext(), R.raw.test_level);
 		
 		mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 240, 128, 0, 0);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
 		mPlayer = new Player(getContext(), R.drawable.tmp_minotaur, 0, 0, 0.5f, 0.5f, 0.02f, mWorldMap);
-		mParticleSystem = new ParticleSystem(getContext(), 100, R.drawable.particle, 5, Type.STAGNANT, stagnantColourList);
+		mParticleSystem = new ParticleSystem(getContext(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
 	}
 		
 	@Override
 	public void onDownTouch(float x, float y, float width, float height) {
 		super.onDownTouch(x, y, width, height);
-		
-		if (mParticleSystem != null) {
-			mParticleSystem.beginSpawning();
-		}
 	}
 
 	@Override
 	public void onReleaseTouch() {
 		super.onReleaseTouch();
-		
-		if (mParticleSystem != null) {
-			mParticleSystem.endSpawning();	
-		}
 	}
 
 	@Override
@@ -89,7 +72,7 @@ public class GameRenderer extends CustomRenderer {
 		super.onSwipe(x1, y1, x2, y2, width, height);
 		Point beginCoords = getGLCoords(x1, y1, width, height);
 		if (mPlayer != null) {
-			mPlayer.setGoal(new Point(getFingerX(), getFingerY()), beginCoords, -getAspectRatio(), getAspectRatio(), 1, -1);
+			mPlayer.setGoal(new Point(getFingerX(), getFingerY()), beginCoords, -getAspectRatio(), getAspectRatio(), 1, -1, mParticleSystem);
 		}
 	}
 	
@@ -97,7 +80,7 @@ public class GameRenderer extends CustomRenderer {
 	public void onSingleTap(float x, float y, float width, float height) {
 		super.onSingleTap(x, y, width, height);
 		if (mPlayer != null) {
-			mPlayer.setGoalPoint(new Point(getFingerX(), getFingerY()));
+			mPlayer.setGoalPoint(new Point(getFingerX(), getFingerY()), mParticleSystem);
 		}
 	}
 }
