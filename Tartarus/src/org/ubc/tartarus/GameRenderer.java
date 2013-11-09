@@ -60,7 +60,7 @@ public class GameRenderer extends CustomRenderer {
 		
 		MapParser.TileMap map = MapParser.readMapFromFile(getContext(), R.raw.test_level);
 		
-		mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 224, 160, 0, 0);
+		mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 240, 128, 0, 0);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
 		mPlayer = new Player(getContext(), R.drawable.tmp_minotaur, 0, 0, 0.5f, 0.5f, 0.02f, mWorldMap);
 		mParticleSystem = new ParticleSystem(getContext(), 100, R.drawable.particle, 5, Type.STAGNANT, stagnantColourList);
@@ -72,10 +72,6 @@ public class GameRenderer extends CustomRenderer {
 		
 		if (mParticleSystem != null) {
 			mParticleSystem.beginSpawning();
-		}
-		
-		if (mPlayer != null) {
-			mPlayer.setGoal(new Point(getFingerX(), getFingerY()));
 		}
 	}
 
@@ -89,10 +85,11 @@ public class GameRenderer extends CustomRenderer {
 	}
 
 	@Override
-	public void onMoveTouch(float x, float y, float width, float height) { 
-		super.onMoveTouch(x, y, width, height);
+	public void onMoveTouch(float x1, float y1, float x2, float y2, float width, float height) { 
+		super.onMoveTouch(x2, y2, x1, y1, width, height);
+		Point beginCoords = getGLCoords(x1, y1, width, height);
 		if (mPlayer != null) {
-			mPlayer.setGoal(new Point(getFingerX(), getFingerY()));
+			mPlayer.setGoal(new Point(getFingerX(), getFingerY()), beginCoords, -getAspectRatio(), getAspectRatio(), 1, -1);
 		}
 	}
 }

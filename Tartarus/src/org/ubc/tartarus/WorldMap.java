@@ -14,7 +14,7 @@ public class WorldMap {
 	private int mNumTilesPerRow;
 	private int mViewportWidth, mViewportHeight;
 	private int mViewportTilesWidth, mViewportTilesHeight;
-	private int mViewportX, mViewportY;
+	private float mViewportX, mViewportY;
 	
 	public WorldMap() {
 		mTileset = null;
@@ -94,8 +94,9 @@ public class WorldMap {
 	}
 	
 	public void shiftViewport(float shiftX, float shiftY) {
-		mViewportX += shiftX;
-		mViewportY += shiftY; 
+
+		mViewportX += Math.round(shiftX);
+		mViewportY += Math.round(shiftY); 
 
 		if (mViewportX <= 0) mViewportX = 0;
 		if (mViewportY <= 0) mViewportY = 0;
@@ -126,10 +127,10 @@ public class WorldMap {
 	}
 	
 	public void drawViewport(float[] modelViewMatrix, float viewWidth, float viewHeight) {
-		int col0 = mViewportX / mTileWidth;
-		int row0 = mViewportY / mTileHeight;
-		int x0 = col0 * mTileWidth - mViewportX; 
-		int y0 = row0 * mTileHeight - mViewportY;
+		int col0 = Math.round(mViewportX) / mTileWidth;
+		int row0 = Math.round(mViewportY) / mTileHeight;
+		int x0 = col0 * mTileWidth - Math.round(mViewportX); 
+		int y0 = row0 * mTileHeight - Math.round(mViewportY);
 		int x1 = x0 + mViewportWidth;
 		int y1 = y0 + mViewportHeight;
 		
@@ -146,8 +147,8 @@ public class WorldMap {
 		
 		for (int i = x0; i <= x1; i += mTileWidth) {
 			for (int j = y0; j <= y1; j += mTileHeight) {
-				int col = (i + mViewportX) / mTileWidth;
-				int row = (j + mViewportY) / mTileHeight;
+				int col = (i + Math.round(mViewportX)) / mTileWidth;
+				int row = (j + Math.round(mViewportY)) / mTileHeight;
 				float translateX, translateY; 
 
 				if (row >= mWorldWidth) continue;

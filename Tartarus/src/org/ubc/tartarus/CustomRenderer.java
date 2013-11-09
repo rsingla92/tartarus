@@ -111,7 +111,7 @@ public class CustomRenderer implements Renderer {
 	   
 	// Found online at:
 	// http://stackoverflow.com/questions/10985487/android-opengl-es-2-0-screen-coordinates-to-world-coordinates
-   public void addFingerCoords( float x, float y, float screenW, float screenH)
+   public Point getGLCoords( float x, float y, float screenW, float screenH)
    { 
        // Auxiliary matrix and vectors
        // to deal with ogl.
@@ -158,8 +158,14 @@ public class CustomRenderer implements Renderer {
            Log.e("World coords", "ERROR!");
        }
 
-       fingerX = outPoint[0] / outPoint[3];
-       fingerY = outPoint[1] / outPoint[3];
+       Point glPoint = new Point(outPoint[0] / outPoint[3], outPoint[1] / outPoint[3]); 
+       return glPoint;
+   }
+   
+   public void addFingerCoords( float x, float y, float screenW, float screenH) {
+	   Point p = getGLCoords(x, y, screenW, screenH); 
+	   fingerX = p.x;
+	   fingerY = p.y;
    }
    
 	public void onDownTouch(float x, float y, float width, float height) {
@@ -168,7 +174,7 @@ public class CustomRenderer implements Renderer {
 
 	public void onReleaseTouch() { }
 
-	public void onMoveTouch(float x, float y, float width, float height) {
+	public void onMoveTouch(float x, float y, float x2, float y2, float width, float height) {
 		addFingerCoords(x, y, width, height);
 	}
 }

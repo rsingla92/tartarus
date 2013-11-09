@@ -31,7 +31,7 @@ public class Player {
 		mMVPMat = new float[16];
 		mSpeed = speed;
 		mDirection = eDIR.LEFT;
-		mGoal = new Point(-1, -1);
+		mGoal = new Point(-5, -5);
 		mWidth = width;
 		mHeight = height;
 		mWorldMap = worldMap;
@@ -66,7 +66,20 @@ public class Player {
 		}
 	}
 	
-	public void setGoal(Point goal) {
+	public void setGoal(Point endPoint, Point beginPoint, float left, float right, float top, float bottom) {
+		// Determine the goal point based on the scroll line (distance of the goal from the player is the same
+		// as the distance of the scroll line, clamped to the size of the viewport). 
+		Point goal = new Point(endPoint.x - beginPoint.x + mPosition.x, endPoint.y - beginPoint.y + mPosition.y); 
+		
+		Log.i("Player", "Goal X: " + goal.x + ", Goal Y: " + goal.y);
+		if (goal.x > right) goal.x = right;
+		else if (goal.x < left) goal.x = left;
+		
+		if (goal.y > top) goal.y = top;
+		else if (goal.y < bottom) goal.y = bottom;
+	
+		Log.i("Player", "Goal X (after clamp): " + goal.x + ", Goal Y (after clamp): " + goal.y);
+		
 		// Use implicit line equations of y - x + x_1 - y_1 and y + x - y_1 - x_1 to 
 		// determine which side of these lines the goal is on. 
 		boolean firstSign = goal.y - goal.x + mPosition.x - mPosition.y >= 0; 
@@ -95,18 +108,18 @@ public class Player {
 	}
 	
 	public void onUpdate(float viewWidth, float viewHeight) {
-		if (mGoal.x != -1 && mGoal.y != -1) {
+		if (mGoal.x != -5 && mGoal.y != -5) {
 			float dx = mGoal.x - mPosition.x;
 			float dy = mGoal.y - mPosition.y;
 
 			float viewportXUnitsPerGL = mWorldMap.getViewportWidth() / viewWidth;
 			float viewportYUnitsPerGL = mWorldMap.getViewportHeight() / viewHeight;
-					
+
 			if (dx > 0) {
 				if (mDirection == eDIR.LEFT){
 					//Overshot the goal
-					mGoal.x = -1;
-					mGoal.y = -1;
+					mGoal.x = -5;
+					mGoal.y = -5;
 				} else {
 					if (mWorldMap.atViewportXBoundary() == -1 || mPosition.x <  viewWidth * 0.25f) {
 						movePlayer(eDIR.RIGHT);
@@ -119,11 +132,10 @@ public class Player {
 			} else if (dx < 0) {
 				if (mDirection == eDIR.RIGHT){
 					//Overshot the goal
-					mGoal.x = -1;
-					mGoal.y = -1;
+					mGoal.x = -5;
+					mGoal.y = -5;
 				} else {
 					if (mWorldMap.atViewportXBoundary() == 1 || mPosition.x > -viewWidth * 0.25f) {
-						Log.i("Player", "Viewport Boundary: " + mWorldMap.atViewportXBoundary() + ", Viewport X: " + mWorldMap.getViewportX());
 						movePlayer(eDIR.LEFT);
 					} else {
 						// Move the viewport -- must shift the goal to account for this
@@ -134,8 +146,8 @@ public class Player {
 			} else if (dy > 0) {
 				if (mDirection == eDIR.DOWN){
 					//Overshot the goal
-					mGoal.x = -1;
-					mGoal.y = -1;
+					mGoal.x = -5;
+					mGoal.y = -5;
 				} else {
 					if (mWorldMap.atViewportYBoundary() == -1 || mPosition.y < viewHeight * 0.1f) {
 						movePlayer(eDIR.UP);
@@ -148,8 +160,8 @@ public class Player {
 			} else if (dy < 0) {
 				if (mDirection == eDIR.UP){
 					//Overshot the goal
-					mGoal.x = -1;
-					mGoal.y = -1;
+					mGoal.x = -5;
+					mGoal.y = -5;
 				} else {
 					if (mWorldMap.atViewportYBoundary() == 1 || mPosition.y > -viewHeight * 0.1f) {
 						movePlayer(eDIR.DOWN);
@@ -161,8 +173,8 @@ public class Player {
 				}
 			} else {
 				// Reached position
-				mGoal.x = -1;
-				mGoal.y = -1;
+				mGoal.x = -5;
+				mGoal.y = -5;
 			}
 		}
 	}
