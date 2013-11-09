@@ -71,7 +71,7 @@ public class MenuRenderer extends CustomRenderer {
 	}
 
 	@Override
-	public void onMoveTouch(float x, float y, float x2, float y2, float width, float height) { 
-		super.onMoveTouch(x, y, x2, y2, width, height);
+	public void onMoveTouch(float x, float y, float width, float height) { 
+		super.onMoveTouch(x, y, width, height);
 	}
 }

@@ -85,11 +85,19 @@ public class GameRenderer extends CustomRenderer {
 	}
 
 	@Override
-	public void onMoveTouch(float x1, float y1, float x2, float y2, float width, float height) { 
-		super.onMoveTouch(x2, y2, x1, y1, width, height);
+	public void onSwipe(float x1, float y1, float x2, float y2, float width, float height) { 
+		super.onSwipe(x1, y1, x2, y2, width, height);
 		Point beginCoords = getGLCoords(x1, y1, width, height);
 		if (mPlayer != null) {
 			mPlayer.setGoal(new Point(getFingerX(), getFingerY()), beginCoords, -getAspectRatio(), getAspectRatio(), 1, -1);
+		}
+	}
+	
+	@Override
+	public void onSingleTap(float x, float y, float width, float height) {
+		super.onSingleTap(x, y, width, height);
+		if (mPlayer != null) {
+			mPlayer.setGoalPoint(new Point(getFingerX(), getFingerY()));
 		}
 	}
 }

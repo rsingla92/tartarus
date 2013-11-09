@@ -6,7 +6,6 @@ import android.support.v4.view.GestureDetectorCompat;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.GestureDetector;
-import android.support.v4.view.GestureDetectorCompat;
 
 public class GameView extends GLSurfaceView implements 
 								GestureDetector.OnGestureListener, GestureDetector.OnDoubleTapListener {
@@ -26,9 +25,6 @@ public class GameView extends GLSurfaceView implements
 	public boolean onTouchEvent(MotionEvent e) {
 		this.mGestureDetector.onTouchEvent(e);
 		
-	    float x = e.getX();
-	    float y = e.getY();
-
 	    switch (e.getAction()) {
 	    /*    case MotionEvent.ACTION_MOVE:
 	            mRenderer.onMoveTouch(x, y, getWidth(), getHeight());
@@ -61,7 +57,7 @@ public class GameView extends GLSurfaceView implements
 	@Override
 	public boolean onSingleTapConfirmed(MotionEvent e) {
 		// TODO Auto-generated method stub
-		Log.i("GameView", "In inSingleTapConfirmer");
+		mRenderer.onSingleTap(e.getX(), e.getY(), getWidth(), getHeight());
 		return true;
 	}
 
@@ -80,7 +76,7 @@ public class GameView extends GLSurfaceView implements
 		float x2 = e2.getX();
 	    float y2 = e2.getY();
 	    Log.i("GameView", "In onFling");
-		mRenderer.onMoveTouch(x, y, x2, y2, getWidth(), getHeight());
+		mRenderer.onSwipe(x, y, x2, y2, getWidth(), getHeight());
 		return true;
 	}
 

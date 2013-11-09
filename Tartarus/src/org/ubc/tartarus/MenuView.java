@@ -22,7 +22,7 @@ public class MenuView extends GLSurfaceView {
 
 	    switch (e.getAction()) {
 	        case MotionEvent.ACTION_MOVE:
-	            mRenderer.onMoveTouch(x, y, 0, 0, getWidth(), getHeight());
+	            mRenderer.onMoveTouch(x, y, getWidth(), getHeight());
 	        break;
 	        case MotionEvent.ACTION_DOWN:
 	        	mRenderer.onDownTouch(x, y, getWidth(), getHeight());

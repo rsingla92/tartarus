@@ -66,20 +66,7 @@ public class Player {
 		}
 	}
 	
-	public void setGoal(Point endPoint, Point beginPoint, float left, float right, float top, float bottom) {
-		// Determine the goal point based on the scroll line (distance of the goal from the player is the same
-		// as the distance of the scroll line, clamped to the size of the viewport). 
-		Point goal = new Point(endPoint.x - beginPoint.x + mPosition.x, endPoint.y - beginPoint.y + mPosition.y); 
-		
-		Log.i("Player", "Goal X: " + goal.x + ", Goal Y: " + goal.y);
-		if (goal.x > right) goal.x = right;
-		else if (goal.x < left) goal.x = left;
-		
-		if (goal.y > top) goal.y = top;
-		else if (goal.y < bottom) goal.y = bottom;
-	
-		Log.i("Player", "Goal X (after clamp): " + goal.x + ", Goal Y (after clamp): " + goal.y);
-		
+	public void setGoalPoint(Point goal) {
 		// Use implicit line equations of y - x + x_1 - y_1 and y + x - y_1 - x_1 to 
 		// determine which side of these lines the goal is on. 
 		boolean firstSign = goal.y - goal.x + mPosition.x - mPosition.y >= 0; 
@@ -105,6 +92,20 @@ public class Player {
 			mGoal.y = goal.y;
 			mGoal.x = mPosition.x;
 		}
+	}
+	
+	public void setGoal(Point endPoint, Point beginPoint, float left, float right, float top, float bottom) {
+		// Determine the goal point based on the scroll line (distance of the goal from the player is the same
+		// as the distance of the scroll line, clamped to the size of the viewport). 
+		Point goal = new Point(endPoint.x - beginPoint.x + mPosition.x, endPoint.y - beginPoint.y + mPosition.y); 
+		
+		if (goal.x > right) goal.x = right;
+		else if (goal.x < left) goal.x = left;
+		
+		if (goal.y > top) goal.y = top;
+		else if (goal.y < bottom) goal.y = bottom;
+	
+		setGoalPoint(goal);
 	}
 	
 	public void onUpdate(float viewWidth, float viewHeight) {

@@ -174,7 +174,15 @@ public class CustomRenderer implements Renderer {
 
 	public void onReleaseTouch() { }
 
-	public void onMoveTouch(float x, float y, float x2, float y2, float width, float height) {
+	public void onMoveTouch(float x, float y, float width, float height) {
 		addFingerCoords(x, y, width, height);
+	}
+	
+	public void onSwipe(float x1, float y1, float x2, float y2, float width, float height) {
+		addFingerCoords(x2, y2, width, height);
+	}
+
+	public void onSingleTap(float x, float y, float width, float height) {
+		addFingerCoords(x, y, width, height);		
 	}
 }
