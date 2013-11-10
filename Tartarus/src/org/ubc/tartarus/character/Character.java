@@ -1,6 +1,9 @@
-package org.ubc.tartarus;
+package org.ubc.tartarus.character;
 
 import java.util.Vector;
+
+import org.ubc.tartarus.utils.Point;
+import org.ubc.tartarus.utils.Rectangle;
 
 import android.util.Log;
 

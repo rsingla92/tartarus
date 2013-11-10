@@ -1,5 +1,7 @@
 package org.ubc.tartarus;
 
+import org.ubc.tartarus.particle.Particle;
+
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;

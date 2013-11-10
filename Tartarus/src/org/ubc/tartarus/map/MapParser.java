@@ -1,4 +1,4 @@
-package org.ubc.tartarus;
+package org.ubc.tartarus.map;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

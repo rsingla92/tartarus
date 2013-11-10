@@ -1,7 +1,14 @@
-package org.ubc.tartarus;
+package org.ubc.tartarus.graphics;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import org.ubc.tartarus.GameActivity;
+import org.ubc.tartarus.R;
+import org.ubc.tartarus.R.drawable;
+import org.ubc.tartarus.particle.Particle;
+import org.ubc.tartarus.particle.ParticleSystem;
+import org.ubc.tartarus.utils.Point;
 
 import android.content.Context;
 import android.content.Intent;
@@ -119,6 +126,7 @@ public class MenuRenderer extends CustomRenderer {
 				getContext().startActivity(intent);
 			}
 		}
+		
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
 	}

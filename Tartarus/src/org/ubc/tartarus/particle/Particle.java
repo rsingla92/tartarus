@@ -1,6 +1,8 @@
-package org.ubc.tartarus;
+package org.ubc.tartarus.particle;
 
 import java.util.Random;
+
+import org.ubc.tartarus.graphics.BitmapImg;
 
 import android.content.Context;
 import android.opengl.Matrix;
@@ -84,11 +86,11 @@ public class Particle {
 		loadedParticleImg = loaded;
 	}
 	
-	void makeSpinner(float radiusSpeed, float angleSpeed, float originX, float originY) {
+	public void makeSpinner(float radiusSpeed, float angleSpeed, float originX, float originY) {
 		makeSpinner(radiusSpeed, angleSpeed, originX, originY, 0, 0);
 	}
 	
-	void makeSpinner(float radiusSpeed, float angleSpeed, float originX, float originY, 
+	public void makeSpinner(float radiusSpeed, float angleSpeed, float originX, float originY, 
 			float initialAngle, float initialRad) {
 		mSpinner = true;
 		mRadSpeed = radiusSpeed;
@@ -99,7 +101,7 @@ public class Particle {
 		mCurrentAngle = initialAngle;
 	}
 	
-	void setSpinner(boolean spinner) {
+	public void setSpinner(boolean spinner) {
 		mSpinner = spinner;
 	}
 	
@@ -107,24 +109,24 @@ public class Particle {
 		if (decay >= 0) mDecay = decay;
 	}
 	
-	void setParticleSpeed(float xSpeed, float ySpeed, float zSpeed) {
+	public void setParticleSpeed(float xSpeed, float ySpeed, float zSpeed) {
 		mXSpeed = xSpeed;
 		mYSpeed = ySpeed;
 		mZSpeed = zSpeed;
 	}
 	
-	void setParticlePosition(float x, float y, float z) {
+	public void setParticlePosition(float x, float y, float z) {
 		mX = x;
 		mY = y;
 		mZ = z;
 	}
 	
-	void setParticleSize(float width, float height) {
+	public void setParticleSize(float width, float height) {
 		mWidth = width;
 		mHeight = height;
 	}
 	
-	void reGenerateParticle(float xPos, float yPos, float zPos, float r, float g, float b, float a,
+	public void reGenerateParticle(float xPos, float yPos, float zPos, float r, float g, float b, float a,
 			float width, float height) {
 		mColour[0] = r;
 		mColour[1] = g;
@@ -150,11 +152,11 @@ public class Particle {
 		}
 	}
 	
-	void setDead(boolean dead) {
+	public void setDead(boolean dead) {
 		mDead = dead;
 	}
 	
-	void updateParticle(float aspect) {
+	public void updateParticle(float aspect) {
 		if (!mDead) {
 			mScaleFactor -= mDecay;
 			
@@ -177,7 +179,7 @@ public class Particle {
 		}
 	}
 	
-	void drawParticle(float[] modelViewMatrix) {
+	public void drawParticle(float[] modelViewMatrix) {
 		if (mDead == false) {
 			Matrix.setIdentityM(modelMat, 0);
 			Matrix.setIdentityM(scaleMat, 0);
@@ -191,7 +193,7 @@ public class Particle {
 		}
 	}
 	
-	boolean isAlive() {
+	public boolean isAlive() {
 		return !mDead;
 	}
 	

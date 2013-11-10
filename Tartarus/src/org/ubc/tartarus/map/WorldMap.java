@@ -1,4 +1,7 @@
-package org.ubc.tartarus;
+package org.ubc.tartarus.map;
+
+import org.ubc.tartarus.graphics.BitmapImg;
+import org.ubc.tartarus.utils.Point;
 
 import android.content.Context;
 import android.opengl.Matrix;

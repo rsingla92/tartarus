@@ -1,4 +1,4 @@
-package org.ubc.tartarus;
+package org.ubc.tartarus.communication;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.TimerTask;
+
+import org.ubc.tartarus.ApplicationData;
 
 import android.app.Activity;
 import android.os.AsyncTask;

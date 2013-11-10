@@ -1,4 +1,6 @@
-package org.ubc.tartarus;
+package org.ubc.tartarus.character;
+
+import org.ubc.tartarus.utils.Rectangle;
 
 public class CharMagus extends Character {
 	

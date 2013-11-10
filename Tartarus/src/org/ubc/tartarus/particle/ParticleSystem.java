@@ -1,4 +1,4 @@
-package org.ubc.tartarus;
+package org.ubc.tartarus.particle;
 
 import java.util.Random;
 import android.content.Context;

@@ -1,8 +1,10 @@
-package org.ubc.tartarus;
+package org.ubc.tartarus.graphics;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+
+import org.ubc.tartarus.utils.Point;
 
 import android.content.Context;
 import android.graphics.Bitmap;

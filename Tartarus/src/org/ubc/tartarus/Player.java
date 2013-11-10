@@ -1,6 +1,11 @@
 package org.ubc.tartarus;
 
-import org.ubc.tartarus.Character.AnimTypes;
+import org.ubc.tartarus.character.Character;
+import org.ubc.tartarus.character.Character.AnimTypes;
+import org.ubc.tartarus.graphics.BitmapImg;
+import org.ubc.tartarus.map.WorldMap;
+import org.ubc.tartarus.particle.ParticleSystem;
+import org.ubc.tartarus.utils.Point;
 
 import android.content.Context;
 import android.opengl.Matrix;

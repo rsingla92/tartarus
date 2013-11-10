@@ -2,6 +2,9 @@ package org.ubc.tartarus;
 
 import java.util.Timer;
 
+import org.ubc.tartarus.communication.SocketComm;
+import org.ubc.tartarus.particle.Particle;
+
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.app.Activity;

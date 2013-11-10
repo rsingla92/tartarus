@@ -1,7 +1,9 @@
-package org.ubc.tartarus;
+package org.ubc.tartarus.graphics;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import org.ubc.tartarus.utils.Point;
 
 import android.content.Context;
 import android.opengl.GLES20;

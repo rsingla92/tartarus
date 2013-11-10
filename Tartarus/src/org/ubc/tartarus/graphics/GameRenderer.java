@@ -1,9 +1,19 @@
-package org.ubc.tartarus;
+package org.ubc.tartarus.graphics;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.ubc.tartarus.ParticleSystem.Type;
+import org.ubc.tartarus.Player;
+import org.ubc.tartarus.R;
+import org.ubc.tartarus.R.drawable;
+import org.ubc.tartarus.R.raw;
+import org.ubc.tartarus.character.CharMagus;
+import org.ubc.tartarus.map.MapParser;
+import org.ubc.tartarus.map.WorldMap;
+import org.ubc.tartarus.map.MapParser.TileMap;
+import org.ubc.tartarus.particle.ParticleSystem;
+import org.ubc.tartarus.particle.ParticleSystem.Type;
+import org.ubc.tartarus.utils.Point;
 
 import android.content.Context;
 
