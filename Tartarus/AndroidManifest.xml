@@ -26,6 +26,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="org.ubc.tartarus.GameActivity"
+            android:label="@string/game_activity_name" 
+            android:screenOrientation="landscape">
+        </activity>
     </application>
 
 </manifest>

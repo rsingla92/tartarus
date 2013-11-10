@@ -4,6 +4,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import android.content.Context;
+import android.content.Intent;
 import android.opengl.Matrix;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -108,12 +109,14 @@ public class MenuRenderer extends CustomRenderer {
 		mCursor.drawParticle(getModelViewMatrix());
 		
 		if (hitJoin) {
-			joinCountdown -= 0.001f; 
+			joinCountdown -= 0.005f; 
 			if (joinCountdown <= 0) {
 				hitJoin = false;
 				joinCountdown = 1.0f;
 				mParticleSystem.endSpawning();
 				// Transition to game activity...
+				Intent intent = new Intent(getContext(), GameActivity.class);
+				getContext().startActivity(intent);
 			}
 		}
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());

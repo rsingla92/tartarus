@@ -159,8 +159,8 @@ public class ParticleSystem {
 			}
 			
 			if (mType == Type.SPIRAL) {
-				float radiusSpeed = 0.001f + mRandGenerator.nextFloat() / 1000.0f;
-				float angleSpeed = 0.01f + mRandGenerator.nextFloat() / 100.0f;
+				float radiusSpeed = 0.002f + mRandGenerator.nextFloat() / 1000.0f;
+				float angleSpeed = 0.05f + mRandGenerator.nextFloat() / 100.0f;
 				
 				tmpParticle.setDecay(mRandGenerator.nextFloat() * 0.0009f + 0.0001f);
 				tmpParticle.makeSpinner(radiusSpeed, angleSpeed, x, y);
