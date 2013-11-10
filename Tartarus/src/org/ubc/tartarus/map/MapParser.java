@@ -32,7 +32,6 @@ public class MapParser {
 		}
 	}
 	
-	//TODO: Replace Scanner -- this is very slow in Android!
 	public static TileMap readMapFromFile(final Context context, final int resId) {
 		InputStreamReader inStream = new InputStreamReader(context.getResources().openRawResource(resId));
 		Scanner scan = new Scanner(new BufferedReader(inStream));

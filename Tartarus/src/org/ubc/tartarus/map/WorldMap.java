@@ -153,8 +153,8 @@ public class WorldMap {
 				int row = (j + Math.round(mViewportY)) / mTileHeight;
 				float translateX, translateY; 
 
-				if (row >= mWorldWidth) continue;
-				if (col >= mWorldHeight) break;
+				if (row >= mWorldHeight) continue;
+				if (col >= mWorldWidth) break;
 
 				pluckTile(mTilemap[row][col]);
 
