@@ -79,6 +79,9 @@ public class GameRenderer extends CustomRenderer {
 	@Override
 	public void onReleaseTouch() {
 		super.onReleaseTouch();
+		if (mPlayer != null) {
+			mPlayer.setReachableGoal(true);
+		}
 	}
 
 	@Override
@@ -86,8 +89,18 @@ public class GameRenderer extends CustomRenderer {
 		super.onSwipe(x1, y1, x2, y2, width, height, vx, vy);
 		Point beginCoords = getGLCoords(x1, y1, width, height);
 		if (mPlayer != null) {
-			mPlayer.setGoal(new Point(getFingerX(), getFingerY()), beginCoords, -getAspectRatio(), getAspectRatio(), 1, -1, mParticleSystem);
+			//mPlayer.setGoal(new Point(getFingerX(), getFingerY()), beginCoords, -getAspectRatio(), getAspectRatio(), 1, -1, mParticleSystem);
 		}
+	}
+	
+	@Override
+	public void onMoveTouch(float x, float y, float width, float height) {
+		super.onMoveTouch(x, y, width, height);
+		
+		if (mPlayer != null) {
+			mPlayer.setGoalPoint(new Point(getFingerX(), getFingerY()), mParticleSystem);
+			mPlayer.setReachableGoal(false);
+		}		
 	}
 	
 	@Override
@@ -95,6 +108,7 @@ public class GameRenderer extends CustomRenderer {
 		super.onSingleTap(x, y, width, height);
 		if (mPlayer != null) {
 			mPlayer.setGoalPoint(new Point(getFingerX(), getFingerY()), mParticleSystem);
+			mPlayer.setReachableGoal(false);
 		}
 	}
 }

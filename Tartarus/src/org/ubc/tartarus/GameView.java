@@ -35,6 +35,9 @@ public class GameView extends GLSurfaceView implements
 	        case MotionEvent.ACTION_DOWN:
 	        	mRenderer.onDownTouch(x, y, getWidth(), getHeight());
 	        break;*/
+		    case MotionEvent.ACTION_MOVE:
+	            mRenderer.onMoveTouch(e.getX(), e.getY(), getWidth(), getHeight());
+	        break;
 	        case MotionEvent.ACTION_UP: 
 	        	mRenderer.onReleaseTouch();
 	        break;
@@ -59,13 +62,12 @@ public class GameView extends GLSurfaceView implements
 
 	@Override
 	public boolean onSingleTapConfirmed(MotionEvent e) {
-		// TODO Auto-generated method stub
 		mRenderer.onSingleTap(e.getX(), e.getY(), getWidth(), getHeight());
 		return true;
 	}
 
 	@Override
-	public boolean onDown(MotionEvent arg0) {
+	public boolean onDown(MotionEvent e) {
 		// TODO Auto-generated method stub
 		//Log.i("GameView", "In onDown");
 		return true;
@@ -78,8 +80,8 @@ public class GameView extends GLSurfaceView implements
 	    float y = e1.getY();
 		float x2 = e2.getX();
 	    float y2 = e2.getY();
-	    Log.i("GameView", "In onFling");
-		mRenderer.onSwipe(x, y, x2, y2, getWidth(), getHeight(), velocityX, velocityY);
+	  //  Log.i("GameView", "In onFling");
+		//mRenderer.onSwipe(x, y, x2, y2, getWidth(), getHeight(), velocityX, velocityY);
 		return true;
 	}
 
@@ -90,8 +92,9 @@ public class GameView extends GLSurfaceView implements
 	}
 
 	@Override
-	public boolean onScroll(MotionEvent e, MotionEvent arg1, float arg2,
-			float arg3) {
+	public boolean onScroll(MotionEvent e, MotionEvent e2, float vx,
+			float vy) {
+		//mRenderer.onMoveTouch(e2.getX(), e2.getY(), getWidth(), getHeight());
 		return true;
 	}
 

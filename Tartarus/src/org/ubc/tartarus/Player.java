@@ -20,6 +20,7 @@ public class Player {
 	private float[] modelMat;
 	private float[] scaleMat;
 	private float[] mMVPMat;
+	private boolean reachableGoal = false;
 	
 	private WorldMap mWorldMap;
 	
@@ -43,6 +44,10 @@ public class Player {
 		mHeight = height;
 		mWorldMap = worldMap;
 		character = c;
+	}
+	
+	public void setReachableGoal(boolean enable) {
+		reachableGoal = enable;
 	}
 	
 	public Point getScaleDimensions() {
@@ -188,7 +193,10 @@ public class Player {
 					} else {
 						// Move the viewport
 						mWorldMap.shiftViewport(-mSpeed*viewportXUnitsPerGL, 0);
-						mGoal.x -= mSpeed;
+						
+						if (reachableGoal) {
+							mGoal.x -= mSpeed;
+						}
 					}
 				}
 			} else if (dx < 0) {
@@ -202,7 +210,9 @@ public class Player {
 					} else {
 						// Move the viewport -- must shift the goal to account for this
 						mWorldMap.shiftViewport(mSpeed*viewportXUnitsPerGL, 0);
-						mGoal.x += mSpeed;
+						if (reachableGoal) {
+							mGoal.x += mSpeed;
+						}
 					}
 				}
 			} else if (dy > 0) {
@@ -216,7 +226,9 @@ public class Player {
 					} else {
 						// Move the viewport
 						mWorldMap.shiftViewport(0, -mSpeed*viewportYUnitsPerGL);
-						mGoal.y -= mSpeed;
+						if (reachableGoal) {
+							mGoal.y -= mSpeed;
+						}
 					}
 				}
 			} else if (dy < 0) {
@@ -230,7 +242,9 @@ public class Player {
 					} else {
 						// Move the viewport
 						mWorldMap.shiftViewport(0, mSpeed*viewportYUnitsPerGL);
-						mGoal.y += mSpeed;
+						if (reachableGoal) {
+							mGoal.y += mSpeed;
+						}
 					}
 				}
 			} else {

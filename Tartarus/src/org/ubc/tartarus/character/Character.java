@@ -61,7 +61,6 @@ public class Character {
 		}
 		
 		public Rectangle getCurrentFrame(){
-			Log.i("CurrentFrame", ""+frameList.elementAt((int)Math.round(currentFrame)).toString());
 			return this.frameList.elementAt((int)Math.round(currentFrame));
 		}
 		

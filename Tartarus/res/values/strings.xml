@@ -4,6 +4,6 @@
     <string name="app_name">Tartarus</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-    <string name="game_activity_name">GameActivity</string>
+    <string name="game_activity_name">Tartarus</string>
 
 </resources>
