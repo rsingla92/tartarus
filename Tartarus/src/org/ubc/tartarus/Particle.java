@@ -99,6 +99,10 @@ public class Particle {
 		mCurrentAngle = initialAngle;
 	}
 	
+	void setSpinner(boolean spinner) {
+		mSpinner = spinner;
+	}
+	
 	public void setDecay(float decay) {
 		if (decay >= 0) mDecay = decay;
 	}

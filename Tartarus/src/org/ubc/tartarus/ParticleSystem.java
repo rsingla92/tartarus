@@ -164,8 +164,18 @@ public class ParticleSystem {
 				
 				tmpParticle.setDecay(mRandGenerator.nextFloat() * 0.0009f + 0.0001f);
 				tmpParticle.makeSpinner(radiusSpeed, angleSpeed, x, y);
+			} else {
+				tmpParticle.setSpinner(false);
 			}
 		}
+	}
+	
+	public void makeSpiralSystem() {
+		mType = Type.SPIRAL;
+	}
+	
+	public void makeNormalSystem() {
+		mType = Type.STANDARD;
 	}
 	
 	public void beginSpawning() {

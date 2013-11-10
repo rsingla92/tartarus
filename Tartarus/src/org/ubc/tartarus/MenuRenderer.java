@@ -15,6 +15,7 @@ public class MenuRenderer extends CustomRenderer {
 	
 	private float joinX;
 	private float joinY;
+	private float joinWidth, joinHeight;
 	
 	public volatile float mAngle;
 	
@@ -25,7 +26,8 @@ public class MenuRenderer extends CustomRenderer {
 	private Particle mCursor;
 	private float cursorVelocityX, cursorVelocityY;
 	private boolean cursorXDirection, cursorYDirection;
-	
+	private boolean hitJoin = false;
+	private float joinCountdown = 1.0f;
 
 	public MenuRenderer(Context context) {
 		super(context);
@@ -94,16 +96,26 @@ public class MenuRenderer extends CustomRenderer {
 		Matrix.setIdentityM(copyMat, 0);
 		scaleX = (2 * getAspectRatio()) / 4.0f; 
 		scaleY = scaleX * ( ((float) joinImg.getHeight()) / joinImg.getWidth());
+		joinWidth = scaleX;
+		joinHeight = scaleY;
 		Matrix.translateM(copyMat, 0, joinX, joinY, 0);
 		Matrix.scaleM(scaleMat, 0, scaleX, scaleY, 1);
 		Matrix.multiplyMM(copyMat, 0, copyMat.clone(), 0, scaleMat, 0);
 		Matrix.multiplyMM(copyMat, 0, getModelViewMatrix(), 0, copyMat.clone(), 0);
 		joinImg.draw(copyMat);
 		
-		//mCursor.setParticleSpeed(cursorVelocityX, cursorVelocityY, 0);
 		mCursor.setParticlePosition(mCursor.getParticleXPos() + cursorVelocityX, mCursor.getParticleYPos() + cursorVelocityY, 0);
-		//mCursor.updateParticle(getAspectRatio());
 		mCursor.drawParticle(getModelViewMatrix());
+		
+		if (hitJoin) {
+			joinCountdown -= 0.001f; 
+			if (joinCountdown <= 0) {
+				hitJoin = false;
+				joinCountdown = 1.0f;
+				mParticleSystem.endSpawning();
+				// Transition to game activity...
+			}
+		}
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
 	}
@@ -140,7 +152,20 @@ public class MenuRenderer extends CustomRenderer {
 		super.onDownTouch(x, y, width, height);
 		
 		mCursor.setParticlePosition(getFingerX(), getFingerY(), 0);
-		cursorVelocityX = cursorVelocityY = 0;
+		cursorVelocityX = cursorVelocityY = 0; 
+		
+		float fx = getFingerX();
+		float fy = getFingerY();
+		
+		if (fx >= joinX - joinWidth && fx <= joinX + joinWidth && 
+				fy >= joinY - joinHeight && fy <= joinY + joinHeight) {
+			// Touched join game
+			mParticleSystem.makeSpiralSystem();
+			hitJoin = true;
+		} else {
+			mParticleSystem.makeNormalSystem();
+			hitJoin = false;
+		}
 		
 		if (mParticleSystem != null) {
 			mParticleSystem.beginSpawning();
@@ -151,7 +176,7 @@ public class MenuRenderer extends CustomRenderer {
 	public void onReleaseTouch() {
 		super.onReleaseTouch();
 		
-		if (mParticleSystem != null) {
+		if (mParticleSystem != null && !hitJoin) {
 			mParticleSystem.endSpawning();	
 		}
 	}
