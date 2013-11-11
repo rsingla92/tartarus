@@ -10,7 +10,7 @@ public class CharRooster extends Character {
 		 new Rectangle(123,127,152,176)
 	}; 
 	
-	private static final Rectangle[] walkRight = { // NEED TO FLIP
+	private static final Rectangle[] walkRight = {
 		 new Rectangle(44,70,75,120),
 		 new Rectangle(80,72,112,122),
 		 new Rectangle(122,72,151,122),

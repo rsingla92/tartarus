@@ -7,8 +7,12 @@ import org.ubc.tartarus.Player;
 import org.ubc.tartarus.R;
 import org.ubc.tartarus.R.drawable;
 import org.ubc.tartarus.R.raw;
+import org.ubc.tartarus.character.CharLock;
 import org.ubc.tartarus.character.CharMagus;
+import org.ubc.tartarus.character.CharMonster;
 import org.ubc.tartarus.character.CharRooster;
+import org.ubc.tartarus.character.CharSerdic;
+import org.ubc.tartarus.character.CharStrider;
 import org.ubc.tartarus.map.MapParser;
 import org.ubc.tartarus.map.WorldMap;
 import org.ubc.tartarus.map.MapParser.TileMap;
@@ -40,6 +44,10 @@ public class GameRenderer extends CustomRenderer {
 	private WorldMap mWorldMap;
 	private CharMagus magus;
 	private CharRooster rooster;
+	private CharMonster monster;
+	private CharSerdic serdic;
+	private CharStrider strider;
+	private CharLock lock;
 	
 	public GameRenderer(Context context) {
 		super(context);
@@ -64,12 +72,16 @@ public class GameRenderer extends CustomRenderer {
 		
 		magus = new CharMagus();
 		rooster = new CharRooster();
+		monster = new CharMonster();
+		serdic = new CharSerdic();
+		strider = new CharStrider();
+		lock = new CharLock();
 		//mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 240, 128, 0, 0);
 		MapParser.TileMap map = MapParser.readMapFromFile(getContext(), R.raw.tartarus_map1);
 		
 		mWorldMap = new WorldMap(getContext(), R.drawable.tileset1, 1, 36, 16, 16, 240, 128, 0, 0);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
-		mPlayer = new Player(getContext(), R.drawable.sprite_rooster, 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, rooster);
+		mPlayer = new Player(getContext(), R.drawable.sprite_lock, 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, lock);
 		mParticleSystem = new ParticleSystem(getContext(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
 	}
 		
