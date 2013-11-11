@@ -238,6 +238,12 @@ int makePowerUpMsg(GenericMsg* msg)
 {
 }
 
+int makeTestMsg(GenericMsg* msg)
+{
+	printf("Received test message from %d! Length: %d\n", msg->clientID_, msg->msgLength_);
+	printf("Message: %s\n", msg->msg_);
+}
+
 void readMsg(GenericMsg* msg)
 {
 }

@@ -43,6 +43,12 @@ int readSerialData(alt_up_rs232_dev *rs232, alt_u8 *data, alt_u8 *parity_error)
 	return alt_up_rs232_read_data(rs232, data, parity_error);
 }
 
+int readSerialDataWait(alt_up_rs232_dev *rs232, alt_u8 *data, alt_u8 *parity_error)
+{
+	while(getSerialUsedSpace(rs232) == 0);
+	return alt_up_rs232_read_data(rs232, data, parity_error);
+}
+
 int readSerialFD(alt_fd* fd, char* ptr, int len)
 {
 	return alt_up_rs232_read_fd (fd, ptr, len);
@@ -54,6 +60,14 @@ int writeSerialFD(alt_fd* fd, const char* ptr, int len)
 }
 
 alt_up_rs232_dev* initSerialPort(const char* name) {
-	return alt_up_rs232_open_dev(name);
+	unsigned char data, parity;
+	alt_up_rs232_dev* new_dev = alt_up_rs232_open_dev(name);
+
+	/* Clear read buffer. */
+	while (alt_up_rs232_get_used_space_in_read_FIFO(new_dev)) {
+	   alt_up_rs232_read_data(new_dev, &data, &parity);
+	}
+
+	return new_dev;
 }
 

@@ -3,19 +3,17 @@
  *  can draw it to the screen.
  */
 #include "Map.h"
+#include "display.h"
 #include <string.h>
 #include <stdlib.h>
-//#include "sdcard.h"
+#include "sdcard.h"
 
 Map map;
 
 // Constructor
-void makeMap( char* mapF, char* tileF, int tileSetWidth, int tileSetHeight)
+void makeMap( char* mapF)
 {
     strcpy(map.mapFile, mapF);
-    strcpy(map.tileFile, tileF);
-    map.setWidth = tileSetWidth;
-    map.setHeight = tileSetHeight;
 }
 
 // Destructor
@@ -25,52 +23,6 @@ void cleanupMap()
     {
         free(map.mapInfo);
     }
-
-    if ( map.tileset )
-    {
-        free(map.tileset);
-    }
-
-}
-
-// drawScreenAll:
-// This simply draws this map (in the current viewport) to the full screen.
-// Params: portX/portY - Position of the viewport
-void drawScreenAll( int portX,
-                    int portY )
-{
-    /* Indices of the first tile*/ 
-    int tilePortX = portX / TILE_WIDTH;
-    int tilePortY = portY / TILE_HEIGHT;
-
-    int endPortX = ( SCREEN_WIDTH ) / (INT_SIZE) + tilePortX;
-    int endPortY = SCREEN_HEIGHT/INT_SIZE + tilePortY;
-
-    if(endPortX > map.mapWidth) endPortX--; 
-    if(endPortY > map.mapHeight) endPortY--;
-
-    int i;
-    int j;
-
-    for(i = tilePortX; i < endPortX; ++i)
-    {
-        for( j = tilePortY; j < endPortY; ++j)
-        {
-            int ID = map.mapInfo[i+j*(map.mapWidth)].id;
-            int xImage = (ID%(map.setWidth/INT_SIZE))*TILE_WIDTH;
-            int yImage = (ID/(map.setWidth/INT_SIZE))*TILE_HEIGHT;
-
-            // draw the image using the
-            // tileset
-            // xImage, yImage
-            // TILE_WIDTH, TILE_HEIGHT,
-            // i-tilePortX * TILE_WIDTH
-            // j-tilePortY * TILE_HEIGHT
-            // 0
-        }
-    }
-
-    return;
 }
 
 // drawScreenPortion:
@@ -89,80 +41,88 @@ void drawScreenPortion( int startMapX,
 {
     if( startTileX < 0 || startTileY < 0 || numXTiles < 0 || numYTiles < 0) return;
 
-    int i;
-    int j;
+    int i, j;
+	colour solidCol;
+	solidCol.r = 127;
+	solidCol.g = 127;
+	solidCol.b = 127;
 
-    for(i = startTileX; i < startTileX+numXTiles; i++)
+    for(i = startTileX; i < startTileX + numXTiles; i++)
     {
-        for(j = startTileY; j < startTileY+numYTiles; j++)
+        for(j = startTileY; j < startTileY + numYTiles; j++)
         {
-            int ID = map.mapInfo[i+j*(map.mapWidth)].id;
-            int xImage = (ID%(map.setWidth/INT_SIZE))*TILE_WIDTH;
-            int yImage = (ID/(map.setWidth/INT_SIZE))*TILE_HEIGHT;
+            unsigned char tile_type = map.mapInfo[i+j*(map.mapWidth)];
 
-            // draw the bitmap at using
-            // tileset
-            // xImage
-            // yImage
-            // TILE_WIDTH
-            // TILE_HEIGHT 
-            //(i-startTileX)*TILE_WIDTH + startMapX*TILE_WIDTH + offsetHoriz
-            // (j-startTileY)*TILE_HEIGHT + startMapY*TILE_HEIGHT + offsetVert
-            //0
+            if (tile_type == 1)
+            {
+            	// Solid -- right now assuming that the world map
+            	// and the map file are the same size... (scaling 1:1).
+            	draw_pixel(i, j, solidCol);
+            }
         }
     }
 
 }
 
 // initialize:
-// Loads the map from the map file and stores it in the array of Tiles
-int initialize()
+// Loads the map from the map file and stores it in the solid-map array.
+int initialize(void)
 {
-    int newWidth;
-    int newHeight;
-    int boolVal;
-
     // Open the file to parse
+    file_handle map_file = open_file(map.mapFile, false);
 
     // Read the header
-    readMapFileHeader();
+    readMapFileHeader(map_file);
 
-    map.mapInfo = (Tile*) malloc(map.sizeInfo * sizeof(Tile));
+    map.mapInfo = (unsigned char*) malloc(map.sizeInfo * sizeof(unsigned char));
 
     // Read the file
     int i;
     for( i = 0; i < map.sizeInfo; ++i)
     {
-        // Check if the file is null
-        //if() break;
-
-        // Read the file into 
-        // read file and assign map.mapInfo[i].id;
-        
-        // read file and assign to boolVal;
-
-        // set map.mapInfo[i].solid to boolVal;
+    	// Set the solid map
+        map.mapInfo[i] = isTileSolid(readShort(map_file));
     }
 
     // Close the file
-
-    // Load the tileset image.
-    // map.tileset 
-
-    // Check if failed to load bitmap
-
+    close_file(map_file);
 
     return 1;
 
 }
 
-void readMapFileHeader(void)
+int readShort(file_handle handle)
 {
-    // Read the txt file header
-    // Retrieve the map width ( first number )
-    // Retrieve the map height (second number)
+	char buf[10]; // No short will be this large...
+	int i;
 
-    map.mapWidth;
-    map.mapHeight; 
-    map.sizeInfo;
+	for (i = 0; i < 9; i++) {
+		buf[i] = read_file(handle);
+
+		if (buf[i] == ' ' || buf[i] == '\0');
+	}
+
+	// Terminate string
+	buf[i] = '\0';
+
+	return atoi(buf);
+}
+
+void readMapFileHeader(file_handle handle)
+{
+	map.mapWidth = readShort(handle);
+    map.mapHeight = readShort(handle);
+    map.sizeInfo = map.mapWidth * map.mapHeight;
+}
+
+// For now, just tells us if a tile is solid or not.
+// In the future, we could extend this to give a code representing the type of
+// terrain of the tile (castle, lava, etc...), so that we could draw a different
+// colour depending on the type (i.e., green for grassland, red for lava, ...).
+unsigned char isTileSolid(unsigned short tileId)
+{
+	// Returns if the tile with id tileId is solid.
+	if (tileId == 0) return 1;
+
+	return 0;
 }

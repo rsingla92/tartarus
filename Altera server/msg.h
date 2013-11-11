@@ -15,7 +15,7 @@
 #define THREE_READY 0x01110111
 #define FOUR_READY 0x11111111
 
-typedef enum { LOAD, GAME, MOVE, POWER_UP } MSG_TYPE ;
+typedef enum { LOAD, GAME, MOVE, POWER_UP, TEST } MSG_TYPE ;
 typedef enum { NO_GAME, INITAL, WAITING, READY, PLAYING, WIN, LOSE } GAME_STATE;
 typedef enum {FREEZE_ALL, FREEZE_ONE, SLOW_ALL, SLOW_ONE, FAST_ONE, RESTART_ONE, RESTART_ALL} POWER_UP_TYPE;
 
@@ -115,6 +115,7 @@ int makeLoadMsg(GenericMsg* msg);
 int makeGameMsg(GenericMsg* msg);
 int makeMoveMsg(GenericMsg* msg);
 int makePowerUpMsg(GenericMsg* msg);
+int makeTestMsg(GenericMsg* msg);
 
 void readMsg();
 void makeMsg();

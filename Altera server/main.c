@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "sdcard.h"
 #include "bitmap.h"
 #include "display.h"
@@ -7,25 +8,17 @@
 #include "sys/alt_alarm.h"
 #include "io.h"
 #include "sys/alt_timestamp.h"
+#include "altera_up_avalon_rs232.h"
 #include "state_machine.h"
 #include "audio.h"
 #include "msg.h"
+#include "random.h"
+#include "serialport.h"
 
 #define NUM_FILES 0
 
 #define leds (volatile char *) LEDS_BASE
 
-/*
-static char* file_list[NUM_FILES] = { "4B.BMP", "B1.BMP", "B2.BMP", "B3.BMP",
-		"B4.BMP", "B5.BMP", "DK1.BMP", "DK2.BMP", "DK3.BMP", "DK4.BMP",
-		"DK5.BMP", "DK6.BMP", "DK7.BMP", "DK8.BMP", "DK9.BMP", "DK10.BMP",
-		"DK11.BMP", "FIRE.BMP", "FIRE1.BMP", "FIRE2.BMP", "FIRE3.BMP",
-		"HMR.BMP", "M1.BMP", "M2.BMP", "M3.BMP", "M4.BMP", "M5.BMP", "M6.BMP",
-		"M7.BMP", "M8.BMP", "M9.BMP", "M10.BMP", "M11.BMP", "M12.BMP",
-		"M13.BMP", "M14.BMP", "M15.BMP", "P1.BMP", "P2.BMP", "PP1.BMP",
-		"PP2.BMP", "PP3.BMP", "PURSE.BMP", "UMBRLA.BMP", "MM1.BMP", "MM2.BMP"};
-*/
-static BitmapHandle* bmp;
 static alt_u32 ticks_per_sec;
 static alt_u32 num_ticks;
 static alt_32 update(void *context);
@@ -35,6 +28,7 @@ int menuSoundBufLen;
 
 GenericMsg* msgHead = NULL;
 GenericMsg* msgTail = NULL;
+static alt_up_rs232_dev* uart_dev;
 
 /* Reads from the TCP/IP socket. Takes in the client ID, message length, and message type
  * and puts them into a generic MSG struct.
@@ -47,12 +41,13 @@ static void readSocket(alt_up_rs232_dev* uart)
 	byte msgID = 0;
 	byte parity;
 
-	if (getSerialUsedSpace(uart) == 0))
+	if (getSerialUsedSpace(uart) == 0)
 	{
 		//If nothing to read, then just return
 		return;
 	}
 
+	printf("Got data!\n");
 	// Make element to add to queue
 	GenericMsg* newElement = (GenericMsg*) malloc(sizeof(GenericMsg));
 
@@ -60,11 +55,11 @@ static void readSocket(alt_up_rs232_dev* uart)
 	readSerialData(uart, &(newElement->clientID_), &parity);
 
 	// second byte. adjust because we actually read the first byte.
-	readSerialData(uart, &(newElement->msgLength_), &parity);
+	readSerialDataWait(uart, &(newElement->msgLength_), &parity);
 	newElement->msgLength_--;
 
 	// third byte
-	readSerialData(uart, &(newElement->msgID_), &parity);
+	readSerialDataWait(uart, &(newElement->msgID_), &parity);
 
 	// store the data
 	newElement->msg_ = (byte*) malloc(sizeof(newElement->msgLength_));
@@ -74,7 +69,7 @@ static void readSocket(alt_up_rs232_dev* uart)
 	for( i = 0; i < newElement->msgLength_; ++i)
 	{
 		// read data
-		readSerialData(uart, &(newElement->msg_[i]), &parity);
+		readSerialDataWait(uart, &(newElement->msg_[i]), &parity);
 	}
 
 	// if it's first element then queue is not set up
@@ -127,6 +122,9 @@ static void parseNextMessage()
 		case POWER_UP:
 			makePowerUpMsg(msgHead);
 			break;
+		case TEST:
+			makeTestMsg(msgHead);
+			break;
 		default:
 			printf("Unknown message type: %d\n", msgHead->msgID_);
 			break;
@@ -147,54 +145,45 @@ static void parseNextMessage()
 
 int main(void) {
 	// Start the timestamp -- will be used for seeding the random number generator.
+	unsigned char message[] = "Testing message";
+	int i;
 
 	//Init RS232
-	alt_up_rs232_dev* uart = initSerialPort("/dev/rs232_0");
+	uart_dev = initSerialPort("/dev/rs232_0");
 
 	alt_timestamp_start();
-	sdcard_handle *sd_dev = init_sdcard();
-	initAudio();
+//	sdcard_handle *sd_dev = init_sdcard();
+//	initAudio();
 
-	menuSoundBufLen = loadSound("Tit2.wav", &menuSoundBuf, 0.5);
-	swapInSound(menuSoundBuf, menuSoundBufLen, 1);
-
+	printf("Initializing display...\n");
 	// Set latch and clock to 0.
 	init_display();
 
 	clear_display();
 
-	if (sd_dev == NULL)
-		return 1;
-
-	printf("Card connected.\n");
-
-	ticks_per_sec = alt_ticks_per_second();
+//	if (sd_dev == NULL)
+//		return 1;
 
 	seed(alt_timestamp());
 
-	alt_u32 tickCount = alt_nticks();
-	num_ticks = ticks_per_sec / 30;
+	int test = 0;
 
 	while (true)
 	{
-		if (alt_nticks() - tickCount >= num_ticks)
-		{
-			tickCount = alt_nticks();
-			update(0);
+		readSocket(uart_dev);
+		parseNextMessage();
+		runState();
+
+		if (!test) {
+			writeSerialData(uart_dev, 0); // Fake device id.
+			writeSerialData(uart_dev, (unsigned char)(strlen(message) + 1)); //Length -- string and id.
+			writeSerialData(uart_dev, (unsigned char) TEST);
+			for (i = 0 ; i < strlen(message); i++) {
+				writeSerialData(uart_dev, message[i]);
+			}
+			test = 1;
 		}
 	}
 
 	return 0;
-}
-
-alt_32 update(void *context) {
-	//int i;
-	//for (i = 0; i < 4; i++) prev_state[i] = button_states[i];
-
-	//readDat();
-	readSocket(uart);
-	parseNextMessage();
-	runState();
-	return 1;
-
 }
