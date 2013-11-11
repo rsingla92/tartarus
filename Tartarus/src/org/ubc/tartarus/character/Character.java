@@ -101,6 +101,7 @@ public class Character {
 	}
 	
 	public void addAnim(int anim, Rectangle[] frames) {
+		animList[anim] = new Animation();
 		for(int i = 0; i < frames.length; i++) {
 			animList[anim].addFrame(frames[i]);
 		}

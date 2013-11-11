@@ -7,7 +7,13 @@ import org.ubc.tartarus.Player;
 import org.ubc.tartarus.R;
 import org.ubc.tartarus.R.drawable;
 import org.ubc.tartarus.R.raw;
+import org.ubc.tartarus.character.CharLock;
 import org.ubc.tartarus.character.CharMagus;
+import org.ubc.tartarus.character.CharMonster;
+import org.ubc.tartarus.character.CharRooster;
+import org.ubc.tartarus.character.CharSerdic;
+import org.ubc.tartarus.character.CharStrider;
+import org.ubc.tartarus.character.Character.CharacterType;
 import org.ubc.tartarus.map.MapParser;
 import org.ubc.tartarus.map.WorldMap;
 import org.ubc.tartarus.map.MapParser.TileMap;
@@ -38,8 +44,7 @@ public class GameRenderer extends CustomRenderer {
 	
 	private Player mPlayer;
 	private WorldMap mWorldMap;
-	private CharMagus magus;
-	
+
 	public GameRenderer(Activity activity) {
 		super(activity);
 	}
@@ -61,14 +66,13 @@ public class GameRenderer extends CustomRenderer {
 		// Load shaders for all BitmapImg objects.
 		super.onSurfaceCreated(arg0, arg1);
 		
-		magus = new CharMagus();
-	
 		//mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 240, 128, 0, 0);
 		MapParser.TileMap map = MapParser.readMapFromFile(getActivity(), R.raw.tartarus_map1);
 		
 		mWorldMap = new WorldMap(getActivity(), R.drawable.tileset1, 1, 36, 16, 16, 240, 128, 0, 0);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
-		mPlayer = new Player(getActivity(), R.drawable.sprite_magus, 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, magus);
+
+		mPlayer = new Player(getActivity(), 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, CharacterType.STRIDER);
 		mParticleSystem = new ParticleSystem(getActivity(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
 	}
 		
@@ -88,10 +92,6 @@ public class GameRenderer extends CustomRenderer {
 	@Override
 	public void onSwipe(float x1, float y1, float x2, float y2, float width, float height, float vx, float vy) { 
 		super.onSwipe(x1, y1, x2, y2, width, height, vx, vy);
-		Point beginCoords = getGLCoords(x1, y1, width, height);
-		if (mPlayer != null) {
-			//mPlayer.setGoal(new Point(getFingerX(), getFingerY()), beginCoords, -getAspectRatio(), getAspectRatio(), 1, -1, mParticleSystem);
-		}
 	}
 	
 	@Override
@@ -109,7 +109,6 @@ public class GameRenderer extends CustomRenderer {
 		super.onSingleTap(x, y, width, height);
 		if (mPlayer != null) {
 			mPlayer.setGoalPoint(new Point(getFingerX(), getFingerY()), mParticleSystem);
-			mPlayer.setReachableGoal(false);
 		}
 	}
 }
