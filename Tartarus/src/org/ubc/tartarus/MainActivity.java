@@ -7,6 +7,7 @@ import org.ubc.tartarus.particle.Particle;
 
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.Log;
 import android.app.Activity;
 
 public class MainActivity extends Activity {
@@ -20,7 +21,10 @@ public class MainActivity extends Activity {
 		surfaceView = new MenuView(this);
 		
 		setContentView(surfaceView);
-		app.socketComm = new SocketComm(this);
+		app.socketComm = new SocketComm(app);
+		
+		Log.i("TestSocket", "Calling openSocket()");
+		app.socketComm.openSocket();
 		
 		// Schedule the read task, using the socketComm in the Application so that it exist
 		// throughout all activities.

@@ -5,8 +5,6 @@ import java.util.Vector;
 import org.ubc.tartarus.utils.Point;
 import org.ubc.tartarus.utils.Rectangle;
 
-import android.util.Log;
-
 public class Character {
 	
 	public enum AnimTypes{
@@ -34,7 +32,6 @@ public class Character {
 			if (this.currentFrame >= frameList.size()-1)
 				//this.animSpeed = -this.animSpeed;
 				this.currentFrame = 0;
-			Log.i("Character", " "+currentFrame);
 		}
 		
 		public void setFlip(boolean bool){

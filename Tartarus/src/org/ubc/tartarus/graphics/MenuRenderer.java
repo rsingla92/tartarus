@@ -10,6 +10,7 @@ import org.ubc.tartarus.particle.Particle;
 import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.utils.Point;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.opengl.Matrix;
@@ -37,8 +38,8 @@ public class MenuRenderer extends CustomRenderer {
 	private boolean hitJoin = false;
 	private float joinCountdown = 1.0f;
 
-	public MenuRenderer(Context context) {
-		super(context);
+	public MenuRenderer(Activity activity) {
+		super(activity);
 	}
 	
 	@Override
@@ -122,8 +123,8 @@ public class MenuRenderer extends CustomRenderer {
 				joinCountdown = 1.0f;
 				mParticleSystem.endSpawning();
 				// Transition to game activity...
-				Intent intent = new Intent(getContext(), GameActivity.class);
-				getContext().startActivity(intent);
+				Intent intent = new Intent(getActivity(), GameActivity.class);
+				getActivity().startActivity(intent);
 			}
 		}
 		
@@ -136,15 +137,15 @@ public class MenuRenderer extends CustomRenderer {
 		// Load shaders for all BitmapImg objects.
 		super.onSurfaceCreated(arg0, arg1);
 		
-		menuBackground = new BitmapImg(getContext(), R.drawable.img_tartarus_menu);
-		titleImg = new BitmapImg(getContext(), R.drawable.tart_title);
-		joinImg = new BitmapImg(getContext(), R.drawable.join_game);
+		menuBackground = new BitmapImg(getActivity(), R.drawable.img_tartarus_menu);
+		titleImg = new BitmapImg(getActivity(), R.drawable.tart_title);
+		joinImg = new BitmapImg(getActivity(), R.drawable.join_game);
 		
-		mCursor = new Particle(getContext(), R.drawable.particle, 0, 0, 0,
+		mCursor = new Particle(getActivity(), R.drawable.particle, 0, 0, 0,
 				0.85098f, 0.0f, 0.0f, 1.0f, 0.2f, 0.2f, false, 0);
 		mCursor.setParticleSpeed(0, 0, 0);
 		
-		mParticleSystem = new ParticleSystem(getContext(), 500, R.drawable.particle, 5);
+		mParticleSystem = new ParticleSystem(getActivity(), 500, R.drawable.particle, 5);
 	}
 	
 	@Override

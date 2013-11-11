@@ -3,6 +3,7 @@ package org.ubc.tartarus;
 import org.ubc.tartarus.graphics.CustomRenderer;
 import org.ubc.tartarus.graphics.GameRenderer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.support.v4.view.GestureDetectorCompat;
@@ -15,12 +16,12 @@ public class GameView extends GLSurfaceView implements
 	private CustomRenderer mRenderer;
 	private GestureDetectorCompat mGestureDetector; 
 	 
-	public GameView(Context context) {
-		super(context);
+	public GameView(Activity activity) {
+		super(activity);
 		setEGLContextClientVersion(2);
-		mRenderer = new GameRenderer(context);
+		mRenderer = new GameRenderer(activity);
 		setRenderer(mRenderer);
-		mGestureDetector = new GestureDetectorCompat(context, this);
+		mGestureDetector = new GestureDetectorCompat(activity, this);
 		mGestureDetector.setOnDoubleTapListener(this);
 	}
 	

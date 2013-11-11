@@ -3,6 +3,7 @@ package org.ubc.tartarus;
 import org.ubc.tartarus.graphics.CustomRenderer;
 import org.ubc.tartarus.graphics.MenuRenderer;
 
+import android.app.Activity;
 import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.support.v4.view.GestureDetectorCompat;
@@ -15,12 +16,12 @@ public class MenuView extends GLSurfaceView implements
 	CustomRenderer mRenderer;
 	private GestureDetectorCompat mGestureDetector; 
 	
-	public MenuView(Context context) {
-		super(context);
+	public MenuView(Activity activity) {
+		super(activity);
 		setEGLContextClientVersion(2);
-		mRenderer = new MenuRenderer(context);
+		mRenderer = new MenuRenderer(activity);
 		setRenderer(mRenderer);
-		mGestureDetector = new GestureDetectorCompat(context, this);
+		mGestureDetector = new GestureDetectorCompat(activity, this);
 	}
 	
 	@Override

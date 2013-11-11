@@ -15,6 +15,7 @@ import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.particle.ParticleSystem.Type;
 import org.ubc.tartarus.utils.Point;
 
+import android.app.Activity;
 import android.content.Context;
 
 public class GameRenderer extends CustomRenderer {
@@ -39,8 +40,8 @@ public class GameRenderer extends CustomRenderer {
 	private WorldMap mWorldMap;
 	private CharMagus magus;
 	
-	public GameRenderer(Context context) {
-		super(context);
+	public GameRenderer(Activity activity) {
+		super(activity);
 	}
 	
 	@Override
@@ -63,12 +64,12 @@ public class GameRenderer extends CustomRenderer {
 		magus = new CharMagus();
 	
 		//mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 240, 128, 0, 0);
-		MapParser.TileMap map = MapParser.readMapFromFile(getContext(), R.raw.tartarus_map1);
+		MapParser.TileMap map = MapParser.readMapFromFile(getActivity(), R.raw.tartarus_map1);
 		
-		mWorldMap = new WorldMap(getContext(), R.drawable.tileset1, 1, 36, 16, 16, 240, 128, 0, 0);
+		mWorldMap = new WorldMap(getActivity(), R.drawable.tileset1, 1, 36, 16, 16, 240, 128, 0, 0);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
-		mPlayer = new Player(getContext(), R.drawable.sprite_magus, 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, magus);
-		mParticleSystem = new ParticleSystem(getContext(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
+		mPlayer = new Player(getActivity(), R.drawable.sprite_magus, 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, magus);
+		mParticleSystem = new ParticleSystem(getActivity(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
 	}
 		
 	@Override

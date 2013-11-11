@@ -6,9 +6,12 @@ import org.ubc.tartarus.graphics.BitmapImg;
 import org.ubc.tartarus.map.WorldMap;
 import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.utils.Point;
+import org.ubc.tartarus.communication.OutMsgMove;
+import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 
-import android.content.Context;
+import android.app.Activity;
 import android.opengl.Matrix;
+import android.util.Log;
 
 public class Player {
 
@@ -30,9 +33,10 @@ public class Player {
 	
 	private eDIR mDirection;
 	private Character character;	
+	private OutMsgMove moveMsg; 
 	
-	public Player(final Context context, final int resId, float x, float y, float width, float height, float speed, WorldMap worldMap, Character c) {
-		mPlayerImg = new BitmapImg(context, resId);
+	public Player(Activity activity, final int resId, float x, float y, float width, float height, float speed, WorldMap worldMap, Character c) {
+		mPlayerImg = new BitmapImg(activity, resId);
 		mPosition = new Point(x, y);
 		modelMat = new float[16];
 		scaleMat = new float[16];
@@ -44,6 +48,7 @@ public class Player {
 		mHeight = height;
 		mWorldMap = worldMap;
 		character = c;
+		moveMsg = new OutMsgMove(activity);
 	}
 	
 	public void setReachableGoal(boolean enable) {
@@ -198,6 +203,12 @@ public class Player {
 							mGoal.x -= mSpeed;
 						}
 					}
+					
+					try {
+						moveMsg.sendMessage((short)(mSpeed*viewportXUnitsPerGL), (short) 0);
+					} catch (MessageTypeMismatchException e) {
+						Log.e("Player", "Could not send a move message.");
+					}
 				}
 			} else if (dx < 0) {
 				if (mDirection == eDIR.RIGHT){
@@ -213,6 +224,12 @@ public class Player {
 						if (reachableGoal) {
 							mGoal.x += mSpeed;
 						}
+					}
+					
+					try {
+						moveMsg.sendMessage((short)(-mSpeed*viewportXUnitsPerGL), (short) 0);
+					} catch (MessageTypeMismatchException e) {
+						Log.e("Player", "Could not send a move message.");
 					}
 				}
 			} else if (dy > 0) {
@@ -230,6 +247,12 @@ public class Player {
 							mGoal.y -= mSpeed;
 						}
 					}
+					
+					try {
+						moveMsg.sendMessage((short)0, (short)(mSpeed*viewportYUnitsPerGL));
+					} catch (MessageTypeMismatchException e) {
+						Log.e("Player", "Could not send a move message.");
+					}
 				}
 			} else if (dy < 0) {
 				if (mDirection == eDIR.UP){
@@ -245,6 +268,12 @@ public class Player {
 						if (reachableGoal) {
 							mGoal.y += mSpeed;
 						}
+					}
+					
+					try {
+						moveMsg.sendMessage((short)0, (short)(-mSpeed*viewportYUnitsPerGL));
+					} catch (MessageTypeMismatchException e) {
+						Log.e("Player", "Could not send a move message.");
 					}
 				}
 			} else {

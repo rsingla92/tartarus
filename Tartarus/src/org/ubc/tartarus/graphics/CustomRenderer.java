@@ -5,6 +5,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.ubc.tartarus.utils.Point;
 
+import android.app.Activity;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
@@ -22,13 +23,13 @@ public class CustomRenderer implements Renderer {
 	private float[] mModelViewMatrix;
 	private float fingerX, fingerY;
 	
-	private Context mContext;
+	private Activity mActivity;
 	private float mAspectRatio;
 	
-	public CustomRenderer(Context context) {
+	public CustomRenderer(Activity activity) {
 		super();
 		
-		mContext = context;
+		mActivity = activity;
 	}
 	
 	protected float getFingerX() {
@@ -51,8 +52,8 @@ public class CustomRenderer implements Renderer {
 		return mProjectionMatrix;
 	}
 	
-	protected Context getContext() {
-		return mContext;
+	protected Activity getActivity() {
+		return mActivity;
 	}
 	
 	protected float getAspectRatio() {
