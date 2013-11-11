@@ -12,6 +12,10 @@ public class Character {
 		ATTACK_DOWN, NUM_ANIM
 	}
 	
+	public enum CharacterType {
+		MAGUS, LOCK, MONSTER, ROOSTER, SERDIC, STRIDER
+	}
+	
 	public class Animation{
 		private Vector<Rectangle> frameList;
 		private float animSpeed = 0.1f;
@@ -72,6 +76,8 @@ public class Character {
 	Animation[] animList;
 	Point refFrame;
 	
+	private int resId;
+	
 	public Animation getCurrentAnimation(){
 		return animList[currentAnimation];
 	}
@@ -129,6 +135,49 @@ public class Character {
 		for (int j = AnimTypes.ATTACK_LEFT.ordinal(); j < AnimTypes.NUM_ANIM.ordinal(); j++) {
 				animList[j] = null;
 		}
+	}
+	
+	public int getResourceId() {
+		return resId;
+	}
+	
+	protected void setResource(int resourceId) {
+		resId = resourceId;
+	}
+	
+	public static Character getCharFromType(Character.CharacterType c) {
+		Character newChar = null; 
+		//MAGUS, LOCK, MONSTER, ROOSTER, SERDIC, STRIDER
+		switch(c) {
+			case MAGUS:
+			newChar = new CharMagus();
+			break;
+			
+			case LOCK:
+			newChar = new CharLock();
+			break;
+			
+			case MONSTER:
+			newChar = new CharMonster();
+			break;
+			
+			case ROOSTER:
+			newChar = new CharRooster();
+			break;
+			
+			case SERDIC:
+			newChar = new CharSerdic();
+			break;
+			
+			case STRIDER:
+			newChar = new CharStrider();
+			break;
+			
+			default:
+			break;
+		}
+		
+		return newChar;
 	}
 	
 }

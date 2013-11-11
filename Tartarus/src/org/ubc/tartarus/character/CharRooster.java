@@ -1,4 +1,5 @@
 package org.ubc.tartarus.character;
+import org.ubc.tartarus.R;
 import org.ubc.tartarus.utils.Rectangle;
 
 public class CharRooster extends Character {
@@ -36,5 +37,6 @@ public class CharRooster extends Character {
 		animList[AnimTypes.WALK_RIGHT.ordinal()].setFlip(false);
 		super.setRefFrame((int)(walkLeft[2].topRight.x - walkLeft[2].bottomLeft.x), 
 				(int)(walkLeft[2].topRight.y - walkLeft[2].bottomLeft.y));
+		super.setResource(R.drawable.sprite_rooster);
 	}
 }

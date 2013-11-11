@@ -1,5 +1,6 @@
 package org.ubc.tartarus.character;
 
+import org.ubc.tartarus.R;
 import org.ubc.tartarus.utils.Rectangle;
 
 public class CharMagus extends Character {
@@ -47,6 +48,7 @@ public class CharMagus extends Character {
 		animList[AnimTypes.WALK_RIGHT.ordinal()].setFlip(true);
 		super.setRefFrame((int)(walkLeft[3].topRight.x - walkLeft[3].bottomLeft.x), 
 				(int)(walkLeft[3].topRight.y - walkLeft[3].bottomLeft.y));
+		super.setResource(R.drawable.sprite_magus);
 	}
 
 }

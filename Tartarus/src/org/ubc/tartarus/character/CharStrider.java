@@ -1,5 +1,6 @@
 package org.ubc.tartarus.character;
 
+import org.ubc.tartarus.R;
 import org.ubc.tartarus.utils.Rectangle;
 
 public class CharStrider extends Character {
@@ -36,5 +37,6 @@ public class CharStrider extends Character {
 		animList[AnimTypes.WALK_RIGHT.ordinal()].setFlip(false);
 		super.setRefFrame((int)(walkDown[1].topRight.x - walkDown[1].bottomLeft.x), 
 				(int)(walkDown[1].topRight.y - walkDown[1].bottomLeft.y));
+		super.setResource(R.drawable.sprite_strider);
 	}
 }

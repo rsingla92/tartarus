@@ -35,8 +35,7 @@ public class Player {
 	private Character character;	
 	private OutMsgMove moveMsg; 
 	
-	public Player(Activity activity, final int resId, float x, float y, float width, float height, float speed, WorldMap worldMap, Character c) {
-		mPlayerImg = new BitmapImg(activity, resId);
+	public Player(Activity activity, float x, float y, float width, float height, float speed, WorldMap worldMap, Character.CharacterType charType) {
 		mPosition = new Point(x, y);
 		modelMat = new float[16];
 		scaleMat = new float[16];
@@ -47,8 +46,12 @@ public class Player {
 		mWidth = width;
 		mHeight = height;
 		mWorldMap = worldMap;
-		character = c;
 		moveMsg = new OutMsgMove(activity);
+		
+		// Get the correct character type.
+		character = Character.getCharFromType(charType);
+		
+		mPlayerImg = new BitmapImg(activity, character.getResourceId());
 	}
 	
 	public void setReachableGoal(boolean enable) {

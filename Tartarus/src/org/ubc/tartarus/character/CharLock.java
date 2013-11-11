@@ -1,5 +1,6 @@
 package org.ubc.tartarus.character;
 
+import org.ubc.tartarus.R;
 import org.ubc.tartarus.utils.Rectangle;
 
 public class CharLock extends Character {
@@ -44,5 +45,6 @@ public class CharLock extends Character {
 		animList[AnimTypes.WALK_RIGHT.ordinal()].setFlip(true);
 		super.setRefFrame((int)(walkDown[2].topRight.x - walkDown[2].bottomLeft.x), 
 				(int)(walkDown[2].topRight.y - walkDown[2].bottomLeft.y));
+		super.setResource(R.drawable.sprite_lock);
 	}
 }
