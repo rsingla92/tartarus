@@ -23,6 +23,7 @@ import org.ubc.tartarus.utils.Point;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 
 public class GameRenderer extends CustomRenderer {
 
@@ -100,6 +101,7 @@ public class GameRenderer extends CustomRenderer {
 		
 		if (mPlayer != null) {
 			mPlayer.setGoalPoint(new Point(getFingerX(), getFingerY()), mParticleSystem);
+			Log.i("TestSocket", "Finger X: " + getFingerX() + ", Finger Y: " + getFingerY());
 			mPlayer.setReachableGoal(false);
 		}		
 	}

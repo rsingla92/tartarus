@@ -6,7 +6,6 @@ import javax.microedition.khronos.opengles.GL10;
 import org.ubc.tartarus.utils.Point;
 
 import android.app.Activity;
-import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.opengl.GLSurfaceView.Renderer;
@@ -126,8 +125,6 @@ public class CustomRenderer implements Renderer {
        normalizedInPoint = new float[4];
        outPoint = new float[4];
 
-       // Invert y coordinate, as android uses
-       // top-left, and ogl bottom-left.
        int oglTouchY = (int) (screenH - y);
 
        /* Transform the screen point to clip
@@ -146,9 +143,10 @@ public class CustomRenderer implements Renderer {
            transformMatrix, 0,
            mProjectionMatrix, 0,
            mViewMatrix, 0);
+       
        Matrix.invertM(invertedMatrix, 0,
            transformMatrix, 0);       
-
+       
        /* Apply the inverse to the point
        in clip space */
        Matrix.multiplyMV(
@@ -158,7 +156,6 @@ public class CustomRenderer implements Renderer {
 
        if (outPoint[3] == 0.0)
        {
-           // Avoid /0 error.
            Log.e("World coords", "ERROR!");
        }
 

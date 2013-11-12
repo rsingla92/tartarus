@@ -5,17 +5,13 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.ubc.tartarus.GameActivity;
 import org.ubc.tartarus.R;
-import org.ubc.tartarus.R.drawable;
 import org.ubc.tartarus.particle.Particle;
 import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.utils.Point;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.opengl.Matrix;
-import android.util.Log;
-import android.view.MotionEvent;
 
 public class MenuRenderer extends CustomRenderer {
 

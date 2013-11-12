@@ -83,7 +83,12 @@ public class Player {
 		Matrix.setIdentityM(scaleMat, 0);
 		Matrix.translateM(modelMat, 0, mPosition.x, mPosition.y, 0);
 
-		int flipVal = (character.getCurrentAnimation().getFlip()? 1 : -1);
+		/*
+		 * We must flip in the opposite direction expected... Because the view matrix is set up to look
+		 * down the negative z-axis, which means that the x-axis is positive going left (opposite that we 
+		 * would expect).  
+		 */
+		int flipVal = (character.getCurrentAnimation().getFlip()? -1 : 1);
 		Matrix.scaleM(scaleMat, 0, flipVal*scaleWidth, scaleHeight, 1);
 		Matrix.multiplyMM(modelMat, 0, modelMat.clone(), 0, scaleMat, 0);
 		Matrix.multiplyMM(mMVPMat, 0, modelViewMatrix, 0, modelMat, 0);
@@ -95,10 +100,10 @@ public class Player {
 	public void movePlayer(eDIR direction) {
 		
 		switch (direction) {
-			case LEFT:
+			case RIGHT:
 				mPosition.x -= mSpeed;
 				break;
-			case RIGHT:
+			case LEFT:
 				mPosition.x += mSpeed;
 				break;
 			case UP:
@@ -116,16 +121,16 @@ public class Player {
 		boolean firstSign = goal.y - goal.x + mPosition.x - mPosition.y >= 0; 
 		boolean secondSign = goal.y + goal.x - mPosition.y - mPosition.x >= 0;
 		float addX = 0, addY = 0;
-		
+
 		if (!firstSign && secondSign) {
-			if (mDirection != eDIR.RIGHT){
+			if (mDirection != eDIR.LEFT){
 				character.getCurrentAnimation().reset();
-				character.setCurrentAnimation(AnimTypes.WALK_RIGHT);
+				character.setCurrentAnimation(AnimTypes.WALK_LEFT);
 			}
 			
 			// In the first region, set x to goal's x. 
 			addX = getScaleDimensions().x / 2.0f; 
-			mDirection = eDIR.RIGHT;
+			mDirection = eDIR.LEFT;
 			mGoal.x = goal.x;
 			mGoal.y = mPosition.y;
 		} else if (firstSign && secondSign) {
@@ -139,13 +144,13 @@ public class Player {
 			mGoal.y = goal.y; 
 			mGoal.x = mPosition.x;
 		} else if (firstSign && !secondSign) {
-			if (mDirection != eDIR.LEFT){
+			if (mDirection != eDIR.RIGHT){
 				character.getCurrentAnimation().reset();
-				character.setCurrentAnimation(AnimTypes.WALK_LEFT);
+				character.setCurrentAnimation(AnimTypes.WALK_RIGHT);
 			}
 			// In the left region
 			addX = -getScaleDimensions().x / 2.0f;
-			mDirection = eDIR.LEFT;
+			mDirection = eDIR.RIGHT;
 			mGoal.x = goal.x;
 			mGoal.y = mPosition.y;
 		} else {
@@ -166,7 +171,7 @@ public class Player {
 		// Determine the goal point based on the scroll line (distance of the goal from the player is the same
 		// as the distance of the scroll line, clamped to the size of the viewport). 
 		Point goal = new Point(endPoint.x - beginPoint.x + mPosition.x, endPoint.y - beginPoint.y + mPosition.y); 
-		
+		Log.i("TestSocket", "EndPoint X: " + endPoint.x + ", BeginPoint X: " + beginPoint.y);
 		if (goal.x > right) goal.x = right;
 		else if (goal.x < left) goal.x = left;
 		
@@ -180,24 +185,39 @@ public class Player {
 		return new Point(mPosition.x, mPosition.y);
 	}
 	
+	short getWorldX(float viewWidth) {
+		float viewportXUnitsPerGL = mWorldMap.getViewportWidth() / viewWidth;
+		float playerXFloat = (-mPosition.x + viewWidth / 2.0f) * viewportXUnitsPerGL;
+		Log.i("TestSocket", "Position X: " + mPosition.x + ", viewport X: " + mWorldMap.getViewportX());
+		return (short) Math.round(playerXFloat + mWorldMap.getViewportX());
+	}
+	
+	short getWorldY(float viewHeight) {
+		float viewportYUnitsPerGL = mWorldMap.getViewportHeight() / viewHeight;
+		float playerYFloat = (-mPosition.y + viewHeight / 2.0f) * viewportYUnitsPerGL;
+		
+		return (short) Math.round(playerYFloat + mWorldMap.getViewportY());
+	}
+	
 	public void onUpdate(float viewWidth, float viewHeight) {
 		if (mGoal.x != -5 && mGoal.y != -5) {
 			character.getCurrentAnimation().animate();
 
 			float dx = mGoal.x - mPosition.x;
 			float dy = mGoal.y - mPosition.y;
-
+			Log.i("TestSocket", "GoalX: " + mGoal.x + ", dx: " + dx);
+			
 			float viewportXUnitsPerGL = mWorldMap.getViewportWidth() / viewWidth;
 			float viewportYUnitsPerGL = mWorldMap.getViewportHeight() / viewHeight;
 
 			if (dx > 0) {
-				if (mDirection == eDIR.LEFT){
+				if (mDirection == eDIR.RIGHT){
 					//Overshot the goal
 					mGoal.x = -5;
 					mGoal.y = -5;
 				} else {
 					if (mWorldMap.atViewportXBoundary() == -1 || mPosition.x <  viewWidth * 0.25f) {
-						movePlayer(eDIR.RIGHT);
+						movePlayer(eDIR.LEFT);
 					} else {
 						// Move the viewport
 						mWorldMap.shiftViewport(-mSpeed*viewportXUnitsPerGL, 0);
@@ -207,20 +227,17 @@ public class Player {
 						}
 					}
 					
-					try {
-						moveMsg.sendMessage((short)(mSpeed*viewportXUnitsPerGL), (short) 0);
-					} catch (MessageTypeMismatchException e) {
-						Log.e("Player", "Could not send a move message.");
-					}
+					moveMsg.setMessage(getWorldX(viewWidth), getWorldY(viewHeight));
 				}
 			} else if (dx < 0) {
-				if (mDirection == eDIR.RIGHT){
+				if (mDirection == eDIR.LEFT){
 					//Overshot the goal
 					mGoal.x = -5;
 					mGoal.y = -5;
 				} else {
 					if (mWorldMap.atViewportXBoundary() == 1 || mPosition.x > -viewWidth * 0.25f) {
-						movePlayer(eDIR.LEFT);
+						Log.i("TestSocket", "Moving Right!");
+						movePlayer(eDIR.RIGHT);
 					} else {
 						// Move the viewport -- must shift the goal to account for this
 						mWorldMap.shiftViewport(mSpeed*viewportXUnitsPerGL, 0);
@@ -229,11 +246,7 @@ public class Player {
 						}
 					}
 					
-					try {
-						moveMsg.sendMessage((short)(-mSpeed*viewportXUnitsPerGL), (short) 0);
-					} catch (MessageTypeMismatchException e) {
-						Log.e("Player", "Could not send a move message.");
-					}
+					moveMsg.setMessage(getWorldX(viewWidth), getWorldY(viewHeight));
 				}
 			} else if (dy > 0) {
 				if (mDirection == eDIR.DOWN){
@@ -251,11 +264,7 @@ public class Player {
 						}
 					}
 					
-					try {
-						moveMsg.sendMessage((short)0, (short)(mSpeed*viewportYUnitsPerGL));
-					} catch (MessageTypeMismatchException e) {
-						Log.e("Player", "Could not send a move message.");
-					}
+					moveMsg.setMessage(getWorldX(viewWidth), getWorldY(viewHeight));
 				}
 			} else if (dy < 0) {
 				if (mDirection == eDIR.UP){
@@ -273,16 +282,19 @@ public class Player {
 						}
 					}
 					
-					try {
-						moveMsg.sendMessage((short)0, (short)(-mSpeed*viewportYUnitsPerGL));
-					} catch (MessageTypeMismatchException e) {
-						Log.e("Player", "Could not send a move message.");
-					}
+					moveMsg.setMessage(getWorldX(viewWidth), getWorldY(viewHeight));
 				}
 			} else {
 				// Reached position
 				mGoal.x = -5;
 				mGoal.y = -5;
+			}
+			
+			/* Send the move message, if it is updated. */
+			try {
+				moveMsg.sendMessage();
+			} catch (MessageTypeMismatchException e) {
+				Log.e("Player", "Message Type Mismatch!");
 			}
 		}
 	}
