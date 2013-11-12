@@ -232,6 +232,7 @@ int makeGameMsg(GenericMsg* msg)
 
 int makeMoveMsg(GenericMsg* msg)
 {
+	printf("Got Move Message!\n");
 }
 
 int makePowerUpMsg(GenericMsg* msg)

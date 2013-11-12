@@ -40,6 +40,7 @@ static void readSocket(alt_up_rs232_dev* uart)
 	byte msgLength = 0;
 	byte msgID = 0;
 	byte parity;
+	byte packetLength = 0;
 
 	if (getSerialUsedSpace(uart) == 0)
 	{
@@ -47,49 +48,66 @@ static void readSocket(alt_up_rs232_dev* uart)
 		return;
 	}
 
-	printf("Got data!\n");
 	// Make element to add to queue
-	GenericMsg* newElement = (GenericMsg*) malloc(sizeof(GenericMsg));
+	GenericMsg* newElement;
 
 	// first byte
-	readSerialData(uart, &(newElement->clientID_), &parity);
+	readSerialData(uart, &clientID, &parity);
+	printf("Got data from %x!\n", clientID);
 
-	// second byte. adjust because we actually read the first byte.
-	readSerialDataWait(uart, &(newElement->msgLength_), &parity);
-	newElement->msgLength_--;
+	// Read size
+	readSerialDataWait(uart, &packetLength, &parity);
+	printf("Length of Packet: %d\n", packetLength);
 
-	// third byte
-	readSerialDataWait(uart, &(newElement->msgID_), &parity);
-
-	// store the data
-	newElement->msg_ = (byte*) malloc(sizeof(newElement->msgLength_));
-
-	// allocate the rest of it.
 	int i;
-	for( i = 0; i < newElement->msgLength_; ++i)
+	for( i = 0; i < packetLength; i += msgLength + 3)
 	{
-		// read data
-		readSerialDataWait(uart, &(newElement->msg_[i]), &parity);
-	}
+		newElement = (GenericMsg*) malloc(sizeof(GenericMsg));
+		newElement->clientID_ = clientID;
+		newElement->next = NULL;
 
-	// if it's first element then queue is not set up
-	if( !msgHead )
-	{
-		// initialize the queue
-		msgHead = newElement;
-		msgTail = msgHead;
-		return;
-	}
+		// HACK: Trying to get to the bottom of this...
+		byte throwaway;
+		readSerialDataWait(uart, &throwaway, &parity);
 
-	// make current tail point to cur element if tail exists
-	if( msgTail)
-	{
-		msgTail->next = newElement;
-	}
+		//Message length...
+		readSerialDataWait(uart, &msgLength, &parity);
+		msgLength--; // We read in the type
+		newElement->msgLength_ = msgLength;
+		printf("Length: %d, ", newElement->msgLength_);
 
-	// new tail
-	msgTail = newElement;
-	newElement->next = NULL;
+		// Read in the message ID:
+		readSerialDataWait(uart, &msgID, &parity);
+		newElement->msgID_ = msgID;
+		printf("Type of message: %x, ", newElement->msgID_);
+
+		newElement->msg_ = (byte*) malloc(sizeof(newElement->msgLength_));
+
+		int j;
+		printf("Data: ");
+		for (j = 0; j < msgLength; j++) {
+			readSerialDataWait(uart, &(newElement->msg_[i]), &parity);
+			printf("%x, ", newElement->msg_[i]);
+		}
+
+		// If it is the first element then the queue is not set up
+		if( !msgHead )
+		{
+			// Initialize the queue
+			msgHead = newElement;
+			msgTail = msgHead;
+		}
+		else
+		{
+			// Make current tail point to cur element if tail exists
+			if( msgTail)
+			{
+				msgTail->next = newElement;
+			}
+
+			msgTail = newElement;
+		}
+	}
 
 	return;
 }
@@ -126,7 +144,7 @@ static void parseNextMessage()
 			makeTestMsg(msgHead);
 			break;
 		default:
-			printf("Unknown message type: %d\n", msgHead->msgID_);
+			printf("Unknown message type: %x\n", msgHead->msgID_);
 			break;
 		}
 
@@ -138,8 +156,6 @@ static void parseNextMessage()
 
 	} while ( msgHead );
 
-	// queue's parse it all mang
-	// lator gator
 	return;
 }
 
@@ -168,21 +184,12 @@ int main(void) {
 
 	int test = 0;
 
+	printf("Going into loop..\n");
 	while (true)
 	{
 		readSocket(uart_dev);
 		parseNextMessage();
 		runState();
-
-		if (!test) {
-			writeSerialData(uart_dev, 0); // Fake device id.
-			writeSerialData(uart_dev, (unsigned char)(strlen(message) + 1)); //Length -- string and id.
-			writeSerialData(uart_dev, (unsigned char) TEST);
-			for (i = 0 ; i < strlen(message); i++) {
-				writeSerialData(uart_dev, message[i]);
-			}
-			test = 1;
-		}
 	}
 
 	return 0;
