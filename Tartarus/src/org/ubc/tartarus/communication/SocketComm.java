@@ -98,6 +98,8 @@ public class SocketComm {
 			if (sock == null) {
 				Log.i("TestSocket", "Could not connect... socket null!");
 			}
+			
+			Log.i("TestSocket", "Connected!");
 			return sock;
 		}
 		

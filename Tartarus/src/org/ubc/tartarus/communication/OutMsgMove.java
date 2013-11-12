@@ -9,16 +9,33 @@ import android.util.Log;
 
 public class OutMsgMove extends OutgoingMessage {
 
+	private short storeX, storeY;
+	private boolean newMsg; 
+	
 	public OutMsgMove(Activity context) {
 		super(context);
+		newMsg = false;
+		storeX = storeY = 0;
 	}
 
-	public void sendMessage(short x, short y) throws MessageTypeMismatchException {
+	public void sendMessage() throws MessageTypeMismatchException {
+		if (!newMsg) return; // No need to send if there is no new message ready.
+		
 		ByteBuffer buffer = ByteBuffer.allocate(4);
-		buffer.putShort(x);
-		buffer.putShort(y);
+		buffer.putShort(storeX);
+		buffer.putShort(storeY);
 		byte buf[] = buffer.array();
-		Log.i("TestSocket", "Sent X: " + x + ", Sent Y: + " + y);
+		Log.i("TestSocket", "Sent X: " + storeX + ", Sent Y: + " + storeY);
 		sendMessage(OutMessageType.MSG_MOVE, buf);
+		newMsg = false; 
+	}
+	
+	public void setMessage(short x, short y) {
+		if (storeX != x || storeY != y) {
+			newMsg = true;
+		}
+		
+		storeX = x;
+		storeY = y;
 	}
 }
