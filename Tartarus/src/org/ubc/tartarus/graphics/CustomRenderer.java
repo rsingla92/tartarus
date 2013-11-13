@@ -3,6 +3,7 @@ package org.ubc.tartarus.graphics;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import org.ubc.tartarus.character.Character.CharacterType;
 import org.ubc.tartarus.utils.Point;
 
 import android.app.Activity;
@@ -186,4 +187,5 @@ public class CustomRenderer implements Renderer {
 	public void onSingleTap(float x, float y, float width, float height) {
 		addFingerCoords(x, y, width, height);		
 	}
+
 }

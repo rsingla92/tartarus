@@ -45,9 +45,11 @@ public class GameRenderer extends CustomRenderer {
 	
 	private Player mPlayer;
 	private WorldMap mWorldMap;
+	private CharacterType charType;
 
-	public GameRenderer(Activity activity) {
+	public GameRenderer(Activity activity, CharacterType charType) {
 		super(activity);
+		this.charType = charType;
 	}
 	
 	@Override
@@ -73,7 +75,7 @@ public class GameRenderer extends CustomRenderer {
 		mWorldMap = new WorldMap(getActivity(), R.drawable.tileset1, 1, 36, 16, 16, 240, 128, 0, 0);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
 
-		mPlayer = new Player(getActivity(), 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, CharacterType.STRIDER);
+		mPlayer = new Player(getActivity(), 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, charType);
 		mParticleSystem = new ParticleSystem(getActivity(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
 	}
 		

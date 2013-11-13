@@ -1,23 +1,27 @@
 package org.ubc.tartarus;
 
+import java.util.Timer;
+
+import org.ubc.tartarus.communication.SocketComm;
+import org.ubc.tartarus.communication.SocketComm.TCPReadTimerTask;
 import org.ubc.tartarus.particle.Particle;
-import org.ubc.tartarus.character.Character;
 
 import android.app.Activity;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.Log;
 
-public class GameActivity extends Activity {
-
+public class LobbyActivity extends Activity {
 	GLSurfaceView surfaceView; 
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		ApplicationData app = (ApplicationData) getApplication();
+		surfaceView = new LobbyView(this);
 		
-		Character.CharacterType charType = (Character.CharacterType) super.getIntent().getExtras().getSerializable(Character.TYPE_INTENT);
-		surfaceView = new GameView(this, charType);
 		setContentView(surfaceView);
+
 	}
 	
 	@Override

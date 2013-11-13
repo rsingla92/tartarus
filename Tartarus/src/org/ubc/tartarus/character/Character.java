@@ -16,6 +16,8 @@ public class Character {
 		MAGUS, LOCK, MONSTER, ROOSTER, SERDIC, STRIDER
 	}
 	
+	public static final String TYPE_INTENT = "CharType";
+	
 	public class Animation{
 		private Vector<Rectangle> frameList;
 		private float animSpeed = 0.1f;
