@@ -34,7 +34,7 @@ public class LobbyRenderer extends CustomRenderer {
 	private boolean cursorXDirection, cursorYDirection;
 	private boolean hitReady = false;
 	private float readyCountdown = 1.0f;
-	private Character.CharacterType charType = Character.CharacterType.MAGUS;
+	private Character.CharacterType charType = Character.CharacterType.NUM_TYPES;
 	public LobbyRenderer(Activity activity) {
 		super(activity);
 	}
@@ -167,25 +167,76 @@ public class LobbyRenderer extends CustomRenderer {
 		float fx = getFingerX();
 		float fy = getFingerY();
 		
-		if (fx >= readyX - readyWidth && fx <= readyX + readyWidth && 
-				fy >= readyY - readyHeight && fy <= readyY + readyHeight) {
-			// Touched join game
-			mParticleSystem.makeSpiralSystem();
-			hitReady = true;
-		} else {
-			mParticleSystem.makeNormalSystem();
-			hitReady = false;
-		}
-		
-		if (mParticleSystem != null) {
-			mParticleSystem.beginSpawning();
-		}
-		
 		// check chars
+		
+		// neku w,h = 44.5,54
+		// neku centre = 130.5, 156
+		if (testBoundingBox(fx,fy, 130.5f,156f,44.5f,54f,width, height))
+			charType = Character.CharacterType.NEKU;
+		
+		// magus w,h = 44,54
+		// magus centre = 284, 156
+		else if (testBoundingBox(fx,fy, 284f,156f,44f,54f, width, height))
+			charType = Character.CharacterType.MAGUS;
+		
+		// monster w,h = 48.5,54
+		// monster centre = 437.5,156
+		else if (testBoundingBox(fx,fy, 437.5f,156f,48.5f,54f,width, height))
+			charType = Character.CharacterType.MONSTER;
+		
+		// serdic w,h = 42,55
+		// serdic centre = 597,157
+		else if (testBoundingBox(fx,fy, 597f,157f,42f,55f,width, height))
+			charType = Character.CharacterType.SERDIC;
+		
+		// rooster w,h = 43,54
+		// rooster centre = 130,313
+		else if (testBoundingBox(fx,fy, 130f,313f,43f,54f,width, height))
+			charType = Character.CharacterType.ROOSTER;
+		
+		// strider w,h = 42.5,54
+		// strider centre = 283.5,313
+		else if (testBoundingBox(fx,fy, 283.5f,313f,42.5f,54f,width, height))
+			charType = Character.CharacterType.STRIDER;
+		
+		// beat w,h = 48.5,54.5
+		// beat centre =438.5,312.5 
+		else if (testBoundingBox(fx,fy, 438.5f,312.5f,48.5f,54.5f,width, height))
+			charType = Character.CharacterType.BEAT;
+		
+		// lock w,h = 47,54
+		// lock centre = 596,313
+		else if (testBoundingBox(fx,fy, 596f,313f,47f,54f,width, height))
+			charType = Character.CharacterType.LOCK;
+		
+		if (charType != Character.CharacterType.NUM_TYPES){
+			if (fx >= readyX - readyWidth && fx <= readyX + readyWidth && 
+					fy >= readyY - readyHeight && fy <= readyY + readyHeight) {
+				// Touched join game
+				mParticleSystem.makeSpiralSystem();
+				hitReady = true;
+			} else {
+				mParticleSystem.makeNormalSystem();
+				hitReady = false;
+			}
+		
+			if (mParticleSystem != null) {
+				mParticleSystem.beginSpawning();
+			}
+		}
+		
 	}
 
-	private boolean testBoundingBox (float x1,float x2,float y1,float y2){
-		return true;
+	private boolean testBoundingBox (float fx, float fy, float x1, float y1, float width, float height, float widthScreen, float heightScreen){
+		Point centre = getGLCoords(x1, y1, widthScreen, heightScreen);
+		
+		if (fx >= centre.x - width && fx <= centre.x + width && 
+				fy >= centre.y - height && fy <= centre.y + height) {
+			// Touched join game
+			mParticleSystem.makeBurstSystem();
+			return true;
+		}
+		return false;
 	}
 	@Override
 	public void onReleaseTouch() {

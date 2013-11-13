@@ -13,7 +13,7 @@ public class Character {
 	}
 	
 	public enum CharacterType {
-		MAGUS, LOCK, MONSTER, ROOSTER, SERDIC, STRIDER
+		MAGUS, LOCK, MONSTER, ROOSTER, SERDIC, STRIDER, NEKU, BEAT, NUM_TYPES
 	}
 	
 	public static final String TYPE_INTENT = "CharType";
