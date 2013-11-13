@@ -31,6 +31,12 @@
             android:label="@string/game_activity_name" 
             android:screenOrientation="landscape">
         </activity>
+        
+        <activity
+            android:name="org.ubc.tartarus.LobbyActivity"
+            android:label="@string/lobby_activity_name" 
+            android:screenOrientation="landscape">
+        </activity>
     </application>
 
 </manifest>
