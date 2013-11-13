@@ -22,12 +22,15 @@
 static alt_u32 ticks_per_sec;
 static alt_u32 num_ticks;
 static alt_32 update(void *context);
+static int writeQueueCounter = 0;
 
 int* menuSoundBuf;
 int menuSoundBufLen;
 
 GenericMsg* msgHead = NULL;
 GenericMsg* msgTail = NULL;
+GenericMsg* writeMsgHead = NULL;
+GenericMsg* writeMsgTail = NULL;
 static alt_up_rs232_dev* uart_dev;
 
 /* Reads from the TCP/IP socket. Takes in the client ID, message length, and message type
@@ -112,6 +115,60 @@ static void readSocket(alt_up_rs232_dev* uart)
 	return;
 }
 
+
+static void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
+{
+	byte clientID = msg->clientID_;
+	byte msgLength = msg->msgLength_;
+	byte msgID = msg->msgID_;
+	int i = 0;
+
+	// write first byte (client #)
+	writeSerialData(uart, clientID);
+	printf("Writing data to %x!\n", clientID);
+
+	// write size (the size of the message)
+	writeSerialData(uart, msgLength);
+	printf("Length of Message: %d\n", msgLength);
+
+	// Send the rest of the data
+	for (i = 0; i < msgLength; i++) {
+		writeSerialData(uart, msg->msg_[i]);
+	}
+
+	writeQueueCounter--;
+}
+
+static void sendMessage(alt_up_rs232_dev* uart, GenericMsg* msg) {
+
+	//Add to the queue
+	// If it is the first element then the queue is not set up
+	if( !writeMsgHead )
+	{
+		// Initialize the queue
+		writeMsgHead = newElement;
+		writeMsgTail = msgHead;
+		writeQueueCounter++;
+	}
+	else
+	{
+		// Make current tail point to cur element if tail exists
+		if( writeMsgTail)
+		{
+			writeMsgTail->next = msg;
+		}
+		writeMsgTail = msg;
+		writeQueueCounter++;
+	}
+}
+
+static void resetQueue() {
+
+	//Destroy all remaining GenericMsg?
+	writeQueueCounter = 0;
+
+}
+
 /* Takes the next element of the messageQueue and
  * creates the appropriate structure for it.
  * Uses msgHead
@@ -185,12 +242,25 @@ int main(void) {
 	int test = 0;
 
 	printf("Going into loop..\n");
-	while (true)
-	{
+
+	GenericMsg* gmsg = (GenericMsg*) malloc(sizeof(GenericMsg));
+	gmsg->clientID_ = 1;
+	gmsg->msgID_ = 1;
+	gmsg->msg_ = "You feel like working now?";
+	gmsg->msgLength_ = strlen(gmsg->msg_);
+
+	//while (true)
+	//{
 		readSocket(uart_dev);
+		writeMsg(uart_dev, gmsg);
+		//readSocket(uart_dev);
+
+		//gmsg->msg_ = "I'm just entering random text so that I get to 128 characters.";
+		//writeMsg(uart_dev, gmsg);
+
 		parseNextMessage();
 		runState();
-	}
+	//}
 
 	return 0;
 }
