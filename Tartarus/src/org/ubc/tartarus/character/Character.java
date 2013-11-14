@@ -151,7 +151,7 @@ public class Character {
 	
 	public static Character getCharFromType(Character.CharacterType c) {
 		Character newChar = null; 
-		//MAGUS, LOCK, MONSTER, ROOSTER, SERDIC, STRIDER
+		//MAGUS, LOCK, MONSTER, ROOSTER, SERDIC, STRIDER, NEKU, BEAT
 		switch(c) {
 			case MAGUS:
 			newChar = new CharMagus();
@@ -177,13 +177,14 @@ public class Character {
 			newChar = new CharStrider();
 			break;
 		
-			case NEKU: 
+			case NEKU:
 			newChar = new CharNeku();
 			break;
 			
 			case BEAT:
 			newChar = new CharBeat();
 			break;
+			
 			default:
 			newChar = new CharRooster();
 			Log.i("Player", "No character found, defaulting to Rooster.");
