@@ -172,42 +172,47 @@ public class LobbyRenderer extends CustomRenderer {
 		// neku w,h = 44.5,54
 		// neku centre = 130.5, 156
 		if (testBoundingBox(fx,fy, 130.5f,156f,44.5f,54f,width, height))
+		{
 			charType = Character.CharacterType.NEKU;
 		
 		// magus w,h = 44,54
 		// magus centre = 284, 156
-		else if (testBoundingBox(fx,fy, 284f,156f,44f,54f, width, height))
-			charType = Character.CharacterType.MAGUS;
+		}else if (testBoundingBox(fx,fy, 284f,156f,44f,54f, width, height))
+		{	charType = Character.CharacterType.MAGUS;
 		
 		// monster w,h = 48.5,54
 		// monster centre = 437.5,156
-		else if (testBoundingBox(fx,fy, 437.5f,156f,48.5f,54f,width, height))
-			charType = Character.CharacterType.MONSTER;
+		}else if (testBoundingBox(fx,fy, 437.5f,156f,48.5f,54f,width, height))
+		{	charType = Character.CharacterType.MONSTER;
 		
 		// serdic w,h = 42,55
 		// serdic centre = 597,157
-		else if (testBoundingBox(fx,fy, 597f,157f,42f,55f,width, height))
-			charType = Character.CharacterType.SERDIC;
+		}else if (testBoundingBox(fx,fy, 597f,157f,42f,55f,width, height))
+		{	charType = Character.CharacterType.SERDIC;
 		
 		// rooster w,h = 43,54
 		// rooster centre = 130,313
-		else if (testBoundingBox(fx,fy, 130f,313f,43f,54f,width, height))
-			charType = Character.CharacterType.ROOSTER;
+		}else if (testBoundingBox(fx,fy, 130f,313f,43f,54f,width, height))
+		{	charType = Character.CharacterType.ROOSTER;
 		
 		// strider w,h = 42.5,54
 		// strider centre = 283.5,313
-		else if (testBoundingBox(fx,fy, 283.5f,313f,42.5f,54f,width, height))
-			charType = Character.CharacterType.STRIDER;
+		}else if (testBoundingBox(fx,fy, 283.5f,313f,42.5f,54f,width, height))
+		{	charType = Character.CharacterType.STRIDER;
 		
 		// beat w,h = 48.5,54.5
 		// beat centre =438.5,312.5 
-		else if (testBoundingBox(fx,fy, 438.5f,312.5f,48.5f,54.5f,width, height))
-			charType = Character.CharacterType.BEAT;
+		}else if (testBoundingBox(fx,fy, 438.5f,312.5f,48.5f,54.5f,width, height))
+		{	charType = Character.CharacterType.BEAT;
 		
 		// lock w,h = 47,54
 		// lock centre = 596,313
-		else if (testBoundingBox(fx,fy, 596f,313f,47f,54f,width, height))
-			charType = Character.CharacterType.LOCK;
+		}else if (testBoundingBox(fx,fy, 596f,313f,47f,54f,width, height))
+		{	charType = Character.CharacterType.LOCK;
+		} else 
+		{
+			charType = Character.CharacterType.ROOSTER;
+		}
 		
 		if (charType != Character.CharacterType.NUM_TYPES){
 			if (fx >= readyX - readyWidth && fx <= readyX + readyWidth && 

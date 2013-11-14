@@ -5,6 +5,8 @@ import java.util.Vector;
 import org.ubc.tartarus.utils.Point;
 import org.ubc.tartarus.utils.Rectangle;
 
+import android.util.Log;
+
 public class Character {
 	
 	public enum AnimTypes{
@@ -174,8 +176,17 @@ public class Character {
 			case STRIDER:
 			newChar = new CharStrider();
 			break;
+		
+			case NEKU: 
+			newChar = new CharNeku();
+			break;
 			
+			case BEAT:
+			newChar = new CharBeat();
+			break;
 			default:
+			newChar = new CharRooster();
+			Log.i("Player", "No character found, defaulting to Rooster.");
 			break;
 		}
 		

@@ -49,6 +49,7 @@ public class Player {
 		moveMsg = new OutMsgMove(activity);
 		
 		// Get the correct character type.
+		Log.i("Player", "CharType: " + charType);
 		character = Character.getCharFromType(charType);
 		
 		mPlayerImg = new BitmapImg(activity, character.getResourceId());
