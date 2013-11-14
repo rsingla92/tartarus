@@ -220,9 +220,10 @@ public class LobbyRenderer extends CustomRenderer {
 				hitReady = false;
 			}
 		
-			if (mParticleSystem != null) {
-				mParticleSystem.beginSpawning();
-			}
+		}
+		
+		if (mParticleSystem != null) {
+			mParticleSystem.beginSpawning();
 		}
 		
 	}
