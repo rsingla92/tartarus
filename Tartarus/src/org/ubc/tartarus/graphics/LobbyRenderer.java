@@ -38,6 +38,7 @@ public class LobbyRenderer extends CustomRenderer {
 	private float cursorVelocityX, cursorVelocityY;
 	private boolean cursorXDirection, cursorYDirection;
 	private boolean hitReady = false;
+	private boolean pickedChar = false;
 	private float readyCountdown = 1.0f;
 	private Character.CharacterType charType = Character.CharacterType.NUM_TYPES;
 	public LobbyRenderer(Activity activity) {
@@ -147,6 +148,16 @@ public class LobbyRenderer extends CustomRenderer {
 			}
 		}
 		
+		if (pickedChar) {
+			readyCountdown -= 0.03f; 
+			if (readyCountdown <= 0) {
+				pickedChar = false;
+				readyCountdown = 1.0f;
+				mParticleSystem.endSpawning();
+				mParticleSystem.makeNormalSystem();
+			}
+		}
+		
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
 	}
@@ -195,57 +206,64 @@ public class LobbyRenderer extends CustomRenderer {
 		
 		if (testBoundingBox(fx,fy, 130.5f,156f,44.5f,54f,width, height)){
 			charType = Character.CharacterType.NEKU;
-			Log.i("ChAR", "im neku");
-			Log.i("ChAR", "Finger X: " + fx + ", Finger Y: " + fy);
+			Log.i("CHAR", "im neku");
+			pickedChar = true;
 		}
 		
 		// magus w,h = 44,54
 		// magus centre = 284, 156
 		else if (testBoundingBox(fx,fy, 284f,156f,44f,54f, width, height)){
 			charType = Character.CharacterType.MAGUS;
-			Log.i("ChAR", "im magus");
+			Log.i("CHAR", "im magus");
+			pickedChar = true;
 		}
 		
 		// monster w,h = 48.5,54
 		// monster centre = 437.5,156
 		else if (testBoundingBox(fx,fy, 437.5f,156f,48.5f,54f,width, height)){
 			charType = Character.CharacterType.MONSTER;
-			Log.i("ChAR", "im a monster");
+			Log.i("CHAR", "im a monster");
+			pickedChar = true;
 		}
 		
 		// serdic w,h = 42,55
 		// serdic centre = 597,157
 		else if (testBoundingBox(fx,fy, 597f,157f,42f,55f,width, height)){
 			charType = Character.CharacterType.SERDIC;
-			Log.i("ChAR", "im Ser Dic");
+			Log.i("CHAR", "im Ser Dic");
+			pickedChar = true;
 		}
 		
 		// rooster w,h = 43,54
 		// rooster centre = 130,313
 		else if (testBoundingBox(fx,fy, 130f,313f,43f,54f,width, height)){
 			charType = Character.CharacterType.ROOSTER;
-			Log.i("ChAR", "im a rooster");
+			Log.i("CHAR", "im a rooster");
+			pickedChar = true;
 		}
 		
 		// strider w,h = 42.5,54
 		// strider centre = 283.5,313
 		else if (testBoundingBox(fx,fy, 283.5f,313f,42.5f,54f,width, height)){
 			charType = Character.CharacterType.STRIDER;
-			Log.i("ChAR", "im strider");
+			Log.i("CHAR", "im strider");
+			pickedChar = true;
 		}
 		
 		// beat w,h = 48.5,54.5
 		// beat centre =438.5,312.5 
 		else if (testBoundingBox(fx,fy, 438.5f,312.5f,48.5f,54.5f,width, height)){
 			charType = Character.CharacterType.BEAT;
-			Log.i("ChAR", "im beat");
+			Log.i("CHAR", "im beat");
+			pickedChar = true;
 		}
 		
 		// lock w,h = 47,54
 		// lock centre = 596,313
 		else if (testBoundingBox(fx,fy, 596f,313f,47f,54f,width, height)){
 			charType = Character.CharacterType.LOCK;
-			Log.i("ChAR", "im lock");
+			Log.i("CHAR", "im lock");
+			pickedChar = true;
 		}
 		
 		if (charType != Character.CharacterType.NUM_TYPES){
@@ -260,7 +278,8 @@ public class LobbyRenderer extends CustomRenderer {
 				mParticleSystem.makeSpiralSystem();
 				hitReady = true;
 			}
-			else {	mParticleSystem.makeNormalSystem();
+			else {	
+				mParticleSystem.makeNormalSystem();
 				hitReady = false;
 			}
 		
@@ -292,7 +311,7 @@ public class LobbyRenderer extends CustomRenderer {
 	public void onReleaseTouch() {
 		super.onReleaseTouch();
 		
-		if (mParticleSystem != null && !hitReady) {
+		if (mParticleSystem != null && !hitReady && !pickedChar) {
 			mParticleSystem.endSpawning();	
 		}
 	}
