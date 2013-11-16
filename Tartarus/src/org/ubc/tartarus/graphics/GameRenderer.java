@@ -78,7 +78,7 @@ public class GameRenderer extends CustomRenderer {
 		mPlayer = new Player(getActivity(), 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, charType);
 		mParticleSystem = new ParticleSystem(getActivity(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
 	}
-		
+
 	@Override
 	public void onDownTouch(float x, float y, float width, float height) {
 		super.onDownTouch(x, y, width, height);

@@ -7,6 +7,7 @@ import org.ubc.tartarus.map.WorldMap;
 import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.utils.Point;
 import org.ubc.tartarus.communication.OutMsgMove;
+import org.ubc.tartarus.exceptions.InvalidTilePositionException;
 import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 
 import android.app.Activity;
@@ -82,7 +83,7 @@ public class Player {
 		float scaleHeight = mHeight * ((topRight.y - bottomLeft.y)/refFrame.y);
 		Matrix.setIdentityM(modelMat, 0);
 		Matrix.setIdentityM(scaleMat, 0);
-		Matrix.translateM(modelMat, 0, mPosition.x, mPosition.y, 0);
+		Matrix.translateM(modelMat, 0, mPosition.x, mPosition.y, 0.2f);
 
 		/*
 		 * We must flip in the opposite direction expected... Because the view matrix is set up to look
@@ -200,6 +201,57 @@ public class Player {
 		return (short) Math.round(playerYFloat + mWorldMap.getViewportY());
 	}
 	
+	public float getCurrentFrameWidth() {
+		Point bottomLeft = character.getCurrentAnimation().getCurrentFrame().bottomLeft;
+		Point topRight = character.getCurrentAnimation().getCurrentFrame().topRight;
+		Point refFrame = character.getRefFrame();
+		 
+		float width = (refFrame.x/refFrame.y)*mHeight;
+		float scaleWidth = width * ((topRight.x - bottomLeft.x)/refFrame.x);
+		
+		return scaleWidth;
+	}
+	
+	public float getCurrentFrameHeight() {
+		Point bottomLeft = character.getCurrentAnimation().getCurrentFrame().bottomLeft;
+		Point topRight = character.getCurrentAnimation().getCurrentFrame().topRight;
+		Point refFrame = character.getRefFrame();
+		 
+		float width = (refFrame.x/refFrame.y)*mHeight;
+		float scaleHeight = mHeight * ((topRight.y - bottomLeft.y)/refFrame.y);	
+		
+		return scaleHeight;
+	}
+	
+	private boolean checkCollision(float positionX, float positionY, float viewWidth, float viewHeight) {
+		int goalTile = 0;
+		
+		try {
+			goalTile = mWorldMap.getTileAt(positionX, positionY, viewWidth, viewHeight);
+			//Log.i("Player", "Tile ID of Selected Goal Tile: " + goalTile);
+		} catch (InvalidTilePositionException e1) {
+			Log.e("Player", "Incorrect value for tile...");
+		}
+		
+		return mWorldMap.isTileSolid(goalTile);
+	}
+	
+	private boolean checkLeftCollision(float viewWidth, float viewHeight) {
+		return checkCollision(mPosition.x + getCurrentFrameWidth()/2.0f, mPosition.y, viewWidth, viewHeight);
+	}
+	
+	private boolean checkRightCollision(float viewWidth, float viewHeight) {
+		return checkCollision(mPosition.x - getCurrentFrameWidth()/2.0f, mPosition.y, viewWidth, viewHeight);
+	}
+	
+	private boolean checkUpCollision(float viewWidth, float viewHeight) {
+		return checkCollision(mPosition.x, mPosition.y + getCurrentFrameHeight()/2.0f, viewWidth, viewHeight);
+	}
+	
+	private boolean checkDownCollision(float viewWidth, float viewHeight) {
+		return checkCollision(mPosition.x, mPosition.y - getCurrentFrameHeight()/2.0f, viewWidth, viewHeight);
+	}
+	
 	public void onUpdate(float viewWidth, float viewHeight) {
 		if (mGoal.x != -5 && mGoal.y != -5) {
 			character.getCurrentAnimation().animate();
@@ -216,7 +268,7 @@ public class Player {
 					//Overshot the goal
 					mGoal.x = -5;
 					mGoal.y = -5;
-				} else {
+				} else if (!checkLeftCollision(viewWidth, viewHeight)) {
 					if (mWorldMap.atViewportXBoundary() == -1 || mPosition.x <  viewWidth * 0.25f) {
 						movePlayer(eDIR.LEFT);
 					} else {
@@ -235,7 +287,7 @@ public class Player {
 					//Overshot the goal
 					mGoal.x = -5;
 					mGoal.y = -5;
-				} else {
+				} else if (!checkRightCollision(viewWidth, viewHeight)) {
 					if (mWorldMap.atViewportXBoundary() == 1 || mPosition.x > -viewWidth * 0.25f) {
 						Log.i("TestSocket", "Moving Right!");
 						movePlayer(eDIR.RIGHT);
@@ -254,7 +306,7 @@ public class Player {
 					//Overshot the goal
 					mGoal.x = -5;
 					mGoal.y = -5;
-				} else {
+				} else if (!checkUpCollision(viewWidth, viewHeight)) {
 					if (mWorldMap.atViewportYBoundary() == -1 || mPosition.y < viewHeight * 0.1f) {
 						movePlayer(eDIR.UP);
 					} else {
@@ -272,7 +324,7 @@ public class Player {
 					//Overshot the goal
 					mGoal.x = -5;
 					mGoal.y = -5;
-				} else {
+				} else if (!checkDownCollision(viewWidth, viewHeight)) {
 					if (mWorldMap.atViewportYBoundary() == 1 || mPosition.y > -viewHeight * 0.1f) {
 						movePlayer(eDIR.DOWN);
 					} else {

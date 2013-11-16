@@ -3,9 +3,10 @@ package org.ubc.tartarus.graphics;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-import org.ubc.tartarus.GameActivity;
 import org.ubc.tartarus.LobbyActivity;
 import org.ubc.tartarus.R;
+import org.ubc.tartarus.communication.OutMsgJoin;
+import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 import org.ubc.tartarus.particle.Particle;
 import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.utils.Point;
@@ -13,6 +14,7 @@ import org.ubc.tartarus.utils.Point;
 import android.app.Activity;
 import android.content.Intent;
 import android.opengl.Matrix;
+import android.util.Log;
 
 public class MenuRenderer extends CustomRenderer {
 
@@ -34,7 +36,8 @@ public class MenuRenderer extends CustomRenderer {
 	private boolean cursorXDirection, cursorYDirection;
 	private boolean hitJoin = false;
 	private float joinCountdown = 1.0f;
-
+	private OutMsgJoin joinMsg = null; 
+	
 	public MenuRenderer(Activity activity) {
 		super(activity);
 	}
@@ -119,6 +122,11 @@ public class MenuRenderer extends CustomRenderer {
 				hitJoin = false;
 				joinCountdown = 1.0f;
 				mParticleSystem.endSpawning();
+				try {
+					joinMsg.sendMessage();
+				} catch (MessageTypeMismatchException e) {
+					Log.i("MenuRenderer", "Could not send a join!");
+				}
 				// Transition to game activity...
 				Intent intent = new Intent(getActivity(), LobbyActivity.class);
 				getActivity().startActivity(intent);
@@ -134,6 +142,7 @@ public class MenuRenderer extends CustomRenderer {
 		// Load shaders for all BitmapImg objects.
 		super.onSurfaceCreated(arg0, arg1);
 		
+		joinMsg = new OutMsgJoin(getActivity());
 		menuBackground = new BitmapImg(getActivity(), R.drawable.img_tartarus_menu);
 		titleImg = new BitmapImg(getActivity(), R.drawable.tart_title);
 		joinImg = new BitmapImg(getActivity(), R.drawable.join_game);
