@@ -52,11 +52,12 @@ public class SocketComm {
 	public void sendMessage(byte data[]) {
 		// Create an array of bytes.  First byte will be the
 		// message length, and the next ones will be the message
+		byte buf[]; 
 		
-		byte buf[] = new byte[data.length + 1];
+	    buf = new byte[data.length + 1];
 		buf[0] = (byte) data.length; 
 		System.arraycopy(data, 0, buf, 1, data.length);
-
+		
 		// Now send through the output stream of the socket
 		
 		OutputStream out = null;
@@ -84,7 +85,7 @@ public class SocketComm {
 		@Override
 		protected Socket doInBackground(Void... voids) {
 			Socket sock = null;
-			String ip = "192.168.1.115";
+			String ip = "192.168.1.132";
 			
 			Log.i("TestSocket", "Trying to connect!");
 			try {

@@ -39,5 +39,4 @@ public class MainActivity extends Activity {
 		// When we resume, we have to reload the particle bitmap.
 		Particle.setParticleImgLoaded(false);
 	}
-	
 }
