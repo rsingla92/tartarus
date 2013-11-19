@@ -9,6 +9,9 @@ import org.ubc.tartarus.particle.Particle;
 import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.utils.Point;
 import org.ubc.tartarus.character.Character;
+import org.ubc.tartarus.communication.OutMsgReady;
+import org.ubc.tartarus.communication.OutMsgSelectChar;
+import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -41,6 +44,7 @@ public class LobbyRenderer extends CustomRenderer {
 	private boolean pickedChar = false;
 	private float readyCountdown = 1.0f;
 	private Character.CharacterType charType = Character.CharacterType.NUM_TYPES;
+	
 	public LobbyRenderer(Activity activity) {
 		super(activity);
 	}
@@ -266,10 +270,27 @@ public class LobbyRenderer extends CustomRenderer {
 			pickedChar = true;
 		}
 		
+		if (pickedChar) {
+			// Send out a message that the character has been picked.
+			OutMsgSelectChar selectCharMsg = new OutMsgSelectChar(getActivity());
+			try {
+				selectCharMsg.sendMessage((byte) charType.ordinal());
+			} catch (MessageTypeMismatchException e) {
+				Log.e("LobbyRenderer", "Could not send Select Character Message.");
+			}
+		}
+		
 		if (charType != Character.CharacterType.NUM_TYPES){
 			if (fx >= readyX - readyWidth && fx <= readyX + readyWidth && 
 					fy >= readyY - readyHeight && fy <= readyY + readyHeight) {
 				// Touched join game
+				// Send out a message that the character has been picked.
+				OutMsgReady readyMsg = new OutMsgReady(getActivity());
+				try {
+					readyMsg.sendMessage();
+				} catch (MessageTypeMismatchException e) {
+					Log.e("LobbyRenderer", "Could not send Ready Message.");
+				}
 				mParticleSystem.makeSpiralSystem();
 				hitReady = true;
 			} else if (fx >= backX - backWidth && fx <= backX + backWidth && 

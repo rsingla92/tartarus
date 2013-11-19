@@ -85,7 +85,7 @@ public class SocketComm {
 		@Override
 		protected Socket doInBackground(Void... voids) {
 			Socket sock = null;
-			String ip = "192.168.1.132";
+			String ip = "192.168.1.115";
 			
 			Log.i("TestSocket", "Trying to connect!");
 			try {
