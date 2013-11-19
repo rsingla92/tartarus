@@ -1,10 +1,15 @@
 #include <stdlib.h>
 #include "msg.h"
+#include "Map.h"
+#include "display.h"
+
+extern Map map;
 
 /* Number of Players specified */
 extern int numPlayers = 0;
 extern GenericMsg* msgHead;
 
+/*
 GAME_STATE getGameState(GameMsg g)
 {
     return g.gameState_;
@@ -43,7 +48,7 @@ unsigned char isGameRequested(GameMsg g)
     return (g.gameRequest_ == GAME_REQUESTED);
 }
 
-// Has a player joined the game? 
+// Has a player joined the game?
 unsigned char getPlayerJoin(GameMsg g, int player)
 {
     // Do some bitmasking to determine if the specified
@@ -64,7 +69,7 @@ unsigned char getPlayerReady(GameMsg g, int player)
     // Player is either 0, 1, 2, 3
     if( player > 3 || player < 0 ) return;
 
-    return (g.lobbyState_ >> (player+4)) & 0x01; 
+    return (g.lobbyState_ >> (player+4)) & 0x01;
 }
 
 // Tell others a player joiend
@@ -130,7 +135,7 @@ unsigned char areAllPlayersReady(GameMsg g)
     case 3:
         checkVal = THREE_READY;
         break;
-    case 4: 
+    case 4:
         checkVal = FOUR_READY;
         break;
     default:
@@ -156,32 +161,6 @@ unsigned char getAffectedPlayers(PowerUpMsg p)
     return p.players_;
 }
 
-
-int getPositionX(MoveMsg m)
-{
-    return m.x_;
-}
-
-int getPositionY(MoveMsg m)
-{
-    return m.y_;
-}
-
-unsigned char getCapturedFlags(MoveMsg m)
-{
-    return m.flagsCaptured_;
-}
-
-void setPositionX(MoveMsg m,  int x)
-{
-    m.x_ = x;
-}
-
-void setPositionY(MoveMsg m,  int y)
-{
-    m.y_ = y;
-}
-
 void setCapturedFlags(MoveMsg m, unsigned char flagsCaptured)
 {
     m.flagsCaptured_ = flagsCaptured;
@@ -194,52 +173,91 @@ void setCapturedFlag(MoveMsg m, int flagID)
 
     m.flagsCaptured_ |= 1 << flagID;
 }
-
-
-int makeLoadMsg(GenericMsg* msg)
-{
-
-}
-
-int makeGameMsg(GenericMsg* msg)
-{
-	GameMsg* gameMsg = (GameMsg*) malloc(sizeof(GameMsg));
-
-	if(msg->msgLength_ != sizeof(GameMsg))
-	{
-		printf("Msg length %d does not correspond to GameMsg size %d\n", msg->msgLength_, sizeof(GameMsg));
-	}
-
-	gameMsg->id_ = msgHead->msg_[0];
-//    // GAME_STATE
-//    GAME_STATE gameState_;
-//
-//    // ASSIGNED ID
-//    int id_;
-//
-//    // GAME START SIGN
-//    unsigned char gameStart_;
-//
-//    // Game request flag
-//    unsigned char gameRequest_;
-//
-//    // This variable refers to the players state
-//    // while in the lobby. The bottom four bits represent
-//    // if a player has joined. The upper four bits represent
-//    // if a player is ready.
-//    unsigned char lobbyState_;
-}
-
-int makeMoveMsg(GenericMsg* msg)
-{
-	printf("Got Move Message!\n");
-}
-
-int makePowerUpMsg(GenericMsg* msg)
-{
-}
+*/
 
 int makeTestMsg(GenericMsg* msg)
+{
+	printf("Received test message from %d! Length: %d\n", msg->clientID_, msg->msgLength_);
+	printf("Message: %s\n", msg->msg_);
+}
+
+int parseMoveMsg(GenericMsg* msg)
+{
+	short xPos = getShort(msg->msg_, 0);
+	short yPos = getShort(msg->msg_, sizeof(short));
+	printf("Got Move Message! X: %d, Y: %d \n", xPos, yPos);
+	int player = findPlayerByDevice(msg->clientID_);
+
+	if (player == -1)
+	{
+		printf("Error: No player found with device %d\n", msg->clientID_);
+	}
+	else
+	{
+		// Erase old pixel for the player.
+	//	erasePositionAt(getPlayerX(player), getPlayerY(player));
+		setPlayerPosition(player, xPos, yPos);
+		// Draw the new pixel for the player.
+		colour col;
+		getPlayerColour(player, &col);
+		drawPlayerAt(xPos, yPos, col);
+		// Swap buffers to see the pixel
+		swap_buffers();
+	}
+}
+
+int parseJoinMsg(GenericMsg* msg)
+{
+	// JOIN message from a player attempting to join the game.
+	// The data is just four-bytes: The integer for the device ID.
+	printf("Join Message\n");
+	unsigned char playerID = addPlayer(msg->clientID_);
+	if (playerID == -1)
+	{
+		// Player not added. Send a message back
+		// indicating failure.
+	}
+	else
+	{
+		// Player successfully added. Send a message
+		// back with the player ID.
+	}
+}
+
+int parseReadyMsg(GenericMsg* msg)
+{
+	// No data with this message.
+	printf("Ready message!");
+	int playerNo = findPlayerByDevice(msg->clientID_);
+
+	if (playerNo == -1)
+	{
+		printf("Error: No player found with device %d\n", msg->clientID_);
+	}
+	else
+	{
+		setPlayerReady(playerNo);
+	}
+
+	// Send a broadcast message indicating that this player is now ready.
+
+}
+
+int parseSelectCharMsg(GenericMsg* msg)
+{
+	int player = findPlayerByDevice(msg->clientID_);
+
+	if (player == -1)
+	{
+		printf("Error: No player found with device ID %d\n", msg->clientID_);
+	}
+	else
+	{
+		updatePlayerChar(player, msg->msg_[0]);
+	}
+}
+
+int parseTestMsg(GenericMsg* msg)
 {
 	printf("Received test message from %d! Length: %d\n", msg->clientID_, msg->msgLength_);
 	printf("Message: %s\n", msg->msg_);
@@ -255,5 +273,20 @@ void makeMsg(GenericMsg* msg)
 
 void sendMsg(GenericMsg* msg)
 {
+}
+
+unsigned int getInt(unsigned char* buf, int offset)
+{
+	unsigned int val = 0;
+	val = (buf[offset] << 8*3) | (buf[offset + 1] << 8*2)
+			| (buf[offset + 2] << 8*1) | (buf[offset + 3]);
+	return val;
+}
+
+unsigned short getShort(unsigned char* buf, int offset)
+{
+	unsigned short val = 0;
+	val = (buf[offset] << 8) | (buf[offset + 1]);
+	return val;
 }
 

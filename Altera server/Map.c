@@ -10,10 +10,13 @@
 
 Map map;
 
+static int initializeMap(void);
+
 // Constructor
 void makeMap( char* mapF)
 {
     strcpy(map.mapFile, mapF);
+    initializeMap();
 }
 
 // Destructor
@@ -27,17 +30,12 @@ void cleanupMap()
 
 // drawScreenPortion:
 // This draws a portion of the map to the map at a specified starting location.
-// Params: startMapX + startMapY - position on screen (relative) to begin drawing in tiles
 // Params: startTileX + startTileY - position in array to begin drawing, in tiles.
 // Params: numXTiles/numYTiles - the width and height of portion in tiles.
-void drawScreenPortion( int startMapX, 
-                        int startMapY,
-                        int startTileX,
+void drawMapPortion( int startTileX,
                         int startTileY,
                         int numXTiles,
-                        int numYTiles,
-                        int offsetHoriz,
-                        int offsetVert)
+                        int numYTiles)
 {
     if( startTileX < 0 || startTileY < 0 || numXTiles < 0 || numYTiles < 0) return;
 
@@ -61,12 +59,31 @@ void drawScreenPortion( int startMapX,
             }
         }
     }
+}
 
+void erasePositionAt(short absX, short absY)
+{
+	colour blackCol;
+	blackCol.r = blackCol.g = blackCol.b = 0;
+
+	drawPlayerAt(absX, absY, blackCol);
+}
+
+void drawPlayerAt(short absX, short absY, colour col)
+{
+	int tileX = absX / TILE_WIDTH;
+	int tileY = absY / TILE_HEIGHT;
+
+	printf("Tile X: %d, Tile Y: %d\n", tileX, tileY);
+	if( tileX < 0 || tileY < 0 || tileX >= map.mapWidth || tileY >= map.mapHeight) return;
+
+	printf("Drawing pixel, with colour (%d, %d, %d)\n", col.r, col.g, col.b);
+	draw_pixel(tileX, tileY, col);
 }
 
 // initialize:
 // Loads the map from the map file and stores it in the solid-map array.
-int initialize(void)
+static int initializeMap(void)
 {
     // Open the file to parse
     file_handle map_file = open_file(map.mapFile, false);
@@ -99,7 +116,7 @@ int readShort(file_handle handle)
 	for (i = 0; i < 9; i++) {
 		buf[i] = read_file(handle);
 
-		if (buf[i] == ' ' || buf[i] == '\0');
+		if (buf[i] == ' ' || buf[i] == '\0') break;
 	}
 
 	// Terminate string
@@ -110,8 +127,11 @@ int readShort(file_handle handle)
 
 void readMapFileHeader(file_handle handle)
 {
+	printf("Reading Header!");
 	map.mapWidth = readShort(handle);
+	printf("Width: %d\n", map.mapWidth);
     map.mapHeight = readShort(handle);
+	printf("Height: %d\n", map.mapHeight);
     map.sizeInfo = map.mapWidth * map.mapHeight;
 }
 
@@ -122,7 +142,16 @@ void readMapFileHeader(file_handle handle)
 unsigned char isTileSolid(unsigned short tileId)
 {
 	// Returns if the tile with id tileId is solid.
-	if (tileId == 0) return 1;
+	if (tileId == 11 || tileId == 28 || tileId == 29 || tileId == 34 ||(tileId >= 36 && tileId <= 63) ||
+			tileId == 61 || tileId == 62 || (tileId >= 72 && tileId <= 79) || (tileId >= 180 && tileId <= 183) ||
+			(tileId >= 288 && tileId <= 295) || tileId == 329 || (tileId >= 398 && tileId <= 400) || (tileId >= 468 && tileId <= 478) ||
+			(tileId >= 504 && tileId <= 521) || (tileId >= 540 && tileId <= 555) || (tileId >= 597 && tileId <= 600) ||
+			(tileId >= 648 && tileId <= 677) || (tileId >= 699 && tileId <= 711) || (tileId >= 720 && tileId <= 738) ||
+			(tileId >= 756 && tileId <= 757) || (tileId >= 792 && tileId <= 797) || tileId == 801 || tileId == 806 ||
+			tileId == 818 || (tileId >= 828 && tileId <= 845) || (tileId >= 853 && tileId <= 857) || tileId == 864 ||
+			tileId == 865 || tileId == 906 || tileId == 907 ||tileId == 908 || tileId == 914 || (tileId >= 936 && tileId <= 961)) {
+		return 1;
+	}
 
 	return 0;
 }

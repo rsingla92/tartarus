@@ -3,6 +3,9 @@
  * in communication between Android and DE2.
  */
 
+#ifndef MSG_H
+#define MSG_H
+
 #define GAME_STARTED 1
 #define GAME_REQUESTED 1
 #define FIRST_PLAYER 0
@@ -15,9 +18,10 @@
 #define THREE_READY 0x01110111
 #define FOUR_READY 0x11111111
 
-typedef enum { LOAD, GAME, MOVE, POWER_UP, TEST } MSG_TYPE ;
-typedef enum { NO_GAME, INITAL, WAITING, READY, PLAYING, WIN, LOSE } GAME_STATE;
-typedef enum {FREEZE_ALL, FREEZE_ONE, SLOW_ALL, SLOW_ONE, FAST_ONE, RESTART_ONE, RESTART_ALL} POWER_UP_TYPE;
+typedef enum { JOIN, READY, MOVE, SELECT_CHAR, TEST } IN_MSG_TYPE ;
+typedef enum { JOIN_RESPONSE, START } OUT_MSG_TYPE ;
+//typedef enum { NO_GAME, INITAL, WAITING, READY, PLAYING, WIN, LOSE } GAME_STATE;
+//typedef enum {FREEZE_ALL, FREEZE_ONE, SLOW_ALL, SLOW_ONE, FAST_ONE, RESTART_ONE, RESTART_ALL} POWER_UP_TYPE;
 
 //typedef unsigned char unsigned char;
 
@@ -33,56 +37,18 @@ struct gMsg {
 
 typedef struct gMsg GenericMsg;
 
-typedef struct GameMsg{
-    // GAME_STATE
-	GAME_STATE gameState_;
-
-    // ASSIGNED ID
-    int id_;
-
-    // GAME START SIGN
-    unsigned char gameStart_;
-
-    // Game request flag
-    unsigned char gameRequest_;
-
-    // This variable refers to the players state 
-    // while in the lobby. The bottom four bits represent
-    // if a player has joined. The upper four bits represent
-    // if a player is ready.
-    unsigned char lobbyState_;
-
-} GameMsg;
-
-typedef struct PowerUpMsg{
-    // POWER UP TYPE
-    POWER_UP_TYPE type_;
-
-    // POWER ARGUMENTS
-
-    // PLAYER(S) TO AFFECT
-    unsigned char players_;
-} PowerUpMsg;
-
 typedef struct MoveMsg{
-    // PLAYER X IS IN PLAYER Y'S VIEWPORT
-    
-    // MOVEMENT REQUEST
     
     // X & Y
-    int x_;
-    int y_;
+    short x_;
+    short y_;
 
-    // CAPTURED FLAG
-    // In the form where the first four bits are T/F
-    // The upper four bits indicate which flag is captured
-    unsigned char flagsCaptured_;
 
 } MoveMsg;
 
 /* TO DO: Load Msg Struct */
 
-GAME_STATE getGameState(GameMsg g);
+/*GAME_STATE getGameState(GameMsg g);
 void setGameState(GameMsg g, GAME_STATE gs);
 unsigned char getID(GameMsg g);
 void setID(GameMsg g, int id);
@@ -99,7 +65,9 @@ POWER_UP_TYPE getPowerUpType(PowerUpMsg p);
 void setPowerUpType(PowerUpMsg p, POWER_UP_TYPE type);
 unsigned char getAffectedPlayers(PowerUpMsg p);
 void setAffectedPlayers(PowerUpMsg p, int numPlayers);
+*/
 
+/*
 int getPositionX(MoveMsg m);
 int getPositionY(MoveMsg m);
 unsigned char getCapturedFlags(MoveMsg m);
@@ -108,15 +76,23 @@ void setPositionX(MoveMsg m,  int x);
 void setPositionY(MoveMsg m,  int y);
 void setCapturedFlags(MoveMsg m, unsigned char flagsCaptured);
 void setCapturedFlag(MoveMsg m, int flagID);
+*/
 
-/* TO DO : Implement */
-// Helper function to determine Android message type
-int makeLoadMsg(GenericMsg* msg);
-int makeGameMsg(GenericMsg* msg);
-int makeMoveMsg(GenericMsg* msg);
-int makePowerUpMsg(GenericMsg* msg);
-int makeTestMsg(GenericMsg* msg);
+/*
+ * The following helper functions are for
+ * receiving messages:
+ */
+int parseJoinMsg(GenericMsg* msg);
+int parseMoveMsg(GenericMsg* msg);
+int parseReadyMsg(GenericMsg* msg);
+int parseTestMsg(GenericMsg* msg);
+int parseSelectCharMsg(GenericMsg* msg);
 
 void readMsg();
 void makeMsg();
 void sendMsg();
+
+unsigned int getInt(unsigned char* buf, int offset);
+unsigned short getShort(unsigned char* buf, int offset);
+
+#endif
