@@ -26,6 +26,9 @@ int menuSoundBufLen;
 GenericMsg* msgHead = NULL;
 GenericMsg* msgTail = NULL;
 static alt_up_rs232_dev* uart_dev;
+static int writeQueueCounter = 0;
+GenericMsg* writeMsgHead = NULL;
+GenericMsg* writeMsgTail = NULL;
 
 extern Map map;
 
@@ -110,6 +113,61 @@ static void readSocket(alt_up_rs232_dev* uart)
 
 	return;
 }
+
+static void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
+{
+	byte clientID = msg->clientID_;
+	byte msgLength = msg->msgLength_;
+	byte msgID = msg->msgID_;
+	int i = 0;
+
+	// write first byte (client #)
+	writeSerialData(uart, clientID);
+	printf("Writing data to %x!\n", clientID);
+
+	// write size (the size of the message)
+	writeSerialData(uart, msgLength);
+	printf("Length of Message: %d\n", msgLength);
+
+	// Send the rest of the data
+	for (i = 0; i < msgLength; i++) {
+		writeSerialData(uart, msg->msg_[i]);
+	}
+
+	writeQueueCounter--;
+ }
+
+/*
+ static void sendMessage(alt_up_rs232_dev* uart, GenericMsg* msg) {
+
+	//Add to the queue
+	// If it is the first element then the queue is not set up
+	if( !writeMsgHead )
+	{
+		// Initialize the queue
+		writeMsgHead = newElement;
+		writeMsgTail = writeMsgHead;
+		writeQueueCounter++;
+	}
+	else
+	{
+		// Make current tail point to cur element if tail exists
+		if( writeMsgTail)
+		{
+			writeMsgTail->next = msg;
+		}
+
+		writeMsgTail = msg;
+		writeQueueCounter++;
+	}
+ }
+*/
+
+ static void resetQueue()
+ {
+	//Destroy all remaining GenericMsg?
+	writeQueueCounter = 0;
+ }
 
 /* Takes the next element of the messageQueue and
  * creates the appropriate structure for it.
