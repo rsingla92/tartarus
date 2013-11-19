@@ -3,11 +3,13 @@
  *  and draws it to the screen. 
  */
 
+#ifndef MAP_H
+#define MAP_H
 #include "bitmap.h"
 
 #define INT_SIZE 32
-#define TILE_WIDTH 100
-#define TILE_HEIGHT 100 
+#define TILE_WIDTH 16
+#define TILE_HEIGHT 16
 #define SCREEN_WIDTH 100
 #define SCREEN_HEIGHT 100
 
@@ -16,7 +18,7 @@ enum OFFSET_DIR_VERT { OFFSET_UP, OFFSET_DOWN, VERT_NONE };
 
 struct BitmapHandle; 
 
-typedef struct Map {
+typedef struct {
     char* mapFile;
     int mapWidth;
     int mapHeight;
@@ -38,20 +40,16 @@ void cleanupMap();
 // Params: startMapX + startMapY - position on screen (relative) to begin drawing in tiles
 // Params: startTileX + startTileY - position in array to begin drawing, in tiles.
 // Params: numXTiles/numYTiles - the width and height of portion in tiles.
-void drawScreenPortion( int startMapX, 
-                        int startMapY,
-                        int startTileX,
+void drawMapPortion( int startTileX,
                         int startTileY,
                         int numXTiles,
-                        int numYTiles,
-                        int offsetHoriz,
-                        int offsetVert);
-
-// initialize:
-// Loads the map from the map file and stores it in the array of Tiles
-int initialize(void);
+                        int numYTiles);
 
 void readMapFileHeader(file_handle handle);
 
 unsigned char isTileSolid(unsigned short tileId);
 int readShort(file_handle handle);
+void erasePositionAt(short absX, short absY);
+void drawPlayerAt(short absX, short absY, colour col);
+
+#endif

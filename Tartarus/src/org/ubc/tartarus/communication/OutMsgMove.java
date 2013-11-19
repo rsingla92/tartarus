@@ -31,11 +31,10 @@ public class OutMsgMove extends OutgoingMessage {
 	}
 	
 	public void setMessage(short x, short y) {
-		if (storeX != x || storeY != y) {
+		if (Math.abs(storeX - x) >= 16 || Math.abs(storeY - y) >= 16) {
 			newMsg = true;
+			storeX = x;
+			storeY = y;
 		}
-		
-		storeX = x;
-		storeY = y;
 	}
 }

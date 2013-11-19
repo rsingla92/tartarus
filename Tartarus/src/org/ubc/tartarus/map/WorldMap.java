@@ -1,5 +1,6 @@
 package org.ubc.tartarus.map;
 
+import org.ubc.tartarus.exceptions.InvalidTilePositionException;
 import org.ubc.tartarus.graphics.BitmapImg;
 import org.ubc.tartarus.utils.Point;
 
@@ -128,6 +129,24 @@ public class WorldMap {
 		return 0;
 	}
 	
+	public int getTileAt(float screenX, float screenY, float viewWidth, float viewHeight)
+			throws InvalidTilePositionException {
+		float adjustedX = -screenX + (viewWidth)/2.0f; 
+		float adjustedY = -screenY + (viewHeight)/2.0f; 
+		
+		int worldPixelX = (int)(adjustedX*(mViewportWidth/viewWidth) + mViewportX); 
+		int worldPixelY = (int)(adjustedY*(mViewportHeight/viewHeight) + mViewportY); 
+		
+		int col = worldPixelX / mTileWidth;
+		int row = worldPixelY / mTileHeight;
+		
+		if (col >= mWorldWidth || row >= mWorldHeight) {
+			throw new InvalidTilePositionException("WorldMap");
+		}
+			
+		return mTilemap[row][col];
+	}
+	
 	public void drawViewport(float[] modelViewMatrix, float viewWidth, float viewHeight) {
 		int col0 = Math.round(mViewportX) / mTileWidth;
 		int row0 = Math.round(mViewportY) / mTileHeight;
@@ -160,7 +179,7 @@ public class WorldMap {
 
 				translateX = (viewWidth / 2) - (((float)i) / mViewportWidth) * viewWidth;
 				translateY = (viewHeight / 2) - (((float)j) / mViewportHeight) * viewHeight;
-				
+
 				translateX -= tileWidthInView / 2.0f; 
 				translateY -= tileHeightInView / 2.0f;
 				
@@ -203,14 +222,14 @@ public class WorldMap {
 	 * but it saves a lot of data passing and time.
 	 */
 	public boolean isTileSolid(int tileId) {
-		if (tileId == 11 || tileId == 28 || tileId == 29 || tileId == 34 ||(tileId >= 35 && tileId <= 57) ||
-				tileId == 61 || tileId == 62 || (tileId >= 70 && tileId <= 77) || (tileId >= 175 && tileId <= 178) ||
-				(tileId >= 280 && tileId <= 287) || tileId == 320 || (tileId >= 387 && tileId <= 389) || (tileId >= 455 && tileId <= 465) || 
-				(tileId >= 490 && tileId <= 507) || (tileId >= 525 && tileId <=540) || (tileId >= 581 && tileId <= 584) ||
-				(tileId >= 630 && tileId <= 659) || (tileId >= 681 && tileId <= 693) || (tileId >= 700 && tileId <= 718) ||
-				(tileId >= 735 && tileId <= 736) || (tileId >= 770 && tileId <= 775) || tileId == 779 || tileId == 784 ||
-				tileId == 796 || (tileId >= 805 && tileId <= 822) || (tileId >= 830 && tileId <= 834) || tileId == 840 ||
-				tileId == 841 || tileId == 882 || tileId == 883 ||tileId == 884 || tileId == 890 || (tileId >= 910 && tileId <= 935)) {
+		if (tileId == 11 || tileId == 28 || tileId == 29 || tileId == 34 ||(tileId >= 36 && tileId <= 63) ||
+				tileId == 61 || tileId == 62 || (tileId >= 72 && tileId <= 79) || (tileId >= 180 && tileId <= 183) ||
+				(tileId >= 288 && tileId <= 295) || tileId == 329 || (tileId >= 398 && tileId <= 400) || (tileId >= 468 && tileId <= 478) ||
+				(tileId >= 504 && tileId <= 521) || (tileId >= 540 && tileId <= 555) || (tileId >= 597 && tileId <= 600) ||
+				(tileId >= 648 && tileId <= 677) || (tileId >= 699 && tileId <= 711) || (tileId >= 720 && tileId <= 738) ||
+				(tileId >= 756 && tileId <= 757) || (tileId >= 792 && tileId <= 797) || tileId == 801 || tileId == 806 ||
+				tileId == 818 || (tileId >= 828 && tileId <= 845) || (tileId >= 853 && tileId <= 857) || tileId == 864 ||
+				tileId == 865 || tileId == 906 || tileId == 907 ||tileId == 908 || tileId == 914 || (tileId >= 936 && tileId <= 961)) {
 			return true;
 		}
 			

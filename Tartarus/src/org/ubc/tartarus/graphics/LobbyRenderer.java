@@ -9,10 +9,14 @@ import org.ubc.tartarus.particle.Particle;
 import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.utils.Point;
 import org.ubc.tartarus.character.Character;
+import org.ubc.tartarus.communication.OutMsgReady;
+import org.ubc.tartarus.communication.OutMsgSelectChar;
+import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.opengl.Matrix;
+import android.util.Log;
 
 public class LobbyRenderer extends CustomRenderer {
 	
@@ -22,6 +26,10 @@ public class LobbyRenderer extends CustomRenderer {
 	private float readyX;
 	private float readyY;
 	private float readyWidth, readyHeight;
+	
+	private float backX;
+	private float backY;
+	private float backWidth, backHeight;
 	
 	public volatile float mAngle;
 	
@@ -33,8 +41,10 @@ public class LobbyRenderer extends CustomRenderer {
 	private float cursorVelocityX, cursorVelocityY;
 	private boolean cursorXDirection, cursorYDirection;
 	private boolean hitReady = false;
+	private boolean pickedChar = false;
 	private float readyCountdown = 1.0f;
 	private Character.CharacterType charType = Character.CharacterType.NUM_TYPES;
+	
 	public LobbyRenderer(Activity activity) {
 		super(activity);
 	}
@@ -95,9 +105,10 @@ public class LobbyRenderer extends CustomRenderer {
 		Matrix.multiplyMM(copyMat, 0, getModelViewMatrix(), 0, copyMat.clone(), 0);
 		titleImg.draw(copyMat);
 		
-		// Transformations for join image. 
+		// Transformations for ready image. 
 		readyX = -(getAspectRatio()/2.0f);
 		readyY = -0.7f;
+		
 		Matrix.setIdentityM(scaleMat, 0);
 		Matrix.setIdentityM(copyMat, 0);
 		scaleX = (2 * getAspectRatio()) / 4.0f; 
@@ -109,6 +120,21 @@ public class LobbyRenderer extends CustomRenderer {
 		Matrix.multiplyMM(copyMat, 0, copyMat.clone(), 0, scaleMat, 0);
 		Matrix.multiplyMM(copyMat, 0, getModelViewMatrix(), 0, copyMat.clone(), 0);
 		readyImg.draw(copyMat);
+		
+		// Transformations for back image
+		backX = (getAspectRatio()/2.0f);
+		backY = -0.7f;
+		Matrix.setIdentityM(scaleMat, 0);
+		Matrix.setIdentityM(copyMat, 0);
+		scaleX = (2 * getAspectRatio()) / 4.0f; 
+		scaleY = scaleX * ( ((float) backImg.getHeight()) / backImg.getWidth());
+		backWidth = scaleX;
+		backHeight = scaleY;
+		Matrix.translateM(copyMat, 0, backX, backY, 0);
+		Matrix.scaleM(scaleMat, 0, scaleX, scaleY, 1);
+		Matrix.multiplyMM(copyMat, 0, copyMat.clone(), 0, scaleMat, 0);
+		Matrix.multiplyMM(copyMat, 0, getModelViewMatrix(), 0, copyMat.clone(), 0);
+		backImg.draw(copyMat);
 		
 		mCursor.setParticlePosition(mCursor.getParticleXPos() + cursorVelocityX, mCursor.getParticleYPos() + cursorVelocityY, 0);
 		mCursor.drawParticle(getModelViewMatrix());
@@ -126,6 +152,16 @@ public class LobbyRenderer extends CustomRenderer {
 			}
 		}
 		
+		if (pickedChar) {
+			readyCountdown -= 0.03f; 
+			if (readyCountdown <= 0) {
+				pickedChar = false;
+				readyCountdown = 1.0f;
+				mParticleSystem.endSpawning();
+				mParticleSystem.makeNormalSystem();
+			}
+		}
+		
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
 	}
@@ -137,8 +173,8 @@ public class LobbyRenderer extends CustomRenderer {
 		
 		lobbyBackground = new BitmapImg(getActivity(), R.drawable.img_tartarus_lobby);
 		titleImg = new BitmapImg(getActivity(), R.drawable.tart_title);
-		readyImg = new BitmapImg(getActivity(), R.drawable.ready); // IMG NAME
-		backImg = new BitmapImg(getActivity(), R.drawable.back); // IMG NAME
+		readyImg = new BitmapImg(getActivity(), R.drawable.ready); 
+		backImg = new BitmapImg(getActivity(), R.drawable.back); 
 		
 		mCursor = new Particle(getActivity(), R.drawable.particle, 0, 0, 0,
 				0.85098f, 0.0f, 0.0f, 1.0f, 0.2f, 0.2f, false, 0);
@@ -171,61 +207,105 @@ public class LobbyRenderer extends CustomRenderer {
 		
 		// neku w,h = 44.5,54
 		// neku centre = 130.5, 156
-		if (testBoundingBox(fx,fy, 130.5f,156f,44.5f,54f,width, height))
-		{
+		
+		if (testBoundingBox(fx,fy, 130.5f,156f,44.5f,54f,width, height)){
 			charType = Character.CharacterType.NEKU;
+			Log.i("CHAR", "im neku");
+			pickedChar = true;
+		}
 		
 		// magus w,h = 44,54
 		// magus centre = 284, 156
-		}else if (testBoundingBox(fx,fy, 284f,156f,44f,54f, width, height))
-		{	charType = Character.CharacterType.MAGUS;
+		else if (testBoundingBox(fx,fy, 284f,156f,44f,54f, width, height)){
+			charType = Character.CharacterType.MAGUS;
+			Log.i("CHAR", "im magus");
+			pickedChar = true;
+		}
 		
 		// monster w,h = 48.5,54
 		// monster centre = 437.5,156
-		}else if (testBoundingBox(fx,fy, 437.5f,156f,48.5f,54f,width, height))
-		{	charType = Character.CharacterType.MONSTER;
+		else if (testBoundingBox(fx,fy, 437.5f,156f,48.5f,54f,width, height)){
+			charType = Character.CharacterType.MONSTER;
+			Log.i("CHAR", "im a monster");
+			pickedChar = true;
+		}
 		
 		// serdic w,h = 42,55
 		// serdic centre = 597,157
-		}else if (testBoundingBox(fx,fy, 597f,157f,42f,55f,width, height))
-		{	charType = Character.CharacterType.SERDIC;
+		else if (testBoundingBox(fx,fy, 597f,157f,42f,55f,width, height)){
+			charType = Character.CharacterType.SERDIC;
+			Log.i("CHAR", "im Ser Dic");
+			pickedChar = true;
+		}
 		
 		// rooster w,h = 43,54
 		// rooster centre = 130,313
-		}else if (testBoundingBox(fx,fy, 130f,313f,43f,54f,width, height))
-		{	charType = Character.CharacterType.ROOSTER;
+		else if (testBoundingBox(fx,fy, 130f,313f,43f,54f,width, height)){
+			charType = Character.CharacterType.ROOSTER;
+			Log.i("CHAR", "im a rooster");
+			pickedChar = true;
+		}
 		
 		// strider w,h = 42.5,54
 		// strider centre = 283.5,313
-		}else if (testBoundingBox(fx,fy, 283.5f,313f,42.5f,54f,width, height))
-		{	charType = Character.CharacterType.STRIDER;
+		else if (testBoundingBox(fx,fy, 283.5f,313f,42.5f,54f,width, height)){
+			charType = Character.CharacterType.STRIDER;
+			Log.i("CHAR", "im strider");
+			pickedChar = true;
+		}
 		
 		// beat w,h = 48.5,54.5
 		// beat centre =438.5,312.5 
-		}else if (testBoundingBox(fx,fy, 438.5f,312.5f,48.5f,54.5f,width, height))
-		{	charType = Character.CharacterType.BEAT;
+		else if (testBoundingBox(fx,fy, 438.5f,312.5f,48.5f,54.5f,width, height)){
+			charType = Character.CharacterType.BEAT;
+			Log.i("CHAR", "im beat");
+			pickedChar = true;
+		}
 		
 		// lock w,h = 47,54
 		// lock centre = 596,313
-		}else if (testBoundingBox(fx,fy, 596f,313f,47f,54f,width, height))
-		{	charType = Character.CharacterType.LOCK;
-		} else 
-		{
-			charType = Character.CharacterType.ROOSTER;
+		else if (testBoundingBox(fx,fy, 596f,313f,47f,54f,width, height)){
+			charType = Character.CharacterType.LOCK;
+			Log.i("CHAR", "im lock");
+			pickedChar = true;
+		}
+		
+		if (pickedChar) {
+			// Send out a message that the character has been picked.
+			OutMsgSelectChar selectCharMsg = new OutMsgSelectChar(getActivity());
+			try {
+				selectCharMsg.sendMessage((byte) charType.ordinal());
+			} catch (MessageTypeMismatchException e) {
+				Log.e("LobbyRenderer", "Could not send Select Character Message.");
+			}
 		}
 		
 		if (charType != Character.CharacterType.NUM_TYPES){
 			if (fx >= readyX - readyWidth && fx <= readyX + readyWidth && 
 					fy >= readyY - readyHeight && fy <= readyY + readyHeight) {
 				// Touched join game
+				// Send out a message that the character has been picked.
+				OutMsgReady readyMsg = new OutMsgReady(getActivity());
+				try {
+					readyMsg.sendMessage();
+				} catch (MessageTypeMismatchException e) {
+					Log.e("LobbyRenderer", "Could not send Ready Message.");
+				}
 				mParticleSystem.makeSpiralSystem();
 				hitReady = true;
-			} else {
+			} else if (fx >= backX - backWidth && fx <= backX + backWidth && 
+					fy >= backY - backHeight && fy <= backY + backHeight) {
+				// Touched join game
+				mParticleSystem.makeSpiralSystem();
+				hitReady = true;
+			}
+			else {	
 				mParticleSystem.makeNormalSystem();
 				hitReady = false;
 			}
 		
 		}
+		
 		
 		if (mParticleSystem != null) {
 			mParticleSystem.beginSpawning();
@@ -234,11 +314,15 @@ public class LobbyRenderer extends CustomRenderer {
 	}
 
 	private boolean testBoundingBox (float fx, float fy, float x1, float y1, float width, float height, float widthScreen, float heightScreen){
-		Point centre = getGLCoords(x1, y1, widthScreen, heightScreen);
+		Point centre = getGLCoords(x1, y1, 722, 519);
 		
-		if (fx >= centre.x - width && fx <= centre.x + width && 
-				fy >= centre.y - height && fy <= centre.y + height) {
-			// Touched join game
+		// need to change the widthScreen to pass in pixel with and height
+		float convertedW = (width/ 722)* (2*getAspectRatio());
+		float convertedH = (height / 519)*2;
+		
+		if (fx >= centre.x - convertedW && fx <= centre.x + convertedW && 
+				fy >= centre.y - convertedH && fy <= centre.y + convertedH) {
+			// Touched character 
 			mParticleSystem.makeBurstSystem();
 			return true;
 		}
@@ -248,7 +332,7 @@ public class LobbyRenderer extends CustomRenderer {
 	public void onReleaseTouch() {
 		super.onReleaseTouch();
 		
-		if (mParticleSystem != null && !hitReady) {
+		if (mParticleSystem != null && !hitReady && !pickedChar) {
 			mParticleSystem.endSpawning();	
 		}
 	}

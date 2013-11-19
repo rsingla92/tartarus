@@ -14,24 +14,23 @@
 #include "msg.h"
 #include "random.h"
 #include "serialport.h"
+#include "Map.h"
 
 #define NUM_FILES 0
 
 #define leds (volatile char *) LEDS_BASE
-
-static alt_u32 ticks_per_sec;
-static alt_u32 num_ticks;
-static alt_32 update(void *context);
-static int writeQueueCounter = 0;
 
 int* menuSoundBuf;
 int menuSoundBufLen;
 
 GenericMsg* msgHead = NULL;
 GenericMsg* msgTail = NULL;
+static alt_up_rs232_dev* uart_dev;
+static int writeQueueCounter = 0;
 GenericMsg* writeMsgHead = NULL;
 GenericMsg* writeMsgTail = NULL;
-static alt_up_rs232_dev* uart_dev;
+
+extern Map map;
 
 /* Reads from the TCP/IP socket. Takes in the client ID, message length, and message type
  * and puts them into a generic MSG struct.
@@ -89,8 +88,8 @@ static void readSocket(alt_up_rs232_dev* uart)
 		int j;
 		printf("Data: ");
 		for (j = 0; j < msgLength; j++) {
-			readSerialDataWait(uart, &(newElement->msg_[i]), &parity);
-			printf("%x, ", newElement->msg_[i]);
+			readSerialDataWait(uart, &(newElement->msg_[j]), &parity);
+			printf("%x, ", newElement->msg_[j]);
 		}
 
 		// If it is the first element then the queue is not set up
@@ -115,7 +114,6 @@ static void readSocket(alt_up_rs232_dev* uart)
 	return;
 }
 
-
 static void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
 {
 	byte clientID = msg->clientID_;
@@ -137,9 +135,10 @@ static void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
 	}
 
 	writeQueueCounter--;
-}
+ }
 
-static void sendMessage(alt_up_rs232_dev* uart, GenericMsg* msg) {
+/*
+ static void sendMessage(alt_up_rs232_dev* uart, GenericMsg* msg) {
 
 	//Add to the queue
 	// If it is the first element then the queue is not set up
@@ -147,7 +146,7 @@ static void sendMessage(alt_up_rs232_dev* uart, GenericMsg* msg) {
 	{
 		// Initialize the queue
 		writeMsgHead = newElement;
-		writeMsgTail = msgHead;
+		writeMsgTail = writeMsgHead;
 		writeQueueCounter++;
 	}
 	else
@@ -157,17 +156,18 @@ static void sendMessage(alt_up_rs232_dev* uart, GenericMsg* msg) {
 		{
 			writeMsgTail->next = msg;
 		}
+
 		writeMsgTail = msg;
 		writeQueueCounter++;
 	}
-}
+ }
+*/
 
-static void resetQueue() {
-
+ static void resetQueue()
+ {
 	//Destroy all remaining GenericMsg?
 	writeQueueCounter = 0;
-
-}
+ }
 
 /* Takes the next element of the messageQueue and
  * creates the appropriate structure for it.
@@ -185,20 +185,20 @@ static void parseNextMessage()
 	do {
 		switch(msgHead->msgID_)
 		{
-		case LOAD:
-			makeLoadMsg(msgHead);
+		case JOIN:
+			parseJoinMsg(msgHead);
 			break;
-		case GAME:
-			makeGameMsg(msgHead);
+		case READY:
+			parseReadyMsg(msgHead);
 			break;
 		case MOVE:
-			makeMoveMsg(msgHead);
+			parseMoveMsg(msgHead);
 			break;
-		case POWER_UP:
-			makePowerUpMsg(msgHead);
+		case SELECT_CHAR:
+			parseSelectCharMsg(msgHead);
 			break;
 		case TEST:
-			makeTestMsg(msgHead);
+			parseTestMsg(msgHead);
 			break;
 		default:
 			printf("Unknown message type: %x\n", msgHead->msgID_);
@@ -217,15 +217,11 @@ static void parseNextMessage()
 }
 
 int main(void) {
-	// Start the timestamp -- will be used for seeding the random number generator.
-	unsigned char message[] = "Testing message";
-	int i;
-
 	//Init RS232
 	uart_dev = initSerialPort("/dev/rs232_0");
 
 	alt_timestamp_start();
-//	sdcard_handle *sd_dev = init_sdcard();
+	sdcard_handle *sd_dev = init_sdcard();
 //	initAudio();
 
 	printf("Initializing display...\n");
@@ -234,33 +230,28 @@ int main(void) {
 
 	clear_display();
 
-//	if (sd_dev == NULL)
-//		return 1;
+	if (sd_dev == NULL)
+		return 1;
 
+	printf("Creating map!\n");
+
+	makeMap("tmap1.txt");
+	printf("Drawing map! Width: %d, Height: %d\n", map.mapWidth, map.mapHeight);
+	drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
+
+	printf("Swapping buffers!\n");
+	swap_buffers();
+	drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
+
+	printf("Drawn!\n");
 	seed(alt_timestamp());
 
-	int test = 0;
-
-	printf("Going into loop..\n");
-
-	GenericMsg* gmsg = (GenericMsg*) malloc(sizeof(GenericMsg));
-	gmsg->clientID_ = 1;
-	gmsg->msgID_ = 1;
-	gmsg->msg_ = "You feel like working now?";
-	gmsg->msgLength_ = strlen(gmsg->msg_);
-
-	//while (true)
-	//{
+	while (true)
+	{
 		readSocket(uart_dev);
-		writeMsg(uart_dev, gmsg);
-		//readSocket(uart_dev);
-
-		//gmsg->msg_ = "I'm just entering random text so that I get to 128 characters.";
-		//writeMsg(uart_dev, gmsg);
-
 		parseNextMessage();
 		runState();
-	//}
+	}
 
 	return 0;
 }
