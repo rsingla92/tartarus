@@ -115,7 +115,7 @@ public class CustomRenderer implements Renderer {
 	   
 	// Found online at:
 	// http://stackoverflow.com/questions/10985487/android-opengl-es-2-0-screen-coordinates-to-world-coordinates
-   public Point getGLCoords( float x, float y, float screenW, float screenH)
+  public Point getGLCoords( float x, float y, float screenW, float screenH)
    { 
        // Auxiliary matrix and vectors
        // to deal with ogl.

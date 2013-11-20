@@ -2,6 +2,8 @@ package org.ubc.tartarus;
 
 import org.ubc.tartarus.character.Character;
 import org.ubc.tartarus.character.Character.AnimTypes;
+import org.ubc.tartarus.character.Gem.GemType;
+import org.ubc.tartarus.character.Gem;
 import org.ubc.tartarus.graphics.BitmapImg;
 import org.ubc.tartarus.map.WorldMap;
 import org.ubc.tartarus.particle.ParticleSystem;
@@ -73,7 +75,9 @@ public class Player {
 		return scaleDimensions;
 	}
 	
+	
 	public void drawPlayer(float[] modelViewMatrix) {
+		
 		Point bottomLeft = character.getCurrentAnimation().getCurrentFrame().bottomLeft;
 		Point topRight = character.getCurrentAnimation().getCurrentFrame().topRight;
 		Point refFrame = character.getRefFrame();
@@ -253,6 +257,7 @@ public class Player {
 	}
 	
 	public void onUpdate(float viewWidth, float viewHeight) {
+
 		if (mGoal.x != -5 && mGoal.y != -5) {
 			character.getCurrentAnimation().animate();
 
