@@ -85,7 +85,7 @@ public class SocketComm {
 		@Override
 		protected Socket doInBackground(Void... voids) {
 			Socket sock = null;
-			String ip = "192.168.1.115";
+			String ip = "192.168.1.101";
 			
 			Log.i("TestSocket", "Trying to connect!");
 			try {
@@ -128,12 +128,12 @@ public class SocketComm {
 						in.read(buf);
 
 						// buf contains data
-						if (buf[1] == OutgoingMessage.OutMessageType.MSG_MOVE.getId()) {
+		                /* if (buf[1] == OutgoingMessage.OutMessageType.MSG_MOVE.getId()) {
 							ByteBuffer buffer = ByteBuffer.wrap(buf, 2, buf.length - 2);
 							short x = buffer.getShort();
 							short y = buffer.getShort();
 							Log.i("TestSocket", "Received X: " + x + ", Received Y: + " + y);
-						}
+						}*/
 					}
 				} catch (IOException e) {
 					e.printStackTrace();
