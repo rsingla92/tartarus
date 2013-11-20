@@ -14,6 +14,8 @@ import org.ubc.tartarus.character.CharRooster;
 import org.ubc.tartarus.character.CharSerdic;
 import org.ubc.tartarus.character.CharStrider;
 import org.ubc.tartarus.character.Character.CharacterType;
+import org.ubc.tartarus.character.Gem;
+import org.ubc.tartarus.character.Gem.GemType;
 import org.ubc.tartarus.map.MapParser;
 import org.ubc.tartarus.map.WorldMap;
 import org.ubc.tartarus.map.MapParser.TileMap;
@@ -46,6 +48,7 @@ public class GameRenderer extends CustomRenderer {
 	private Player mPlayer;
 	private WorldMap mWorldMap;
 	private CharacterType charType;
+	private Gem[] GemArray;
 
 	public GameRenderer(Activity activity, CharacterType charType) {
 		super(activity);
@@ -58,7 +61,14 @@ public class GameRenderer extends CustomRenderer {
 		
 		mWorldMap.drawViewport(getModelViewMatrix(), VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
 		mPlayer.onUpdate(VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
+		
 		mPlayer.drawPlayer(getModelViewMatrix());
+		
+		for (int i = 0; i < GemArray.length; i ++ ){
+			GemArray[i].getCurrentAnimation().animate();
+			GemArray[i].drawGems(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
+					mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);	
+		}
 		
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
@@ -77,6 +87,9 @@ public class GameRenderer extends CustomRenderer {
 
 		mPlayer = new Player(getActivity(), 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, charType);
 		mParticleSystem = new ParticleSystem(getActivity(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
+		
+		GemArray = new Gem[1]; // HOW MANY GEMS
+		GemArray[0] = new Gem(getActivity(),GemType.BLUE,0.3f,0.3f);
 	}
 
 	@Override

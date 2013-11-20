@@ -4,7 +4,10 @@ import org.ubc.tartarus.graphics.BitmapImg;
 import org.ubc.tartarus.utils.Point;
 import org.ubc.tartarus.utils.Rectangle;
 
-import android.R;
+import org.ubc.tartarus.R;
+
+import android.app.Activity;
+import android.opengl.Matrix;
 import android.util.Log;
 
 public class Gem {
@@ -14,12 +17,13 @@ public class Gem {
 	GemType type;
 	
 	public static final String GEM_INTENT = "GemType";
-	
 	private BitmapImg mGemImg;
 	private Point mPosition;
+	private int resId;
 	private float mWidth, mHeight;
 	private float[] scaleMat;
 	private float[] modelMat;
+	private float[] mMVPMat;
 	
 	// bottom left and top right in that order
 	public static final Rectangle[] blue = {
@@ -58,35 +62,35 @@ public class Gem {
 		new Rectangle(16, 453-389, 34, 453-357)
 	};
 	
-		
-	
 	// GEM
 	int currentAnimation = 0;
 	Animation[] animList;
 	Point refFrame;
-	
-	
-	private int resId;
 	
 	public Animation getCurrentAnimation(){
 		return animList[currentAnimation];
 	}
 	
 	// Modified to take in only a rotation animation list
-	public Gem(GemType g){
+	public Gem(Activity activity, GemType g,float height,float width){
 				
 		this.animList = new Animation[AnimTypes.NUM_ANIM.ordinal()];
-		
-		for(int i = 0; i < animList.length; ++i)
-		{
-			animList[i] = new Animation();
-		}
+		mMVPMat = new float[16];
+		animList[0] = new Animation();
+		modelMat = new float[16];
+		scaleMat = new float[16];
+		mHeight = height;
+		mWidth = width;
 		
 		this.currentAnimation = 0;
-		this.refFrame = new Point(0,0);
-		//this.resId(R.drawable.gems);
+		this.setRefFrame((int)(yellow[3].topRight.x - yellow[3].bottomLeft.x), 
+				(int)(yellow[3].topRight.y - yellow[3].bottomLeft.y));
+		setResource(R.drawable.gems);
+		mGemImg = new BitmapImg(activity, this.getResourceId());
+		this.mPosition = new Point (0,0);
 		
 		type = g;
+		
 		switch(g) {
 		case BLUE:
 			populateAnimList(blue);
@@ -106,7 +110,6 @@ public class Gem {
 			populateAnimList(blue);
 				break;
 		}
-		
 	}
 	
 	public void setCurrentAnimation(AnimTypes anim){
@@ -121,13 +124,6 @@ public class Gem {
 		return this.refFrame;
 	}
 	
-	public void addAnim(int anim, Rectangle[] frames){
-		animList[anim] = new Animation();
-		for(int i = 0; i < frames.length; i++) {
-			animList[anim].addFrame(frames[i]);
-		}
-	}
-	
 	public void populateAnimList(Rectangle[] rotate){
 		for(int i = 0; i < rotate.length; i++){
 			animList[0].addFrame(rotate[i]);
@@ -140,6 +136,49 @@ public class Gem {
 		
 	protected void setResource(int resourceId){
 			resId = resourceId;
+	}
+	
+	public void setPosition(Point p){
+		// Need to randomize this
+		mPosition.x = p.x;
+		mPosition.y = p.y;
+	}
+	
+	public Point getPosition(){
+		return mPosition;
+	}
+	
+	public void drawGems(float[] modelViewMatrix, float ViewPortX, float ViewPortY, 
+			float viewportWidth, float viewportHeight, float viewWidth, float viewHeight){
+		
+		if (mPosition.x < ViewPortX || mPosition.x > ViewPortX + viewportWidth || mPosition.y < ViewPortY 
+				|| mPosition.y > ViewPortY + viewportHeight) return;
+
+		float convertedX = ((mPosition.x - ViewPortX)/ viewportWidth) * viewWidth;
+		float convertedY = ((mPosition.y - ViewPortY) / viewportHeight) * viewHeight;
+		Point bottomLeft = this.getCurrentAnimation().getCurrentFrame().bottomLeft;
+		Point topRight = this.getCurrentAnimation().getCurrentFrame().topRight;
+		Point refFrame = this.getRefFrame();
+		 
+		float width = (refFrame.x/refFrame.y)*mHeight;
+		float scaleWidth = width * ((topRight.x - bottomLeft.x)/refFrame.x);
+		float scaleHeight = mHeight * ((topRight.y - bottomLeft.y)/refFrame.y);
+		Matrix.setIdentityM(modelMat, 0);
+		Matrix.setIdentityM(scaleMat, 0);
+		Matrix.translateM(modelMat, 0, convertedX, convertedY, 0.2f);
+
+		/*
+		 * We must flip in the opposite direction expected... Because the view matrix is set up to look
+		 * down the negative z-axis, which means that the x-axis is positive going left (opposite that we 
+		 * would expect).  
+		 */
+		int flipVal = (this.getCurrentAnimation().getFlip()? -1 : 1);
+		Matrix.scaleM(scaleMat, 0, flipVal*scaleWidth, scaleHeight, 1);
+		Matrix.multiplyMM(modelMat, 0, modelMat.clone(), 0, scaleMat, 0);
+		Matrix.multiplyMM(mMVPMat, 0, modelViewMatrix, 0, modelMat, 0);
+		
+		mGemImg.setTexturePortion(this.getCurrentAnimation().getCurrentFrame().bottomLeft, this.getCurrentAnimation().getCurrentFrame().topRight);
+		mGemImg.draw(mMVPMat);
 	}
 }
 	
