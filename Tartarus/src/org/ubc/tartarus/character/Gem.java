@@ -87,7 +87,7 @@ public class Gem {
 				(int)(yellow[3].topRight.y - yellow[3].bottomLeft.y));
 		setResource(R.drawable.gems);
 		mGemImg = new BitmapImg(activity, this.getResourceId());
-		this.mPosition = new Point (0,0);
+		this.mPosition = new Point (32, 32);
 		
 		type = g;
 		

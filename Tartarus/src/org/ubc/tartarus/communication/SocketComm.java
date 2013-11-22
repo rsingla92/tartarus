@@ -110,6 +110,7 @@ public class SocketComm {
 	}
 	
 	public class TCPReadTimerTask extends TimerTask {
+		
 		public void run() {
 			if (mAppData.sock != null && mAppData.sock.isConnected()
 					&& !mAppData.sock.isClosed()) {
@@ -127,6 +128,7 @@ public class SocketComm {
 						byte buf[] = new byte[bytes_avail];
 						in.read(buf);
 
+						// The 0th index of the buffer contains the length. 
 						// buf contains data
 		                /* if (buf[1] == OutgoingMessage.OutMessageType.MSG_MOVE.getId()) {
 							ByteBuffer buffer = ByteBuffer.wrap(buf, 2, buf.length - 2);

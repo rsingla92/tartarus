@@ -26,7 +26,7 @@ public class IncomingMessageParser {
 		}
 	}
 	
-	IncomingMessage getMessageFromID(byte id) {
+	static IncomingMessage getMessageFromID(byte id) {
 		if (id == InMessageType.MSG_JOIN_RESPONSE.id) {
 			return new InMsgJoinResponse();
 		} else if (id == InMessageType.MSG_START.id) {
