@@ -62,14 +62,13 @@ public class GameRenderer extends CustomRenderer {
 		mWorldMap.drawViewport(getModelViewMatrix(), VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
 		mPlayer.onUpdate(VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
 		
-		mPlayer.drawPlayer(getModelViewMatrix());
-		
 		for (int i = 0; i < GemArray.length; i ++ ){
 			GemArray[i].getCurrentAnimation().animate();
 			GemArray[i].drawGems(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
 					mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);	
 		}
 		
+		mPlayer.drawPlayer(getModelViewMatrix());
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
 	}
@@ -89,7 +88,7 @@ public class GameRenderer extends CustomRenderer {
 		mParticleSystem = new ParticleSystem(getActivity(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
 		
 		GemArray = new Gem[1]; // HOW MANY GEMS
-		GemArray[0] = new Gem(getActivity(),GemType.BLUE,0.3f,0.3f);
+		GemArray[0] = new Gem(getActivity(),GemType.BLUE,0.2f,0.2f);
 	}
 
 	@Override
