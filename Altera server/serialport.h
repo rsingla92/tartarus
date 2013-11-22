@@ -16,7 +16,6 @@ unsigned getSerialFreeSpace(alt_up_rs232_dev *rs232);
 int writeSerialData(alt_up_rs232_dev *rs232, alt_u8 data);
 
 int readSerialData(alt_up_rs232_dev *rs232, alt_u8 *data, alt_u8 *parity_error);
-int readSerialDataWait(alt_up_rs232_dev *rs232, alt_u8 *data, alt_u8 *parity_error);
 
 int readSerialFD(alt_fd* fd, char* ptr, int len);
 

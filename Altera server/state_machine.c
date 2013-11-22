@@ -13,7 +13,6 @@ static eState current_state = MAIN_MENU;
 
 static State states[NUM_STATE_MACHINE_STATES] =
 {
-		{NULL, NULL, NULL, 0}
 //	{updateMainMenu, draw_main_menu, NULL, 0},	/* MAIN_MENU */
 //	{updateLoadScreen, NULL, NULL, 0},	/* LOBBY */
 //	{update_level1, NULL, NULL, 0},	/* PLAYING */

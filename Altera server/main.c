@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include "sdcard.h"
 #include "bitmap.h"
 #include "display.h"
@@ -8,29 +7,34 @@
 #include "sys/alt_alarm.h"
 #include "io.h"
 #include "sys/alt_timestamp.h"
-#include "altera_up_avalon_rs232.h"
 #include "state_machine.h"
 #include "audio.h"
 #include "msg.h"
-#include "random.h"
-#include "serialport.h"
-#include "Map.h"
 
 #define NUM_FILES 0
 
 #define leds (volatile char *) LEDS_BASE
+
+/*
+static char* file_list[NUM_FILES] = { "4B.BMP", "B1.BMP", "B2.BMP", "B3.BMP",
+		"B4.BMP", "B5.BMP", "DK1.BMP", "DK2.BMP", "DK3.BMP", "DK4.BMP",
+		"DK5.BMP", "DK6.BMP", "DK7.BMP", "DK8.BMP", "DK9.BMP", "DK10.BMP",
+		"DK11.BMP", "FIRE.BMP", "FIRE1.BMP", "FIRE2.BMP", "FIRE3.BMP",
+		"HMR.BMP", "M1.BMP", "M2.BMP", "M3.BMP", "M4.BMP", "M5.BMP", "M6.BMP",
+		"M7.BMP", "M8.BMP", "M9.BMP", "M10.BMP", "M11.BMP", "M12.BMP",
+		"M13.BMP", "M14.BMP", "M15.BMP", "P1.BMP", "P2.BMP", "PP1.BMP",
+		"PP2.BMP", "PP3.BMP", "PURSE.BMP", "UMBRLA.BMP", "MM1.BMP", "MM2.BMP"};
+*/
+static BitmapHandle* bmp;
+static alt_u32 ticks_per_sec;
+static alt_u32 num_ticks;
+static alt_32 update(void *context);
 
 int* menuSoundBuf;
 int menuSoundBufLen;
 
 GenericMsg* msgHead = NULL;
 GenericMsg* msgTail = NULL;
-static alt_up_rs232_dev* uart_dev;
-static int writeQueueCounter = 0;
-GenericMsg* writeMsgHead = NULL;
-GenericMsg* writeMsgTail = NULL;
-
-extern Map map;
 
 /* Reads from the TCP/IP socket. Takes in the client ID, message length, and message type
  * and puts them into a generic MSG struct.
@@ -42,132 +46,58 @@ static void readSocket(alt_up_rs232_dev* uart)
 	byte msgLength = 0;
 	byte msgID = 0;
 	byte parity;
-	byte packetLength = 0;
 
-	if (getSerialUsedSpace(uart) == 0)
+	if (getSerialUsedSpace(uart) == 0))
 	{
 		//If nothing to read, then just return
 		return;
 	}
 
 	// Make element to add to queue
-	GenericMsg* newElement;
+	GenericMsg* newElement = (GenericMsg*) malloc(sizeof(GenericMsg));
 
 	// first byte
-	readSerialData(uart, &clientID, &parity);
-	printf("Got data from %x!\n", clientID);
+	readSerialData(uart, &(newElement->clientID_), &parity);
 
-	// Read size
-	readSerialDataWait(uart, &packetLength, &parity);
-	printf("Length of Packet: %d\n", packetLength);
+	// second byte. adjust because we actually read the first byte.
+	readSerialData(uart, &(newElement->msgLength_), &parity);
+	newElement->msgLength_--;
 
+	// third byte
+	readSerialData(uart, &(newElement->msgID_), &parity);
+
+	// store the data
+	newElement->msg_ = (byte*) malloc(sizeof(newElement->msgLength_));
+
+	// allocate the rest of it.
 	int i;
-	for( i = 0; i < packetLength; i += msgLength + 3)
+	for( i = 0; i < newElement->msgLength_; ++i)
 	{
-		newElement = (GenericMsg*) malloc(sizeof(GenericMsg));
-		newElement->clientID_ = clientID;
-		newElement->next = NULL;
-
-		// HACK: Trying to get to the bottom of this...
-		byte throwaway;
-		readSerialDataWait(uart, &throwaway, &parity);
-
-		//Message length...
-		readSerialDataWait(uart, &msgLength, &parity);
-		msgLength--; // We read in the type
-		newElement->msgLength_ = msgLength;
-		printf("Length: %d, ", newElement->msgLength_);
-
-		// Read in the message ID:
-		readSerialDataWait(uart, &msgID, &parity);
-		newElement->msgID_ = msgID;
-		printf("Type of message: %x, ", newElement->msgID_);
-
-		newElement->msg_ = (byte*) malloc(sizeof(newElement->msgLength_));
-
-		int j;
-		printf("Data: ");
-		for (j = 0; j < msgLength; j++) {
-			readSerialDataWait(uart, &(newElement->msg_[j]), &parity);
-			printf("%x, ", newElement->msg_[j]);
-		}
-
-		// If it is the first element then the queue is not set up
-		if( !msgHead )
-		{
-			// Initialize the queue
-			msgHead = newElement;
-			msgTail = msgHead;
-		}
-		else
-		{
-			// Make current tail point to cur element if tail exists
-			if( msgTail)
-			{
-				msgTail->next = newElement;
-			}
-
-			msgTail = newElement;
-		}
+		// read data
+		readSerialData(uart, &(newElement->msg_[i]), &parity);
 	}
+
+	// if it's first element then queue is not set up
+	if( !msgHead )
+	{
+		// initialize the queue
+		msgHead = newElement;
+		msgTail = msgHead;
+		return;
+	}
+
+	// make current tail point to cur element if tail exists
+	if( msgTail)
+	{
+		msgTail->next = newElement;
+	}
+
+	// new tail
+	msgTail = newElement;
+	newElement->next = NULL;
 
 	return;
 }
-
-static void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
-{
-	byte clientID = msg->clientID_;
-	byte msgLength = msg->msgLength_;
-	byte msgID = msg->msgID_;
-	int i = 0;
-
-	// write first byte (client #)
-	writeSerialData(uart, clientID);
-	printf("Writing data to %x!\n", clientID);
-
-	// write size (the size of the message)
-	writeSerialData(uart, msgLength);
-	printf("Length of Message: %d\n", msgLength);
-
-	// Send the rest of the data
-	for (i = 0; i < msgLength; i++) {
-		writeSerialData(uart, msg->msg_[i]);
-	}
-
-	writeQueueCounter--;
- }
-
-/*
- static void sendMessage(alt_up_rs232_dev* uart, GenericMsg* msg) {
-
-	//Add to the queue
-	// If it is the first element then the queue is not set up
-	if( !writeMsgHead )
-	{
-		// Initialize the queue
-		writeMsgHead = newElement;
-		writeMsgTail = writeMsgHead;
-		writeQueueCounter++;
-	}
-	else
-	{
-		// Make current tail point to cur element if tail exists
-		if( writeMsgTail)
-		{
-			writeMsgTail->next = msg;
-		}
-
-		writeMsgTail = msg;
-		writeQueueCounter++;
-	}
- }
-*/
-
- static void resetQueue()
- {
-	//Destroy all remaining GenericMsg?
-	writeQueueCounter = 0;
- }
 
 /* Takes the next element of the messageQueue and
  * creates the appropriate structure for it.
@@ -185,23 +115,20 @@ static void parseNextMessage()
 	do {
 		switch(msgHead->msgID_)
 		{
-		case JOIN:
-			parseJoinMsg(msgHead);
+		case LOAD:
+			makeLoadMsg(msgHead);
 			break;
-		case READY:
-			parseReadyMsg(msgHead);
+		case GAME:
+			makeGameMsg(msgHead);
 			break;
 		case MOVE:
-			parseMoveMsg(msgHead);
+			makeMoveMsg(msgHead);
 			break;
-		case SELECT_CHAR:
-			parseSelectCharMsg(msgHead);
-			break;
-		case TEST:
-			parseTestMsg(msgHead);
+		case POWER_UP:
+			makePowerUpMsg(msgHead);
 			break;
 		default:
-			printf("Unknown message type: %x\n", msgHead->msgID_);
+			printf("Unknown message type: %d\n", msgHead->msgID_);
 			break;
 		}
 
@@ -213,18 +140,24 @@ static void parseNextMessage()
 
 	} while ( msgHead );
 
+	// queue's parse it all mang
+	// lator gator
 	return;
 }
 
 int main(void) {
+	// Start the timestamp -- will be used for seeding the random number generator.
+
 	//Init RS232
-	uart_dev = initSerialPort("/dev/rs232_0");
+	alt_up_rs232_dev* uart = initSerialPort("/dev/rs232_0");
 
 	alt_timestamp_start();
 	sdcard_handle *sd_dev = init_sdcard();
-//	initAudio();
+	initAudio();
 
-	printf("Initializing display...\n");
+	menuSoundBufLen = loadSound("Tit2.wav", &menuSoundBuf, 0.5);
+	swapInSound(menuSoundBuf, menuSoundBufLen, 1);
+
 	// Set latch and clock to 0.
 	init_display();
 
@@ -233,25 +166,35 @@ int main(void) {
 	if (sd_dev == NULL)
 		return 1;
 
-	printf("Creating map!\n");
+	printf("Card connected.\n");
 
-	makeMap("tmap1.txt");
-	printf("Drawing map! Width: %d, Height: %d\n", map.mapWidth, map.mapHeight);
-	drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
+	ticks_per_sec = alt_ticks_per_second();
 
-	printf("Swapping buffers!\n");
-	swap_buffers();
-	drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
-
-	printf("Drawn!\n");
 	seed(alt_timestamp());
+
+	alt_u32 tickCount = alt_nticks();
+	num_ticks = ticks_per_sec / 30;
 
 	while (true)
 	{
-		readSocket(uart_dev);
-		parseNextMessage();
-		runState();
+		if (alt_nticks() - tickCount >= num_ticks)
+		{
+			tickCount = alt_nticks();
+			update(0);
+		}
 	}
 
 	return 0;
+}
+
+alt_32 update(void *context) {
+	//int i;
+	//for (i = 0; i < 4; i++) prev_state[i] = button_states[i];
+
+	//readDat();
+	readSocket(uart);
+	parseNextMessage();
+	runState();
+	return 1;
+
 }
