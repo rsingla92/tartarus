@@ -50,15 +50,15 @@ public class GameView extends GLSurfaceView implements
 	}
 
 	@Override
-	public boolean onDoubleTap(MotionEvent arg0) {
-		// TODO Auto-generated method stub
+	public boolean onDoubleTap(MotionEvent e) {
+		mRenderer.onDoubleTap(e.getX(), e.getY(), getWidth(), getHeight());
 		Log.i("GameView", "In onDoubleTap");
 		return true;
 	}
 
 	@Override
 	public boolean onDoubleTapEvent(MotionEvent e) {
-		// TODO Auto-generated method stub
+		
 		return true;
 	}
 

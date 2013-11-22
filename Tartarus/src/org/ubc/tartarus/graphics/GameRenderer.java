@@ -61,7 +61,7 @@ public class GameRenderer extends CustomRenderer {
 	@Override
 	public void onDrawFrame(GL10 arg0) {
 		super.onDrawFrame(arg0);
-		
+
 		mWorldMap.drawViewport(getModelViewMatrix(), VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
 		mPlayer.onUpdate(VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
 		
@@ -95,11 +95,13 @@ public class GameRenderer extends CustomRenderer {
 
 		mPlayer = new Player(getActivity(), 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, charType);
 		mParticleSystem = new ParticleSystem(getActivity(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
-		
+		if (!Bomb.getBombImgLoaded()){
+			Bomb.loadBombImg(getActivity(), R.drawable.bomb);
+			Bomb.setBombImgLoaded(true);
+		}
 		GemArray = new Gem[1]; // HOW MANY GEMS
 		GemArray[0] = new Gem(getActivity(),GemType.BLUE,0.2f,0.2f);
 		BombVector = new Vector<Bomb>();
-		BombVector.add(new Bomb(getActivity(),0.25f,0.25f));
 	}
 
 	@Override
@@ -136,6 +138,22 @@ public class GameRenderer extends CustomRenderer {
 		super.onSingleTap(x, y, width, height);
 		if (mPlayer != null) {
 			mPlayer.setGoalPoint(new Point(getFingerX(), getFingerY()), mParticleSystem);
+		}
+	}
+	
+	@Override
+	public void onDoubleTap (float x, float y, float width, float height) {
+		super.onDoubleTap(x, y, width, height);
+		
+		if (mPlayer != null) { // TODO: need to also check if player has bombs
+			float pixelX = (x/width) * mWorldMap.getViewportWidth();
+			float pixelY = (y/height) * mWorldMap.getViewportHeight(); //+ mWorldMap.getViewportHeight();
+			Bomb b = new Bomb(getActivity(), 0.25f, 0.25f);
+			BombVector.add(b);
+			BombVector.lastElement().setPosition(new Point(pixelX + mWorldMap.getViewportX(), pixelY + mWorldMap.getViewportY()));
+			Log.i("TAP", "FX "+getFingerX() + " FY " + getFingerY() );
+			Log.i("TAP", "BOMBX " + BombVector.lastElement().getPosition().x + " BOMBY " + BombVector.lastElement().getPosition().y);
+			Log.i("TAP", "pix X " + pixelX + " pix Y " + pixelY);
 		}
 	}
 }

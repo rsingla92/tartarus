@@ -8,15 +8,17 @@ import org.ubc.tartarus.utils.Rectangle;
 import org.ubc.tartarus.R;
 
 import android.app.Activity;
+import android.content.Context;
 import android.opengl.Matrix;
 import android.util.Log;
 
 public class Bomb {
 	public enum BombAnimTypes{ EXPLODE, NUM_ANIM };
-	private BitmapImg mBombImg;
+	private static BitmapImg mBombImg;
 	private Point mPosition;
-	private int resId;
+	private static int resId;
 	private float mWidth, mHeight;
+	private static boolean loadedBombImg = false;
 	private float[] scaleMat;
 	private float[] modelMat;
 	private float[] mMVPMat;
@@ -42,6 +44,19 @@ public class Bomb {
 		return animList[currentAnimation];
 	}
 	
+	public static void loadBombImg(final Context context, int resId) {
+		mBombImg = new BitmapImg(context, resId);
+		loadedBombImg = true;
+	}
+	
+	public static boolean getBombImgLoaded() {
+		return loadedBombImg;
+	}
+	
+	public static void setBombImgLoaded(boolean loaded) {
+		loadedBombImg = loaded;
+	}
+	
 	// Modified to take in only a rotation animation list
 	public Bomb(Activity activity,float height,float width){
 				
@@ -57,7 +72,6 @@ public class Bomb {
 		this.setRefFrame((int)(bombAnimation[2].topRight.x - bombAnimation[2].bottomLeft.x), 
 				(int)(bombAnimation[2].topRight.y - bombAnimation[2].bottomLeft.y));
 		setResource(R.drawable.bomb);
-		mBombImg = new BitmapImg(activity, this.getResourceId());
 		this.mPosition = new Point (32,50);
 		populateAnimList(bombAnimation);
 	}
@@ -89,7 +103,7 @@ public class Bomb {
 	}
 	
 	public void setPosition(Point p){
-		// Need to randomize this
+
 		mPosition.x = p.x;
 		mPosition.y = p.y;
 	}
