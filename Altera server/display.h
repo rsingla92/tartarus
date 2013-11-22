@@ -26,5 +26,6 @@ void draw_line(int x0, int y0, int x1, int y1, colour col, int backbuffer);
 void draw_box(int x0, int y0, int x1, int y1, colour col, int backbuffer);
 colour makeCol(unsigned char r, unsigned char g, unsigned char b);
 int draw_pixel_fast(alt_up_pixel_buffer_dma_dev *pixel_buffer, unsigned int color, unsigned int x, unsigned int y);
+void draw_pixel(int x, int y, colour col);
 
 #endif /* DISPLAY_H_ */

@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include "msg.h"
+#include "Map.h"
+#include "display.h"
 
-/* Number of Players specified */
-extern int numPlayers = 0;
-extern GenericMsg* msgHead;
+extern Map map;
+extern alt_up_rs232_dev* uart_dev;
 
+/*
 GAME_STATE getGameState(GameMsg g)
 {
     return g.gameState_;
@@ -43,7 +45,7 @@ unsigned char isGameRequested(GameMsg g)
     return (g.gameRequest_ == GAME_REQUESTED);
 }
 
-// Has a player joined the game? 
+// Has a player joined the game?
 unsigned char getPlayerJoin(GameMsg g, int player)
 {
     // Do some bitmasking to determine if the specified
@@ -64,7 +66,7 @@ unsigned char getPlayerReady(GameMsg g, int player)
     // Player is either 0, 1, 2, 3
     if( player > 3 || player < 0 ) return;
 
-    return (g.lobbyState_ >> (player+4)) & 0x01; 
+    return (g.lobbyState_ >> (player+4)) & 0x01;
 }
 
 // Tell others a player joiend
@@ -130,7 +132,7 @@ unsigned char areAllPlayersReady(GameMsg g)
     case 3:
         checkVal = THREE_READY;
         break;
-    case 4: 
+    case 4:
         checkVal = FOUR_READY;
         break;
     default:
@@ -156,32 +158,6 @@ unsigned char getAffectedPlayers(PowerUpMsg p)
     return p.players_;
 }
 
-
-int getPositionX(MoveMsg m)
-{
-    return m.x_;
-}
-
-int getPositionY(MoveMsg m)
-{
-    return m.y_;
-}
-
-unsigned char getCapturedFlags(MoveMsg m)
-{
-    return m.flagsCaptured_;
-}
-
-void setPositionX(MoveMsg m,  int x)
-{
-    m.x_ = x;
-}
-
-void setPositionY(MoveMsg m,  int y)
-{
-    m.y_ = y;
-}
-
 void setCapturedFlags(MoveMsg m, unsigned char flagsCaptured)
 {
     m.flagsCaptured_ = flagsCaptured;
@@ -194,59 +170,180 @@ void setCapturedFlag(MoveMsg m, int flagID)
 
     m.flagsCaptured_ |= 1 << flagID;
 }
+*/
 
-
-int makeLoadMsg(GenericMsg* msg)
+int makeTestMsg(GenericMsg* msg)
 {
-
+	printf("Received test message from %d! Length: %d\n", msg->clientID_, msg->msgLength_);
+	printf("Message: %s\n", msg->msg_);
 }
 
-int makeGameMsg(GenericMsg* msg)
+int parseMoveMsg(GenericMsg* msg)
 {
-	GameMsg* gameMsg = (GameMsg*) malloc(sizeof(GameMsg));
+	short xPos = getShort(msg->msg_, 0);
+	short yPos = getShort(msg->msg_, sizeof(short));
+	printf("Got Move Message! X: %d, Y: %d \n", xPos, yPos);
+	int player = findPlayerByDevice(msg->clientID_);
 
-	if(msg->msgLength_ != sizeof(GameMsg))
+	if (player == -1)
 	{
-		printf("Msg length %d does not correspond to GameMsg size %d\n", msg->msgLength_, sizeof(GameMsg));
+		printf("Error: No player found with device %d\n", msg->clientID_);
+	}
+	else
+	{
+		// Erase old pixel for the player.
+		//	erasePositionAt(getPlayerX(player), getPlayerY(player));
+		setPlayerPosition(player, xPos, yPos);
+
+		if (abs(getStoredX(player) - xPos) >= 16 || abs(getStoredY(player) - yPos) >= 16)
+		{
+			// Draw the new pixel for the player.
+			colour col;
+			getPlayerColour(player, &col);
+			drawPlayerAt(xPos, yPos, col);
+			// Swap buffers to see the pixel
+			swap_buffers();
+			drawPlayerAt(xPos, yPos, col);
+			setStoredX(player, xPos);
+			setStoredY(player, yPos);
+		}
+	}
+}
+
+int parseJoinMsg(GenericMsg* msg)
+{
+	// JOIN message from a player attempting to join the game.
+	// The data is just four-bytes: The integer for the device ID.
+	printf("Join Message\n");
+	unsigned char playerID = addPlayer(msg->clientID_);
+	unsigned char response = 1;
+
+	if (playerID == -1)
+	{
+		// Player not added. Send a message back
+		// indicating failure.
+		response = 0;
+	}
+	else
+	{
+		// Player successfully added. Send a message
+		// back with the player number.
+		response = playerID + 1;
 	}
 
-	gameMsg->id_ = msgHead->msg_[0];
-//    // GAME_STATE
-//    GAME_STATE gameState_;
-//
-//    // ASSIGNED ID
-//    int id_;
-//
-//    // GAME START SIGN
-//    unsigned char gameStart_;
-//
-//    // Game request flag
-//    unsigned char gameRequest_;
-//
-//    // This variable refers to the players state
-//    // while in the lobby. The bottom four bits represent
-//    // if a player has joined. The upper four bits represent
-//    // if a player is ready.
-//    unsigned char lobbyState_;
+	sendJoinResponse(playerID, response);
 }
 
-int makeMoveMsg(GenericMsg* msg)
+int parseReadyMsg(GenericMsg* msg)
 {
+	// No data with this message.
+	printf("Ready message!");
+	int playerNo = findPlayerByDevice(msg->clientID_);
+
+	if (playerNo == -1)
+	{
+		printf("Error: No player found with device %d\n", msg->clientID_);
+	}
+	else
+	{
+		setPlayerReady(playerNo);
+	}
+
+	// Send a broadcast message indicating that this player is now ready.
+
 }
 
-int makePowerUpMsg(GenericMsg* msg)
+int parseSelectCharMsg(GenericMsg* msg)
 {
+	int player = findPlayerByDevice(msg->clientID_);
+
+	if (player == -1)
+	{
+		printf("Error: No player found with device ID %d\n", msg->clientID_);
+	}
+	else
+	{
+		updatePlayerChar(player, msg->msg_[0]);
+		sendCharacterChosenMsg(player, msg->msg_[0]);
+	}
 }
 
-void readMsg(GenericMsg* msg)
+int parseTestMsg(GenericMsg* msg)
 {
+	printf("Received test message from %d! Length: %d\n", msg->clientID_, msg->msgLength_);
+	printf("Message: %s\n", msg->msg_);
 }
 
-void makeMsg(GenericMsg* msg)
+void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
 {
+	byte clientID = msg->clientID_;
+	byte msgLength = msg->msgLength_;
+	byte msgID = msg->msgID_;
+	int i = 0;
+
+	// write first byte (client #)
+	writeSerialData(uart, clientID);
+	printf("Writing data to %x!\n", clientID);
+
+	// write size (the size of the message)
+	writeSerialData(uart, msgLength);
+	printf("Length of Message: %d\n", msgLength);
+
+	// Send the rest of the data
+	for (i = 0; i < msgLength; i++) {
+		writeSerialData(uart, msg->msg_[i]);
+	}
+ }
+
+void sendCharacterChosenMsg(int player_id, unsigned char charID)
+{
+	// The player with ID player_id has
+	// selected the character with ID charID. Send a message
+	// to all devices indicating the player can no longer be chosen.
+	GenericMsg charChosenMsg;
+	charChosenMsg.clientID_ = 0; //Doesn't matter, since this is broadcast.
+	charChosenMsg.msgID_ = CHAR_CHOSEN_MSG;
+	charChosenMsg.msgLength_ = 2;
+	charChosenMsg.msg_ = (unsigned char*) malloc(charChosenMsg.msgLength_);
+	charChosenMsg.msg_[0] = (unsigned char) player_id;
+	charChosenMsg.msg_[1] = charID;
+	sendBroadcastExclusive(uart_dev, &charChosenMsg, player_id);
+	free(charChosenMsg.msg_);
 }
 
-void sendMsg(GenericMsg* msg)
+// A response of 0 indicates that the player cannot join (too many players).
+// A response of 1 indicates that the player can.
+void sendJoinResponse(int player_id, unsigned char response)
 {
+	// The player with ID player_id has
+	// selected the character with ID charID. Send a message
+	// to all devices indicating the player can no longer be chosen.
+	GenericMsg joinRespMsg;
+	int err_code = 0;
+	joinRespMsg.clientID_ = getPlayerDevice(player_id, &err_code); //Doesn't matter, since this is broadcast.
+
+	if (err_code == -1) return;
+
+	joinRespMsg.msgID_ = JOIN_RESPONSE;
+	joinRespMsg.msgLength_ = 1;
+	joinRespMsg.msg_ = (unsigned char*) malloc(joinRespMsg.msgLength_);
+	joinRespMsg.msg_[0] = response;
+	writeMsg(uart_dev, &joinRespMsg);
+	free(joinRespMsg.msg_);
+}
+
+unsigned int getInt(unsigned char* buf, int offset)
+{
+	unsigned int val = 0;
+	val = (buf[offset] << 8*3) | (buf[offset + 1] << 8*2)
+			| (buf[offset + 2] << 8*1) | (buf[offset + 3]);
+	return val;
+}
+
+unsigned short getShort(unsigned char* buf, int offset)
+{
+	unsigned short val = 0;
+	val = (buf[offset] << 8) | (buf[offset + 1]);
+	return val;
 }
 

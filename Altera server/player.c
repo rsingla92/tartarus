@@ -15,10 +15,10 @@ static unsigned char numPlayers = 0;
 
 static sPlayer playerDevTable[MAX_PLAYERS] =
 {
-		{NOT_CONNECTED, 0, 0, 0, 0, {0xff, 0, 0}},
-		{NOT_CONNECTED, 0, 0, 0, 0, {0, 0xff, 0}},
-		{NOT_CONNECTED, 0, 0, 0, 0, {0, 0, 0xff}},
-		{NOT_CONNECTED, 0, 0, 0, 0, {0x8f, 0, 0xff}}
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, {0xff, 0, 0}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, {0, 0xff, 0}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, {0, 0, 0xff}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, {0x8f, 0, 0xff}}
 };
 
 unsigned char doesPlayerExist(int player)
@@ -108,7 +108,7 @@ unsigned char playersReady(void)
 	int i;
 	for (i = 0; i < numPlayers; i++)
 	{
-		if (playerDevTable[i].state != READY) return 0;
+		if (playerDevTable[i].state != PLAYER_READY) return 0;
 	}
 
 	return 1;
@@ -118,7 +118,7 @@ void setPlayerReady(int player)
 {
 	if (player < 0 || player >= MAX_PLAYERS || !doesPlayerExist(player)) return;
 
-	playerDevTable[player].state = READY;
+	playerDevTable[player].state = PLAYER_READY;
 }
 
 void updatePlayerChar(int player, unsigned char charType)
@@ -149,4 +149,57 @@ void setPlayerPosition(int player, short x, short y)
 
 	playerDevTable[player].x = x;
 	playerDevTable[player].y = y;
+}
+
+unsigned char getPlayerDevice(int player, int* error)
+{
+	if (player < 0 || player >= MAX_PLAYERS || !doesPlayerExist(player))
+	{
+		printf("Error: Player not valid.\n");
+		*error = -1;
+		return 0;
+	}
+
+	*error = 0;
+	return playerDevTable[player].deviceId;
+}
+
+void setStoredX(int player, int x)
+{
+	playerDevTable[player].storedX = x;
+}
+
+void setStoredY(int player, int y)
+{
+	playerDevTable[player].storedY = y;
+}
+
+short getStoredX(int player)
+{
+	return playerDevTable[player].storedX;
+}
+
+short getStoredY(int player)
+{
+	return playerDevTable[player].storedY;
+}
+
+void sendBroadcast(alt_up_rs232_dev* uart, GenericMsg* msg)
+{
+	sendBroadcastExclusive(uart, msg, -1);
+}
+
+void sendBroadcastExclusive(alt_up_rs232_dev* uart, GenericMsg* msg, int excluded_player)
+{
+	int i;
+
+	for (i = 0; i < numPlayers; i++)
+	{
+		if(i != excluded_player && playerDevTable[i].state != NOT_CONNECTED)
+		{
+			// Send the message
+			msg->clientID_ = playerDevTable[i].deviceId;
+			writeMsg(uart, msg);
+		}
+	}
 }
