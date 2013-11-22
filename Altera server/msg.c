@@ -2,10 +2,11 @@
 #include "msg.h"
 #include "Map.h"
 #include "display.h"
+#include "player.h"
 
 extern Map map;
 extern alt_up_rs232_dev* uart_dev;
-
+extern unsigned char numPlayers;
 /*
 GAME_STATE getGameState(GameMsg g)
 {
@@ -239,6 +240,7 @@ int parseReadyMsg(GenericMsg* msg)
 	// No data with this message.
 	printf("Ready message!");
 	int playerNo = findPlayerByDevice(msg->clientID_);
+	static unsigned char readyPlayers = 0;
 
 	if (playerNo == -1)
 	{
@@ -246,11 +248,15 @@ int parseReadyMsg(GenericMsg* msg)
 	}
 	else
 	{
-		setPlayerReady(playerNo);
+		readyPlayers += setPlayerReady(playerNo);
 	}
 
 	// Send a broadcast message indicating that this player is now ready.
 
+	if(readyPlayers == numPlayers) {
+		printf("\nReady: %d\n", readyPlayers);
+		sendStartResponse(playerNo);
+	}
 }
 
 int parseSelectCharMsg(GenericMsg* msg)
@@ -330,6 +336,26 @@ void sendJoinResponse(int player_id, unsigned char response)
 	joinRespMsg.msg_[0] = response;
 	writeMsg(uart_dev, &joinRespMsg);
 	free(joinRespMsg.msg_);
+}
+
+//Ready response
+void sendStartResponse(int player_id)
+{
+	// The player with ID player_id has
+	// selected the character with ID charID. Send a message
+	// to all devices indicating the player can no longer be chosen.
+	GenericMsg startMsg;
+	int err_code = 0;
+	startMsg.clientID_ = getPlayerDevice(player_id, &err_code); //Doesn't matter, since this is broadcast.
+
+	if (err_code == -1) return;
+
+	startMsg.msgID_ = START;
+	startMsg.msgLength_ = 1;
+	startMsg.msg_ = (unsigned char*) malloc(startMsg.msgLength_);
+	startMsg.msg_[0] = 1;
+	writeMsg(uart_dev, &startMsg);
+	free(startMsg.msg_);
 }
 
 unsigned int getInt(unsigned char* buf, int offset)
