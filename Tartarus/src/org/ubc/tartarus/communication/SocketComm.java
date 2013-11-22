@@ -127,7 +127,23 @@ public class SocketComm {
 						
 						byte buf[] = new byte[bytes_avail];
 						in.read(buf);
+						
+						int dataLen = buf[0];
 
+						while (dataLen < buf.length) {
+							if (buf.length > 1) {
+								IncomingMessage msg = IncomingMessageParser.getMessageFromID(buf[1]);
+							//	System.arraycopy(dat, 0, data, 2, dat.length);
+							//	System.arraycopy(arg0, arg1, arg2, arg3, arg4)
+								msg.handleMsg(buf);
+							} 
+							else
+							{
+								Log.e("SocketComm", "Incoming message did not include an ID.");
+								break;
+							}
+						}
+						
 						// The 0th index of the buffer contains the length. 
 						// buf contains data
 		                /* if (buf[1] == OutgoingMessage.OutMessageType.MSG_MOVE.getId()) {
