@@ -1,5 +1,7 @@
 package org.ubc.tartarus.graphics;
 
+import java.util.Vector;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -7,6 +9,7 @@ import org.ubc.tartarus.Player;
 import org.ubc.tartarus.R;
 import org.ubc.tartarus.R.drawable;
 import org.ubc.tartarus.R.raw;
+import org.ubc.tartarus.character.Bomb;
 import org.ubc.tartarus.character.CharLock;
 import org.ubc.tartarus.character.CharMagus;
 import org.ubc.tartarus.character.CharMonster;
@@ -49,7 +52,7 @@ public class GameRenderer extends CustomRenderer {
 	private WorldMap mWorldMap;
 	private CharacterType charType;
 	private Gem[] GemArray;
-
+	private Vector<Bomb> BombVector;
 	public GameRenderer(Activity activity, CharacterType charType) {
 		super(activity);
 		this.charType = charType;
@@ -68,6 +71,12 @@ public class GameRenderer extends CustomRenderer {
 					mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);	
 		}
 		
+		for (int i = 0; i < BombVector.size(); i ++ ){
+			BombVector.elementAt(i).getCurrentAnimation().animate();
+			BombVector.elementAt(i).drawBomb(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
+					mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);
+		}
+		
 		mPlayer.drawPlayer(getModelViewMatrix());
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
@@ -81,7 +90,7 @@ public class GameRenderer extends CustomRenderer {
 		//mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 240, 128, 0, 0);
 		MapParser.TileMap map = MapParser.readMapFromFile(getActivity(), R.raw.tartarus_map1);
 		
-		mWorldMap = new WorldMap(getActivity(), R.drawable.tileset1, 1, 36, 16, 16, 240, 128, 0, map.worldHeight*16 - 128);
+		mWorldMap = new WorldMap(getActivity(), R.drawable.tileset1, 1, 36, 16, 16, 240, 128, 0, 0);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
 
 		mPlayer = new Player(getActivity(), 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, charType);
@@ -89,6 +98,8 @@ public class GameRenderer extends CustomRenderer {
 		
 		GemArray = new Gem[1]; // HOW MANY GEMS
 		GemArray[0] = new Gem(getActivity(),GemType.BLUE,0.2f,0.2f);
+		BombVector = new Vector<Bomb>();
+		BombVector.add(new Bomb(getActivity(),0.25f,0.25f));
 	}
 
 	@Override

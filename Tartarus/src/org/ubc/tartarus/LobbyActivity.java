@@ -1,15 +1,14 @@
 package org.ubc.tartarus;
 
-import java.util.Timer;
+import java.io.IOException;
 
-import org.ubc.tartarus.communication.SocketComm;
-import org.ubc.tartarus.communication.SocketComm.TCPReadTimerTask;
 import org.ubc.tartarus.particle.Particle;
 
 import android.app.Activity;
+import android.content.res.AssetFileDescriptor;
+import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
-import android.util.Log;
 
 public class LobbyActivity extends Activity {
 	GLSurfaceView surfaceView; 

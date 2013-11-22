@@ -1,9 +1,13 @@
 package org.ubc.tartarus;
 
-import org.ubc.tartarus.particle.Particle;
+import java.io.IOException;
+
 import org.ubc.tartarus.character.Character;
+import org.ubc.tartarus.particle.Particle;
 
 import android.app.Activity;
+import android.content.res.AssetFileDescriptor;
+import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 
