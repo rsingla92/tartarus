@@ -13,6 +13,7 @@ import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.utils.Point;
 import org.ubc.tartarus.character.Character;
 import org.ubc.tartarus.communication.IncomingMessage;
+import org.ubc.tartarus.communication.IncomingMessageParser;
 import org.ubc.tartarus.communication.OutMsgReady;
 import org.ubc.tartarus.communication.OutMsgSelectChar;
 import org.ubc.tartarus.communication.SocketComm;
@@ -178,10 +179,22 @@ public class LobbyRenderer extends CustomRenderer {
 				}
 				
 				IncomingMessage msg = socketComm.getNextMessage();
-				msg.handleMsg();
+				parseMsg(msg);
 			}
 		} catch(NoSuchElementException e) {
 			// Intentionally empty
+		}
+	}
+
+	void parseMsg(IncomingMessage msg) {
+		if (msg.getID() == IncomingMessageParser.InMessageType.MSG_START.getId()) {
+			// Transition to the game
+			mParticleSystem.makeSpiralSystem();
+			mParticleSystem.beginSpawning();
+			hitReady = true;
+		} else if (msg.getID() == IncomingMessageParser.InMessageType.MSG_CHAR_CHOSEN.getId()) {
+			// Character chosen handling -- make the character un-selectable.
+			Log.i("Msg", "Received Char Chosen Msg!");
 		}
 	}
 	
@@ -305,13 +318,16 @@ public class LobbyRenderer extends CustomRenderer {
 				// Touched join game
 				// Send out a message that the character has been picked.
 				OutMsgReady readyMsg = new OutMsgReady(getActivity());
+				
 				try {
 					readyMsg.sendMessage();
 				} catch (MessageTypeMismatchException e) {
 					Log.e("LobbyRenderer", "Could not send Ready Message.");
 				}
-				mParticleSystem.makeSpiralSystem();
-				hitReady = true;
+				
+				// Now we wait for a response from the DE2.
+				//mParticleSystem.makeSpiralSystem();
+				//hitReady = true;
 			} else if (fx >= backX - backWidth && fx <= backX + backWidth && 
 					fy >= backY - backHeight && fy <= backY + backHeight) {
 				// Touched join game

@@ -19,6 +19,7 @@ import org.ubc.tartarus.character.Character.CharacterType;
 import org.ubc.tartarus.character.Gem;
 import org.ubc.tartarus.character.Gem.GemType;
 import org.ubc.tartarus.communication.IncomingMessage;
+import org.ubc.tartarus.communication.IncomingMessageParser;
 import org.ubc.tartarus.communication.SocketComm;
 import org.ubc.tartarus.map.MapParser;
 import org.ubc.tartarus.map.WorldMap;
@@ -90,13 +91,17 @@ public class GameRenderer extends CustomRenderer {
 				}
 				
 				IncomingMessage msg = socketComm.getNextMessage();
-				msg.handleMsg();
+				parseMsg(msg);
 			}
 		} catch(NoSuchElementException e) {
 			// Intentionally empty
 		}
 	}
 
+	void parseMsg(IncomingMessage msg) {
+		// Nothing for now...
+	}
+	
 	@Override
 	public void onSurfaceCreated(GL10 arg0, EGLConfig arg1) {
 		// Load shaders for all BitmapImg objects.

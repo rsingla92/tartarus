@@ -28,11 +28,11 @@ public class IncomingMessageParser {
 	
 	static IncomingMessage getMessageFromID(byte id) {
 		if (id == InMessageType.MSG_JOIN_RESPONSE.id) {
-			return new InMsgJoinResponse();
+			return new IncomingMessage(InMessageType.MSG_JOIN_RESPONSE.getDataLen(), InMessageType.MSG_JOIN_RESPONSE.getId());
 		} else if (id == InMessageType.MSG_START.id) {
-			return new InMsgStart();
+			return new IncomingMessage(InMessageType.MSG_START.getDataLen(), InMessageType.MSG_START.getId());
 		} else if (id == InMessageType.MSG_CHAR_CHOSEN.id) {
-			return new InMsgCharChosen();
+			return new IncomingMessage(InMessageType.MSG_CHAR_CHOSEN.getDataLen(), InMessageType.MSG_CHAR_CHOSEN.getId());
 		}
 		
 		return null;

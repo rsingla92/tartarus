@@ -8,6 +8,7 @@ import javax.microedition.khronos.opengles.GL10;
 import org.ubc.tartarus.LobbyActivity;
 import org.ubc.tartarus.R;
 import org.ubc.tartarus.communication.IncomingMessage;
+import org.ubc.tartarus.communication.IncomingMessageParser;
 import org.ubc.tartarus.communication.OutMsgJoin;
 import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 import org.ubc.tartarus.particle.Particle;
@@ -18,6 +19,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.opengl.Matrix;
 import android.util.Log;
+import android.widget.Toast;
 
 public class MenuRenderer extends CustomRenderer {
 
@@ -125,11 +127,7 @@ public class MenuRenderer extends CustomRenderer {
 				hitJoin = false;
 				joinCountdown = 1.0f;
 				mParticleSystem.endSpawning();
-				try {
-					joinMsg.sendMessage();
-				} catch (MessageTypeMismatchException e) {
-					Log.i("MenuRenderer", "Could not send a join!");
-				}
+
 				// Transition to game activity...
 				Intent intent = new Intent(getActivity(), LobbyActivity.class);
 				getActivity().startActivity(intent);
@@ -147,13 +145,35 @@ public class MenuRenderer extends CustomRenderer {
 				}
 				
 				IncomingMessage msg = socketComm.getNextMessage();
-				msg.handleMsg();
+				parseMsg(msg);
 			}
 		} catch(NoSuchElementException e) {
 			// Intentionally empty
 		}
 	}
 
+	void parseMsg(IncomingMessage msg) {
+		if (msg.getID() == IncomingMessageParser.InMessageType.MSG_JOIN_RESPONSE.getId()) 
+		{
+			int ret = IncomingMessage.handleJoinResponse(msg);
+			
+			if (ret == -1) {
+				Log.e("MenuRenderer", "Failure to parse join response.");
+			} else if (ret == 0) {
+				// Send a message indicating that the player cannot join yet.
+				Toast.makeText(getActivity(), "The Lobby is full. Please wait until the next game is available.",
+						Toast.LENGTH_LONG).show();
+			} else {
+				// Successfully joined the game. 
+				// TODO: Set the player's ID-- this is in ret. 
+				Log.i("Msg", "Got a join response!");
+				mParticleSystem.makeSpiralSystem();
+				mParticleSystem.beginSpawning();
+				hitJoin = true;
+			}
+		}
+	}
+	
 	@Override
 	public void onSurfaceCreated(GL10 arg0, EGLConfig arg1) {
 		// Load shaders for all BitmapImg objects.
@@ -195,8 +215,12 @@ public class MenuRenderer extends CustomRenderer {
 		if (fx >= joinX - joinWidth && fx <= joinX + joinWidth && 
 				fy >= joinY - joinHeight && fy <= joinY + joinHeight) {
 			// Touched join game
-			mParticleSystem.makeSpiralSystem();
-			hitJoin = true;
+			
+			try {
+				joinMsg.sendMessage();
+			} catch (MessageTypeMismatchException e) {
+				Log.i("MenuRenderer", "Could not send a join!");
+			}
 		} else {
 			mParticleSystem.makeNormalSystem();
 			hitJoin = false;
