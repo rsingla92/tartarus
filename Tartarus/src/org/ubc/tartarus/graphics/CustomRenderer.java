@@ -193,4 +193,7 @@ public class CustomRenderer implements Renderer {
 		addFingerCoords(x, y, width, height);		
 	}
 
+	public void onDoubleTap(float x, float y, float width, float height) {
+		addFingerCoords(x,y,width,height);
+	}
 }

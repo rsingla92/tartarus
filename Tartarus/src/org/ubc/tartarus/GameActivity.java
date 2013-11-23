@@ -2,8 +2,8 @@ package org.ubc.tartarus;
 
 import java.io.IOException;
 
-import org.ubc.tartarus.particle.Particle;
 import org.ubc.tartarus.character.Character;
+import org.ubc.tartarus.particle.Particle;
 
 import android.app.Activity;
 import android.content.res.AssetFileDescriptor;

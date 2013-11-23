@@ -11,7 +11,7 @@
 /* From map. */
 extern Map map;
 
-static unsigned char numPlayers = 0;
+unsigned char numPlayers = 0;
 
 static sPlayer playerDevTable[MAX_PLAYERS] =
 {
@@ -114,11 +114,12 @@ unsigned char playersReady(void)
 	return 1;
 }
 
-void setPlayerReady(int player)
+int setPlayerReady(int player)
 {
-	if (player < 0 || player >= MAX_PLAYERS || !doesPlayerExist(player)) return;
+	if (player < 0 || player >= MAX_PLAYERS || !doesPlayerExist(player)) return 0;
 
 	playerDevTable[player].state = PLAYER_READY;
+	return 1;
 }
 
 void updatePlayerChar(int player, unsigned char charType)

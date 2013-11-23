@@ -21,7 +21,7 @@
 #define FOUR_READY 0x11111111
 
 typedef enum { JOIN, READY, MOVE, SELECT_CHAR, TEST } IN_MSG_TYPE ;
-typedef enum { JOIN_RESPONSE, START, CHAR_CHOSEN_MSG } OUT_MSG_TYPE ;
+typedef enum { JOIN_RESPONSE, START, CHAR_CHOSEN_MSG} OUT_MSG_TYPE ;
 //typedef enum { NO_GAME, INITAL, WAITING, READY, PLAYING, WIN, LOSE } GAME_STATE;
 //typedef enum {FREEZE_ALL, FREEZE_ONE, SLOW_ALL, SLOW_ONE, FAST_ONE, RESTART_ONE, RESTART_ALL} POWER_UP_TYPE;
 
@@ -92,6 +92,7 @@ int parseSelectCharMsg(GenericMsg* msg);
 
 void sendCharacterChosenMsg(int player_id, unsigned char charID);
 void sendJoinResponse(int player_id, unsigned char response);
+void sendStartResponse(int player_id);
 
 void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg);
 
