@@ -140,7 +140,7 @@ public class WorldMap {
 		int col = worldPixelX / mTileWidth;
 		int row = worldPixelY / mTileHeight;
 		
-		if (col >= mWorldWidth || row >= mWorldHeight) {
+		if (col >= mWorldWidth || row >= mWorldHeight || col < 0 || row < 0) {
 			throw new InvalidTilePositionException("WorldMap");
 		}
 			

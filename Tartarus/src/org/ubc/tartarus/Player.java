@@ -235,6 +235,7 @@ public class Player {
 			//Log.i("Player", "Tile ID of Selected Goal Tile: " + goalTile);
 		} catch (InvalidTilePositionException e1) {
 			Log.e("Player", "Incorrect value for tile...");
+			return true;
 		}
 		
 		return mWorldMap.isTileSolid(goalTile);
