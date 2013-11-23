@@ -95,12 +95,40 @@ unsigned char addPlayer(int deviceId)
 {
 	if (numPlayers >= MAX_PLAYERS) return -1;
 
-	unsigned char playerId = numPlayers++;
+	unsigned char playerId;
+
+	if (playerDevTable[numPlayers].state == NOT_CONNECTED)
+	{
+		playerId = numPlayers;
+	}
+	else
+	{
+		int i;
+		// Loop until we reach an empty slot.
+		for (i = 0; i < MAX_PLAYERS &&
+			playerDevTable[i].state != NOT_CONNECTED; i++);
+
+		if (i >= MAX_PLAYERS || playerDevTable[i].state == NOT_CONNECTED) return -1;
+
+		playerId = i;
+	}
 
 	playerDevTable[playerId].deviceId = deviceId;
 	playerDevTable[playerId].state = JOINED;
 
+	numPlayers++;
 	return playerId;
+}
+
+void removePlayer(int deviceId)
+{
+	int playerId = findPlayerByDevice(deviceId);
+
+	if (playerId != -1)
+	{
+		playerDevTable[playerId].state = NOT_CONNECTED;
+		numPlayers--;
+	}
 }
 
 unsigned char playersReady(void)

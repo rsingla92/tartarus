@@ -174,6 +174,9 @@ static void parseNextMessage()
 		case SELECT_CHAR:
 			parseSelectCharMsg(msgHead);
 			break;
+		case DISCONNECT:
+			parseDisconnectMsg(msgHead);
+			break;
 		case TEST:
 			parseTestMsg(msgHead);
 			break;

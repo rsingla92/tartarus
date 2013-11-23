@@ -43,6 +43,7 @@ void setStoredY(int player, int y);
 void setStoredX(int player, int x);
 
 unsigned char addPlayer(int deviceId);
+void removePlayer(int deviceId);
 int setPlayerReady(int player);
 int findPlayerByDevice(unsigned char deviceId);
 unsigned char getPlayerDevice(int player, int* error);

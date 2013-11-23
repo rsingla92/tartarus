@@ -232,7 +232,13 @@ int parseJoinMsg(GenericMsg* msg)
 		response = playerID + 1;
 	}
 
-	sendJoinResponse(playerID, response);
+	sendJoinResponse(playerID, response, msg->clientID_);
+}
+
+int parseDisconnectMsg(GenericMsg *msg)
+{
+    printf("Disconnect Message\n");
+    removePlayer(msg->clientID_);
 }
 
 int parseReadyMsg(GenericMsg* msg)
@@ -324,16 +330,13 @@ void sendCharacterChosenMsg(int player_id, unsigned char charID)
 
 // A response of 0 indicates that the player cannot join (too many players).
 // A response of 1 indicates that the player can.
-void sendJoinResponse(int player_id, unsigned char response)
+void sendJoinResponse(int player_id, unsigned char response, unsigned char devID)
 {
 	// The player with ID player_id has
 	// selected the character with ID charID. Send a message
 	// to all devices indicating the player can no longer be chosen.
 	GenericMsg joinRespMsg;
-	int err_code = 0;
-	joinRespMsg.clientID_ = getPlayerDevice(player_id, &err_code); //Doesn't matter, since this is broadcast.
-
-	if (err_code == -1) return;
+	joinRespMsg.clientID_ = devID;
 
 	joinRespMsg.msgID_ = JOIN_RESPONSE;
 	joinRespMsg.msgLength_ = 1;
