@@ -3,7 +3,9 @@ package org.ubc.tartarus.graphics;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import org.ubc.tartarus.ApplicationData;
 import org.ubc.tartarus.character.Character.CharacterType;
+import org.ubc.tartarus.communication.SocketComm;
 import org.ubc.tartarus.utils.Point;
 
 import android.app.Activity;
@@ -25,11 +27,14 @@ public class CustomRenderer implements Renderer {
 	
 	private Activity mActivity;
 	private float mAspectRatio;
+	protected SocketComm socketComm;
 	
 	public CustomRenderer(Activity activity) {
 		super();
 		
 		mActivity = activity;
+		ApplicationData dat = (ApplicationData) activity.getApplication(); 
+		socketComm = dat.socketComm;
 	}
 	
 	protected float getFingerX() {

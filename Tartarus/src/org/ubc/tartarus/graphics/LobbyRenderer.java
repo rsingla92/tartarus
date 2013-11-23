@@ -1,16 +1,21 @@
 package org.ubc.tartarus.graphics;
 
+import java.util.NoSuchElementException;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import org.ubc.tartarus.ApplicationData;
 import org.ubc.tartarus.GameActivity;
 import org.ubc.tartarus.R;
 import org.ubc.tartarus.particle.Particle;
 import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.utils.Point;
 import org.ubc.tartarus.character.Character;
+import org.ubc.tartarus.communication.IncomingMessage;
 import org.ubc.tartarus.communication.OutMsgReady;
 import org.ubc.tartarus.communication.OutMsgSelectChar;
+import org.ubc.tartarus.communication.SocketComm;
 import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 
 import android.app.Activity;
@@ -164,6 +169,20 @@ public class LobbyRenderer extends CustomRenderer {
 		
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
+		
+		try {
+			while (true) {
+				if (socketComm == null) {
+					Log.i("Msg", "SocketComm is NULL!!");
+					break;
+				}
+				
+				IncomingMessage msg = socketComm.getNextMessage();
+				msg.handleMsg();
+			}
+		} catch(NoSuchElementException e) {
+			// Intentionally empty
+		}
 	}
 	
 	@Override

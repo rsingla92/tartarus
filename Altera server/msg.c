@@ -248,9 +248,6 @@ int parseReadyMsg(GenericMsg* msg)
 	{
 		setPlayerReady(playerNo);
 	}
-
-	// Send a broadcast message indicating that this player is now ready.
-
 }
 
 int parseSelectCharMsg(GenericMsg* msg)
@@ -277,7 +274,7 @@ int parseTestMsg(GenericMsg* msg)
 void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
 {
 	byte clientID = msg->clientID_;
-	byte msgLength = msg->msgLength_;
+	byte msgLength = msg->msgLength_ + 1; // An extra 1 for the ID.
 	byte msgID = msg->msgID_;
 	int i = 0;
 
@@ -289,8 +286,12 @@ void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
 	writeSerialData(uart, msgLength);
 	printf("Length of Message: %d\n", msgLength);
 
+	// Send the message ID
+	writeSerialData(uart, msgID);
+
 	// Send the rest of the data
-	for (i = 0; i < msgLength; i++) {
+	for (i = 0; i < msg->msgLength_; i++) {
+		printf("Writing: %d\n", msg->msg_[i]);
 		writeSerialData(uart, msg->msg_[i]);
 	}
  }
@@ -307,7 +308,9 @@ void sendCharacterChosenMsg(int player_id, unsigned char charID)
 	charChosenMsg.msg_ = (unsigned char*) malloc(charChosenMsg.msgLength_);
 	charChosenMsg.msg_[0] = (unsigned char) player_id;
 	charChosenMsg.msg_[1] = charID;
-	sendBroadcastExclusive(uart_dev, &charChosenMsg, player_id);
+	//sendBroadcastExclusive(uart_dev, &charChosenMsg, player_id);
+    // For testing purposes with one device:
+	sendBroadcast(uart_dev, &charChosenMsg);
 	free(charChosenMsg.msg_);
 }
 

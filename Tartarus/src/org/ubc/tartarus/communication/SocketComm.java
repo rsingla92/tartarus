@@ -5,22 +5,39 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
+import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.TimerTask;
-
 import org.ubc.tartarus.ApplicationData;
 
-import android.app.Activity;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
-import android.view.View;
 
 public class SocketComm {
 
 	private ApplicationData mAppData;
+	private Handler socketMsgHandler;
+	private LinkedList<IncomingMessage> msgList; 
 	
 	public SocketComm(ApplicationData appData) {
 		mAppData = appData;
+		msgList = new LinkedList<IncomingMessage>();
+
+		socketMsgHandler = new Handler(Looper.getMainLooper()) {
+			@Override
+			public void handleMessage(Message msg) {
+				IncomingMessage incoming = (IncomingMessage) msg.obj;
+				Log.i("Msg", "Received msg with ID " + incoming.msgID + ", adding to list.");
+				msgList.addFirst(incoming);
+			}
+		};
+	}
+	
+	public IncomingMessage getNextMessage() throws NoSuchElementException {
+	   return msgList.removeFirst();
 	}
 	
 	public void openSocket() {
@@ -85,7 +102,7 @@ public class SocketComm {
 		@Override
 		protected Socket doInBackground(Void... voids) {
 			Socket sock = null;
-			String ip = "192.168.1.101";
+			String ip = "192.168.1.115";
 			
 			Log.i("TestSocket", "Trying to connect!");
 			try {
@@ -119,39 +136,35 @@ public class SocketComm {
 					InputStream in = mAppData.sock.getInputStream();
 
 					// See if any bytes are available from the Middleman
-					
 					int bytes_avail = in.available();
 					if (bytes_avail > 0) {
 						
 						// If so, read them in and create a sring
-						
 						byte buf[] = new byte[bytes_avail];
+						int cur_pos = 0;
+						
+						Log.i("Msg", "Available bytes: " + bytes_avail);
+						
+						// Read in the ID
 						in.read(buf);
-						
-						int dataLen = buf[0];
 
-						while (dataLen < buf.length) {
-							if (buf.length > 1) {
-								IncomingMessage msg = IncomingMessageParser.getMessageFromID(buf[1]);
-							//	System.arraycopy(dat, 0, data, 2, dat.length);
-							//	System.arraycopy(arg0, arg1, arg2, arg3, arg4)
-								msg.handleMsg(buf);
-							} 
-							else
-							{
-								Log.e("SocketComm", "Incoming message did not include an ID.");
-								break;
+						if (buf.length > 1) {
+							IncomingMessage msg = IncomingMessageParser.getMessageFromID(buf[cur_pos++]);
+								
+							if (bytes_avail - 1 > 0) {								
+								msg.populateData(buf, cur_pos, bytes_avail - 1);
+								cur_pos += bytes_avail - 1; 
 							}
+								
+							Message out_msg = new Message(); 
+							out_msg.obj = msg;
+							Log.i("Msg", "Sending msg from socketComm.");
+							socketMsgHandler.sendMessage(out_msg);
+						} 
+						else
+						{
+							Log.e("SocketComm", "Incoming message did not include an ID.");			
 						}
-						
-						// The 0th index of the buffer contains the length. 
-						// buf contains data
-		                /* if (buf[1] == OutgoingMessage.OutMessageType.MSG_MOVE.getId()) {
-							ByteBuffer buffer = ByteBuffer.wrap(buf, 2, buf.length - 2);
-							short x = buffer.getShort();
-							short y = buffer.getShort();
-							Log.i("TestSocket", "Received X: " + x + ", Received Y: + " + y);
-						}*/
 					}
 				} catch (IOException e) {
 					e.printStackTrace();

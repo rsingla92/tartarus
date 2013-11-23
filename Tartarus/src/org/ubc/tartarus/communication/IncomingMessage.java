@@ -5,13 +5,14 @@ import android.util.Log;
 public class IncomingMessage {
 
 	protected int msgLength; 
-	protected int msgID;
+	protected byte msgID;
+	protected byte[] data;
 	
 	public IncomingMessage() { 
 		msgLength = msgID = 0;
 	}
 	
-	public IncomingMessage(int len, int ID) {
+	protected IncomingMessage(int len, byte ID) {
 		msgLength = len;
 		msgID = ID;
 	}
@@ -20,16 +21,21 @@ public class IncomingMessage {
 		return msgLength;
 	}
 	
-	public int getID() {
+	public byte getID() {
 		return msgID;
 	}
 	
-	public int handleMsg(byte[] buf) {
-		if (buf.length != msgLength) {
-			Log.e("IncomingMessage", "Message length incorrect.");
-			return 0;
+	public void populateData(byte[] src, int src_offset, int data_len) {
+		data = new byte[data_len];
+		System.arraycopy(src, src_offset, data, 0, data_len);
+	}
+	
+	public boolean handleMsg() {
+		if (data == null || data.length != msgLength) {
+			Log.e("Msg", "Message length incorrect.");
+			return false;
 		}
 		
-		return 1;
+		return true;
 	}
 }

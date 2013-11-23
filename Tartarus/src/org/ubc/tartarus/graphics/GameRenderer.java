@@ -1,30 +1,25 @@
 package org.ubc.tartarus.graphics;
 
+import java.util.NoSuchElementException;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import org.ubc.tartarus.ApplicationData;
 import org.ubc.tartarus.Player;
 import org.ubc.tartarus.R;
-import org.ubc.tartarus.R.drawable;
-import org.ubc.tartarus.R.raw;
-import org.ubc.tartarus.character.CharLock;
-import org.ubc.tartarus.character.CharMagus;
-import org.ubc.tartarus.character.CharMonster;
-import org.ubc.tartarus.character.CharRooster;
-import org.ubc.tartarus.character.CharSerdic;
-import org.ubc.tartarus.character.CharStrider;
 import org.ubc.tartarus.character.Character.CharacterType;
 import org.ubc.tartarus.character.Gem;
 import org.ubc.tartarus.character.Gem.GemType;
+import org.ubc.tartarus.communication.IncomingMessage;
+import org.ubc.tartarus.communication.SocketComm;
 import org.ubc.tartarus.map.MapParser;
 import org.ubc.tartarus.map.WorldMap;
-import org.ubc.tartarus.map.MapParser.TileMap;
 import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.particle.ParticleSystem.Type;
 import org.ubc.tartarus.utils.Point;
 
 import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 
 public class GameRenderer extends CustomRenderer {
@@ -69,8 +64,24 @@ public class GameRenderer extends CustomRenderer {
 		}
 		
 		mPlayer.drawPlayer(getModelViewMatrix());
-		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
-		mParticleSystem.drawParticles(getModelViewMatrix());
+		
+		//Particles should be used for special events.
+	//	mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
+	//	mParticleSystem.drawParticles(getModelViewMatrix());
+		
+		try {
+			while (true) {
+				if (socketComm == null) {
+					Log.i("Msg", "SocketComm is NULL!!");
+					break;
+				}
+				
+				IncomingMessage msg = socketComm.getNextMessage();
+				msg.handleMsg();
+			}
+		} catch(NoSuchElementException e) {
+			// Intentionally empty
+		}
 	}
 
 	@Override

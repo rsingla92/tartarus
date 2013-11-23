@@ -1,10 +1,13 @@
 package org.ubc.tartarus.graphics;
 
+import java.util.NoSuchElementException;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import org.ubc.tartarus.LobbyActivity;
 import org.ubc.tartarus.R;
+import org.ubc.tartarus.communication.IncomingMessage;
 import org.ubc.tartarus.communication.OutMsgJoin;
 import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 import org.ubc.tartarus.particle.Particle;
@@ -135,6 +138,20 @@ public class MenuRenderer extends CustomRenderer {
 		
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
+		
+		try {
+			while (true) {
+				if (socketComm == null) {
+					Log.i("Msg", "SocketComm is NULL!!");
+					break;
+				}
+				
+				IncomingMessage msg = socketComm.getNextMessage();
+				msg.handleMsg();
+			}
+		} catch(NoSuchElementException e) {
+			// Intentionally empty
+		}
 	}
 
 	@Override

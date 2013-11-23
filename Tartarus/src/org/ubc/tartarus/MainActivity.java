@@ -1,14 +1,17 @@
 package org.ubc.tartarus;
 
+import java.io.IOException;
 import java.util.Timer;
 
 import org.ubc.tartarus.communication.SocketComm;
 import org.ubc.tartarus.particle.Particle;
 
+import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.app.Activity;
+import android.content.res.AssetFileDescriptor;
 
 public class MainActivity extends Activity {
 	
@@ -20,13 +23,13 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		ApplicationData app = (ApplicationData) getApplication();
+		
+		app.socketComm = new SocketComm(app);
+		app.socketComm.openSocket();
+		
 		surfaceView = new MenuView(this);
 		
 		setContentView(surfaceView);
-		app.socketComm = new SocketComm(app);
-		
-		Log.i("TestSocket", "Calling openSocket()");
-		app.socketComm.openSocket();
 		
 		//Play music here!
 		AssetFileDescriptor afd;
