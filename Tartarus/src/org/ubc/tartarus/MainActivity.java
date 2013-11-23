@@ -3,7 +3,9 @@ package org.ubc.tartarus;
 import java.io.IOException;
 import java.util.Timer;
 
+import org.ubc.tartarus.communication.OutMsgDisconnect;
 import org.ubc.tartarus.communication.SocketComm;
+import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 import org.ubc.tartarus.particle.Particle;
 
 import android.media.MediaPlayer;

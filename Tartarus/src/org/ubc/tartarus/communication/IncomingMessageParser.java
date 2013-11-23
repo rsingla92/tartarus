@@ -6,7 +6,7 @@ public class IncomingMessageParser {
 		
 		// Add any other messages here... 
 		MSG_JOIN_RESPONSE((byte) 0, 1),
-		MSG_START((byte) 1, 0),
+		MSG_START((byte) 1, 1),
 		MSG_CHAR_CHOSEN((byte) 2, 2);
 		
 		private byte id;

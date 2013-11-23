@@ -1,6 +1,9 @@
 package org.ubc.tartarus;
 
 import java.io.IOException;
+
+import org.ubc.tartarus.communication.OutMsgDisconnect;
+import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 import org.ubc.tartarus.particle.Particle;
 
 import android.app.Activity;
@@ -8,6 +11,7 @@ import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.Log;
 
 public class LobbyActivity extends Activity {
 	GLSurfaceView surfaceView; 
@@ -47,6 +51,23 @@ public class LobbyActivity extends Activity {
 		// When we resume, we have to reload the particle bitmap.
 		Particle.setParticleImgLoaded(false);
 		player.pause();
+	}
+	
+	@Override 
+	protected void onDestroy() {
+		ApplicationData dat = (ApplicationData) getApplication();
+		
+		if (dat.socketComm != null) {
+			try {
+				new OutMsgDisconnect(this).sendMessage();
+			} catch (MessageTypeMismatchException e) {
+				Log.e("LobbyActivity", "Message type mismatch sending disconnect message.");
+			}
+		} else {
+			Log.i("LobbyActivity", "Socket comm is null. Not sending a disconnect message.");
+		}
+		
+		super.onDestroy();
 	}
 	
 	@Override

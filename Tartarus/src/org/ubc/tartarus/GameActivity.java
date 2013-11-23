@@ -3,6 +3,8 @@ package org.ubc.tartarus;
 import java.io.IOException;
 
 import org.ubc.tartarus.character.Character;
+import org.ubc.tartarus.communication.OutMsgDisconnect;
+import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 import org.ubc.tartarus.particle.Particle;
 
 import android.app.Activity;
@@ -10,6 +12,7 @@ import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.util.Log;
 
 public class GameActivity extends Activity {
 
@@ -43,6 +46,23 @@ public class GameActivity extends Activity {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	@Override 
+	protected void onDestroy() {
+		ApplicationData dat = (ApplicationData) getApplication();
+		
+		if (dat.socketComm != null) {
+			try {
+				new OutMsgDisconnect(this).sendMessage();
+			} catch (MessageTypeMismatchException e) {
+				Log.e("GameActivity", "Message type mismatch sending disconnect message.");
+			}
+		} else {
+			Log.i("GameActivity", "Socket comm is null. Not sending a disconnect message.");
+		}
+		
+		super.onDestroy();
 	}
 	
 	@Override

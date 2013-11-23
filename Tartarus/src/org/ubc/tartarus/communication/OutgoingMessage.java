@@ -14,7 +14,8 @@ public class OutgoingMessage {
 		MSG_JOIN((byte) 0, 0),
 		MSG_READY((byte) 1, 0),
 		MSG_MOVE((byte) 2, 4),
-		MSG_SELECT_CHAR((byte) 3, 1);
+		MSG_SELECT_CHAR((byte) 3, 1),
+		MSG_DISCONNECT((byte) 4, 0);
 		
 		private byte id;
 		private int dataLen;
