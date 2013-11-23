@@ -221,10 +221,19 @@ public class MenuRenderer extends CustomRenderer {
 				fy >= joinY - joinHeight && fy <= joinY + joinHeight) {
 			// Touched join game
 			
-			try {
-				joinMsg.sendMessage();
-			} catch (MessageTypeMismatchException e) {
-				Log.i("MenuRenderer", "Could not send a join!");
+			if (socketComm == null) {
+				// Not connected -- allow the player to join as a single player.
+				Log.i("MenuRenderer", "Not connected to a socket. Joining in single-player mode.");
+				mParticleSystem.makeSpiralSystem();
+				hitJoin = true;
+			}
+			else 
+			{
+				try {
+					joinMsg.sendMessage();
+				} catch (MessageTypeMismatchException e) {
+					Log.i("MenuRenderer", "Could not send a join!");
+				}
 			}
 		} else {
 			mParticleSystem.makeNormalSystem();

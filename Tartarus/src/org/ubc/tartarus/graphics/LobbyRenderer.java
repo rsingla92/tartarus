@@ -317,14 +317,21 @@ public class LobbyRenderer extends CustomRenderer {
 					fy >= readyY - readyHeight && fy <= readyY + readyHeight) {
 				// Touched join game
 				// Send out a message that the character has been picked.
-				OutMsgReady readyMsg = new OutMsgReady(getActivity());
-				
-				try {
-					readyMsg.sendMessage();
-				} catch (MessageTypeMismatchException e) {
-					Log.e("LobbyRenderer", "Could not send Ready Message.");
+				if (socketComm == null) {
+					Log.i("LobbyRenderer", "Running in single-player mode, allowing you to join.");
+					mParticleSystem.makeSpiralSystem();
+					hitReady = true;
 				}
-				
+				else 
+				{
+					OutMsgReady readyMsg = new OutMsgReady(getActivity());
+					
+					try {
+						readyMsg.sendMessage();
+					} catch (MessageTypeMismatchException e) {
+						Log.e("LobbyRenderer", "Could not send Ready Message.");
+					}
+				}
 				// Now we wait for a response from the DE2.
 				//mParticleSystem.makeSpiralSystem();
 				//hitReady = true;
