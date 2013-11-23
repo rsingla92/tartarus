@@ -161,8 +161,13 @@ public class MenuRenderer extends CustomRenderer {
 				Log.e("MenuRenderer", "Failure to parse join response.");
 			} else if (ret == 0) {
 				// Send a message indicating that the player cannot join yet.
-				Toast.makeText(getActivity(), "The Lobby is full. Please wait until the next game is available.",
-						Toast.LENGTH_LONG).show();
+				getActivity().runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						Toast.makeText(getActivity(), "The Lobby is full. Please wait until the next game is available.",
+								Toast.LENGTH_LONG).show();
+					}
+				});
 			} else {
 				// Successfully joined the game. 
 				// TODO: Set the player's ID-- this is in ret. 
