@@ -174,6 +174,29 @@ public class CustomRenderer implements Renderer {
 	   fingerX = p.x;
 	   fingerY = p.y;
    }
+    
+   public Point worldToOpenGLCoords(float x, float y, float viewportX, float viewportY, float viewportWidth, float viewportHeight) {
+		float viewWidth = VIEW_HEIGHT * getAspectRatio();
+	    float convertedX = (-(x - viewportX)/ viewportWidth) * viewWidth + viewWidth/2;
+		float convertedY = (-(y - viewportY) / viewportHeight) * VIEW_HEIGHT + VIEW_HEIGHT/2; 
+		
+		Point p = new Point(convertedX, convertedY);
+
+		return p;
+   }
+   
+   public Point openGLToWorldCoords(float x, float y,  float viewportX, float viewportY, float viewportWidth, float viewportHeight) {
+		float viewWidth = VIEW_HEIGHT * getAspectRatio();
+	    float convertedX = (-x/ viewWidth) * viewportWidth + viewportWidth/2;
+		float convertedY = (-y/ VIEW_HEIGHT) * viewportHeight + viewportHeight/2; 
+		
+		convertedX += viewportX;
+		convertedY += viewportY;
+		
+		Point p = new Point(convertedX, convertedY);
+
+		return p;
+   }
    
 	public void onDownTouch(float x, float y, float width, float height) {
 		addFingerCoords(x, y, width, height);
