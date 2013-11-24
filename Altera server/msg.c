@@ -274,8 +274,16 @@ int parseSelectCharMsg(GenericMsg* msg)
 	}
 	else
 	{
-		updatePlayerChar(player, msg->msg_[0]);
-		sendCharacterChosenMsg(player, msg->msg_[0]);
+		if (updatePlayerChar(player, msg->msg_[0]))
+		{
+			// Only send message if character hasn't been
+			// chosen.
+			sendCharacterChosenMsg(player, msg->msg_[0]);
+		}
+		else
+		{
+			printf("Another character already chose character %d\n", msg->msg_[0]);
+		}
 	}
 }
 
@@ -320,7 +328,7 @@ void sendCharacterChosenMsg(int player_id, unsigned char charID)
 	charChosenMsg.msgID_ = CHAR_CHOSEN_MSG;
 	charChosenMsg.msgLength_ = 2;
 	charChosenMsg.msg_ = (unsigned char*) malloc(charChosenMsg.msgLength_);
-	charChosenMsg.msg_[0] = (unsigned char) player_id;
+	charChosenMsg.msg_[0] = (unsigned char) (player_id + 1);
 	charChosenMsg.msg_[1] = charID;
 	//sendBroadcastExclusive(uart_dev, &charChosenMsg, player_id);
     // For testing purposes with one device:

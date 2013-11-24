@@ -26,6 +26,7 @@ typedef struct
 	unsigned short storedX, storedY;
 	unsigned char deviceId;
 	unsigned char character;
+	unsigned char chosen;
 	colour playerCol;
 } sPlayer;
 
@@ -47,7 +48,7 @@ void removePlayer(int deviceId);
 int setPlayerReady(int player);
 int findPlayerByDevice(unsigned char deviceId);
 unsigned char getPlayerDevice(int player, int* error);
-void updatePlayerChar(int player, unsigned char charType);
+int updatePlayerChar(int player, unsigned char charType);
 void getPlayerColour(int player, colour* col);
 void sendBroadcastExclusive(alt_up_rs232_dev* uart, GenericMsg* msg, int excluded_player);
 void sendBroadcast(alt_up_rs232_dev* uart, GenericMsg* msg);

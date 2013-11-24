@@ -15,10 +15,10 @@ unsigned char numPlayers = 0;
 
 static sPlayer playerDevTable[MAX_PLAYERS] =
 {
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, {0xff, 0, 0}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, {0, 0xff, 0}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, {0, 0, 0xff}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, {0x8f, 0, 0xff}}
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0xff, 0, 0}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0, 0xff, 0}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0xff}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0x8f, 0, 0xff}}
 };
 
 unsigned char doesPlayerExist(int player)
@@ -150,11 +150,26 @@ int setPlayerReady(int player)
 	return 1;
 }
 
-void updatePlayerChar(int player, unsigned char charType)
+int updatePlayerChar(int player, unsigned char charType)
 {
 	if (player < 0 || player >= MAX_PLAYERS || !doesPlayerExist(player)) return;
 
+	int i;
+	for (i = 0; i < MAX_PLAYERS; i++)
+	{
+	   // Cannot choose if character is already taken.
+	   if (playerDevTable[i].state != NOT_CONNECTED &&
+			   playerDevTable[i].chosen &&
+			   playerDevTable[i].character == charType)
+	   {
+		   return 0;
+	   }
+	}
+
 	playerDevTable[player].character = charType;
+	playerDevTable[player].chosen = 1;
+
+	return 1;
 }
 
 int findPlayerByDevice(unsigned char deviceId)
