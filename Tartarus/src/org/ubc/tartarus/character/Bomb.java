@@ -126,11 +126,11 @@ public class Bomb {
 		mPosition.y = p.y;
 	}
 	
-	public Point getPosition(){
+	public Point getPosition() {
 		return mPosition;
 	}
 	
-	public Point getDimensions(){
+	public Point getScaleDimensions(){
 		Point bottomLeft = this.getCurrentAnimation().getCurrentFrame().bottomLeft;
 		Point topRight = this.getCurrentAnimation().getCurrentFrame().topRight;
 		Point refFrame = this.getRefFrame();
@@ -141,7 +141,15 @@ public class Bomb {
 			
 		Point scaleDimensions = new Point(scaleWidth, scaleHeight);
 		return scaleDimensions;
+	}
+	
+	public Point getPixelDimensions(float viewportWidth, float viewportHeight, float viewWidth, float viewHeight) {
+		Point glCoords = getScaleDimensions();
+
+		float normalizedW = glCoords.x / viewWidth;
+		float normalizedH = glCoords.y / viewHeight;
 		
+		return new Point(normalizedW * viewportWidth, normalizedH * viewportHeight);
 	}
 	
 	public void drawBomb(float[] modelViewMatrix, float ViewPortX, float ViewPortY, 

@@ -221,4 +221,15 @@ public class CustomRenderer implements Renderer {
 	public void onDoubleTap(float x, float y, float width, float height) {
 		addFingerCoords(x,y,width,height);
 	}
+	
+	public static Point getConvertWorld(float x, float y, float viewportW, float viewportH, 
+		float viewWidth, float viewHeight, float viewportX, float viewportY) {
+		float adjustedX = -x + (viewWidth)/2.0f; 
+		float adjustedY = -y + (viewHeight)/2.0f; 
+		
+		int convertedX = (int)(adjustedX*(viewportW/viewWidth) + viewportX); 
+		int convertedY = (int)(adjustedY*(viewportH/viewHeight) + viewportY);  
+		
+		return new Point(convertedX, convertedY);
+	}
 }

@@ -5,6 +5,7 @@ import org.ubc.tartarus.character.Character.AnimTypes;
 import org.ubc.tartarus.character.Gem.GemType;
 import org.ubc.tartarus.character.Gem;
 import org.ubc.tartarus.graphics.BitmapImg;
+import org.ubc.tartarus.graphics.CustomRenderer;
 import org.ubc.tartarus.map.WorldMap;
 import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.utils.Point;
@@ -58,30 +59,19 @@ public class Player {
 		mPlayerImg = new BitmapImg(activity, character.getResourceId());
 	}
 	
-	public Point getConvertWorld(float x, float y, float viewportW, float viewportH, 
-			float viewWidth, float viewHeight, float viewportX, float viewportY) {
-		float adjustedX = -x + (viewWidth)/2.0f; 
-		float adjustedY = -y + (viewHeight)/2.0f; 
-		
-		int convertedX = (int)(adjustedX*(viewportW/viewWidth) + viewportX); 
-		int convertedY = (int)(adjustedY*(viewportH/viewHeight) + viewportY);  
-		
-		return new Point(convertedX, convertedY);
-	}
-	
 	public boolean isCollision(float x, float y, float objectWidth, float objectHeight,float viewportX, float viewportY,
 			float viewportW, float viewportH, float viewWidth, float viewHeight){
 
-		Point playerLeft = getConvertWorld(mPosition.x + getCurrentFrameWidth()/2.0f, mPosition.y,
+		Point playerLeft = CustomRenderer.getConvertWorld(mPosition.x + getCurrentFrameWidth()/2.0f, mPosition.y,
 				viewportW, viewportH, viewWidth, viewHeight, viewportX, viewportY);
 		
-		Point playerRight = getConvertWorld(mPosition.x - getCurrentFrameWidth()/2.0f, mPosition.y,
+		Point playerRight = CustomRenderer.getConvertWorld(mPosition.x - getCurrentFrameWidth()/2.0f, mPosition.y,
 				viewportW, viewportH, viewWidth, viewHeight, viewportX, viewportY); 
 		
-		Point playerTop = getConvertWorld(mPosition.x, mPosition.y + getCurrentFrameHeight()/2.0f,
+		Point playerTop = CustomRenderer.getConvertWorld(mPosition.x, mPosition.y + getCurrentFrameHeight()/2.0f,
 				viewportW, viewportH, viewWidth, viewHeight, viewportX, viewportY); 
 		
-		Point playerBottom = getConvertWorld(mPosition.x, mPosition.y - getCurrentFrameHeight()/2.0f,
+		Point playerBottom = CustomRenderer.getConvertWorld(mPosition.x, mPosition.y - getCurrentFrameHeight()/2.0f,
 				viewportW, viewportH, viewWidth, viewHeight, viewportX, viewportY); 
 		
 		float objectLeft = x - objectWidth/2;
@@ -89,13 +79,15 @@ public class Player {
 		float objectTop = y - objectHeight/2;
 		float objectBottom = y + objectHeight/2;
 		
-		Log.i("BOMB", "player " + playerLeft.x + " " + playerRight.x + " " + playerTop.y + " " + playerBottom.y);
-		Log.i("BOMB", "object " + objectLeft + " " + objectRight + " " +objectTop + " " + objectBottom);
+	//	Log.i("BOMB", "player " + playerLeft.x + " " + playerRight.x + " " + playerTop.y + " " + playerBottom.y);
+		//Log.i("BOMB", "object " + objectLeft + " " + objectRight + " " +objectTop + " " + objectBottom);
 		
 		
 		//Log.i("TAP" , "player p collision " + p.x + " " + p.y);
 		if (playerRight.x >= objectLeft && playerLeft.x <= objectRight && 
 				playerBottom.y >= objectTop && playerTop.y <= objectBottom ) {
+			
+			Log.i("BOMB", "CollisioN!!");
 			return true;
 		}
 		
