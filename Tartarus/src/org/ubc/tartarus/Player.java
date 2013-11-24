@@ -58,37 +58,47 @@ public class Player {
 		mPlayerImg = new BitmapImg(activity, character.getResourceId());
 	}
 	
+	public Point getConvertWorld(float x, float y, float viewportW, float viewportH, 
+			float viewWidth, float viewHeight, float viewportX, float viewportY) {
+		float adjustedX = -x + (viewWidth)/2.0f; 
+		float adjustedY = -y + (viewHeight)/2.0f; 
+		
+		int convertedX = (int)(adjustedX*(viewportW/viewWidth) + viewportX); 
+		int convertedY = (int)(adjustedY*(viewportH/viewHeight) + viewportY);  
+		
+		return new Point(convertedX, convertedY);
+	}
+	
 	public boolean isCollision(float x, float y, float objectWidth, float objectHeight,float viewportX, float viewportY,
 			float viewportW, float viewportH, float viewWidth, float viewHeight){
+
+		Point playerLeft = getConvertWorld(mPosition.x + getCurrentFrameWidth()/2.0f, mPosition.y,
+				viewportW, viewportH, viewWidth, viewHeight, viewportX, viewportY);
 		
-	    float convertedX = (-mPosition.x/ viewWidth) * viewportW + viewportW/2;
-		float convertedY = (-mPosition.y/ viewHeight) * viewportH + viewportH/2; 
+		Point playerRight = getConvertWorld(mPosition.x - getCurrentFrameWidth()/2.0f, mPosition.y,
+				viewportW, viewportH, viewWidth, viewHeight, viewportX, viewportY); 
 		
-		convertedX += viewportX;
-		convertedY += viewportY;
+		Point playerTop = getConvertWorld(mPosition.x, mPosition.y + getCurrentFrameHeight()/2.0f,
+				viewportW, viewportH, viewWidth, viewHeight, viewportX, viewportY); 
 		
-		Point p = new Point(convertedX, convertedY); // in world coordinates
-		float playerLeft = p.x - this.getPixelDimensions().x/4;
-		float playerRight = p.x + this.getPixelDimensions().x/4;
-		float playerTop = p.y - this.getPixelDimensions().y/4;
-		float playerBottom = p.y + this.getPixelDimensions().y/4;
+		Point playerBottom = getConvertWorld(mPosition.x, mPosition.y - getCurrentFrameHeight()/2.0f,
+				viewportW, viewportH, viewWidth, viewHeight, viewportX, viewportY); 
 		
 		float objectLeft = x - objectWidth/2;
 		float objectRight = x + objectWidth/2;
 		float objectTop = y - objectHeight/2;
 		float objectBottom = y + objectHeight/2;
 		
-		Log.i("BOMB", "player " + playerLeft + " " + playerRight+ " " +playerTop+ " " + playerBottom);
-		Log.i("BOMB", "object " +objectLeft + " " + objectRight + " " +objectTop + " " + objectBottom);
+		Log.i("BOMB", "player " + playerLeft.x + " " + playerRight.x + " " + playerTop.y + " " + playerBottom.y);
+		Log.i("BOMB", "object " + objectLeft + " " + objectRight + " " +objectTop + " " + objectBottom);
 		
 		
 		//Log.i("TAP" , "player p collision " + p.x + " " + p.y);
-		if ( ((playerLeft >= objectLeft && playerLeft <= objectLeft)  || (playerRight >= objectLeft && playerRight <= objectRight))
-				&& ((playerTop >= objectTop && playerTop <= objectBottom) || (playerBottom >= objectTop && playerBottom <= objectBottom)))
-		{
-
+		if (playerRight.x >= objectLeft && playerLeft.x <= objectRight && 
+				playerBottom.y >= objectTop && playerTop.y <= objectBottom ) {
 			return true;
 		}
+		
 		return false;
 	}
 	
