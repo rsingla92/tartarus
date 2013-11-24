@@ -195,16 +195,19 @@ public class GameRenderer extends CustomRenderer {
 			Point finger = openGLToWorldCoords(getFingerX(), getFingerY(), 
 					mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
 					mWorldMap.getViewportHeight());
-			Log.i("TAP", "player " + converted.x + " " + converted.y);
-			Log.i("TAP", "finger " + finger.x + " " + finger.y);
-			//Log.i("TAP", "player wh " + mPlayer.getCurrentFrameWidth() + " " + mPlayer.getCurrentFrameHeight());
 			
-			if (finger.x <= converted.x + 5 && finger.x >= converted.x - 5 && 
-					finger.y <= converted.y + 10 && finger.y >= converted.y - 10 ){
+			//Log.i("TAP", "player wh " + mPlayer.getCurrentFrameWidth()/2.0f + " " + mPlayer.getCurrentFrameHeight()/2.0f);
+			Log.i("TAP", "player wh " + mPlayer.getPixelDimensions().x/4 + " " +mPlayer.getPixelDimensions().y/4);
+			//Log.i("TAP", "finger " + finger.x + " " + finger.y);
+			Log.i("TAP", "player pos " + converted.x + " " +converted.y);
+			if (finger.x < converted.x + mPlayer.getPixelDimensions().x/4 && finger.x > converted.x - mPlayer.getPixelDimensions().x/4 && 
+					finger.y < converted.y + mPlayer.getPixelDimensions().y/4 && finger.y > converted.y - mPlayer.getPixelDimensions().y/4 ){
 			
 				Bomb b = new Bomb(getActivity(), 0.25f, 0.25f);
 				BombVector.add(b);
 				BombVector.lastElement().setPosition(new Point(converted.x, converted.y));
+				Log.i("TAP", "bomb pos " + BombVector.lastElement().getPosition().x + " " +BombVector.lastElement().getPosition().y);
+				Log.i("TAP", "bomb wh " + BombVector.lastElement().getDimensions().x/4 + " " +BombVector.lastElement().getDimensions().y/4);
 				
 			}
 

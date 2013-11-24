@@ -67,11 +67,25 @@ public class Player {
 		convertedX += viewportX;
 		convertedY += viewportY;
 		
-		Point p = new Point(convertedX, convertedY);
+		Point p = new Point(convertedX, convertedY); // in world coordinates
+		float playerLeft = p.x - this.getPixelDimensions().x/4;
+		float playerRight = p.x + this.getPixelDimensions().x/4;
+		float playerTop = p.y - this.getPixelDimensions().y/4;
+		float playerBottom = p.y + this.getPixelDimensions().y/4;
 		
-		//Log.i("BOMB", "p x : " + pixelX + " p y " + pixelY);
-		if ((p.x + 5 >= x - 3 || p.x-5 <= x +3) &&
-				(p.y - 10 <= y + 3 || p.y + 10 >= y - 3)){
+		float objectLeft = x - objectWidth/2;
+		float objectRight = x + objectWidth/2;
+		float objectTop = y - objectHeight/2;
+		float objectBottom = y + objectHeight/2;
+		
+		Log.i("BOMB", "player " + playerLeft + " " + playerRight+ " " +playerTop+ " " + playerBottom);
+		Log.i("BOMB", "object " +objectLeft + " " + objectRight + " " +objectTop + " " + objectBottom);
+		
+		
+		//Log.i("TAP" , "player p collision " + p.x + " " + p.y);
+		if ( ((playerLeft >= objectLeft && playerLeft <= objectLeft)  || (playerRight >= objectLeft && playerRight <= objectRight))
+				&& ((playerTop >= objectTop && playerTop <= objectBottom) || (playerBottom >= objectTop && playerBottom <= objectBottom)))
+		{
 
 			return true;
 		}
@@ -247,6 +261,15 @@ public class Player {
 		return scaleHeight;
 	}
 	
+		public Point getPixelDimensions() {
+		Point bottomLeft = character.getCurrentAnimation().getCurrentFrame().bottomLeft;
+		Point topRight = character.getCurrentAnimation().getCurrentFrame().topRight;
+		
+		float w = topRight.x - bottomLeft.x;
+		float h = topRight.y - bottomLeft.y;
+		return new Point(w,h);
+	}
+
 	private boolean checkCollision(float positionX, float positionY, float viewWidth, float viewHeight) {
 		int goalTile = 0;
 		
