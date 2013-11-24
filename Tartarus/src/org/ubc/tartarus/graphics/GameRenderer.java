@@ -83,9 +83,11 @@ public class GameRenderer extends CustomRenderer {
 		}	
 		
 		for (int i = 0; i < BombVector.size(); i ++ ){
-			Log.i("BOMB", " "+BombVector.elementAt(i).getDimensions().x + " " + BombVector.elementAt(i).getDimensions().y);
+			Point pixelDimensions = BombVector.elementAt(i).getPixelDimensions(mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(),
+					VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
+			Log.i("BOMB", " "+ pixelDimensions.x + " " + pixelDimensions.y);
 			if (mPlayer.isCollision(BombVector.elementAt(i).getPosition().x, BombVector.elementAt(i).getPosition().y, 
-					BombVector.elementAt(i).getDimensions().x , BombVector.elementAt(i).getDimensions().y, 
+					pixelDimensions.x , pixelDimensions.y, 
 					mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
 					mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT) && BombVector.elementAt(i).isBombActivated())
 				
@@ -206,8 +208,6 @@ public class GameRenderer extends CustomRenderer {
 				Bomb b = new Bomb(getActivity(), 0.25f, 0.25f);
 				BombVector.add(b);
 				BombVector.lastElement().setPosition(new Point(converted.x, converted.y));
-				Log.i("TAP", "bomb pos " + BombVector.lastElement().getPosition().x + " " +BombVector.lastElement().getPosition().y);
-				Log.i("TAP", "bomb wh " + BombVector.lastElement().getDimensions().x/4 + " " +BombVector.lastElement().getDimensions().y/4);
 				
 			}
 
