@@ -133,15 +133,10 @@ public class Bomb {
 	public Point getDimensions(){
 		Point bottomLeft = this.getCurrentAnimation().getCurrentFrame().bottomLeft;
 		Point topRight = this.getCurrentAnimation().getCurrentFrame().topRight;
-		Point refFrame = this.getRefFrame();
 			 
-		float width = (refFrame.x/refFrame.y)*mHeight;
-		float scaleWidth = width * ((topRight.x - bottomLeft.x)/refFrame.x);
-		float scaleHeight = mHeight * ((topRight.y - bottomLeft.y)/refFrame.y);
-			
-		Point scaleDimensions = new Point(scaleWidth, scaleHeight);
-		return scaleDimensions;
-		
+		float width = topRight.x - bottomLeft.x;
+		float height = topRight.y - bottomLeft.y;
+		return new Point(width, height);
 	}
 	
 	public void drawBomb(float[] modelViewMatrix, float ViewPortX, float ViewPortY, 
