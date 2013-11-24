@@ -58,6 +58,26 @@ public class Player {
 		mPlayerImg = new BitmapImg(activity, character.getResourceId());
 	}
 	
+	public boolean isCollision(float x, float y, float objectWidth, float objectHeight,float viewportX, float viewportY,
+			float viewportW, float viewportH, float viewWidth, float viewHeight){
+		
+	    float convertedX = (-mPosition.x/ viewWidth) * viewportW + viewportW/2;
+		float convertedY = (-mPosition.y/ viewHeight) * viewportH + viewportH/2; 
+		
+		convertedX += viewportX;
+		convertedY += viewportY;
+		
+		Point p = new Point(convertedX, convertedY);
+		
+		//Log.i("BOMB", "p x : " + pixelX + " p y " + pixelY);
+		if ((p.x + 5 >= x - 3 || p.x-5 <= x +3) &&
+				(p.y - 10 <= y + 3 || p.y + 10 >= y - 3)){
+
+			return true;
+		}
+		return false;
+	}
+	
 	public void setReachableGoal(boolean enable) {
 		reachableGoal = enable;
 	}
@@ -235,7 +255,6 @@ public class Player {
 			//Log.i("Player", "Tile ID of Selected Goal Tile: " + goalTile);
 		} catch (InvalidTilePositionException e1) {
 			Log.e("Player", "Incorrect value for tile...");
-			return true;
 		}
 		
 		return mWorldMap.isTileSolid(goalTile);
