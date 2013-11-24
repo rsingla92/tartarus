@@ -53,6 +53,10 @@ public class Animation{
 		return this.frameList.elementAt((int)Math.round(currentFrame));
 	}
 	
+	public int getFrameNumber(){
+		return (int)Math.round(currentFrame);
+	}
+	
 	public double getAnimSpeed(){
 		return this.animSpeed;
 	}

@@ -60,6 +60,12 @@ public class Character {
 		}
 	}
 	
+	public Point getDimensions(){
+		float w = this.getCurrentAnimation().getCurrentFrame().topRight.x - this.getCurrentAnimation().getCurrentFrame().bottomLeft.x;
+		float h = this.getCurrentAnimation().getCurrentFrame().bottomLeft.y - this.getCurrentAnimation().getCurrentFrame().topRight.y;
+		return new Point(w,h);
+	}
+	
 	public void populateAnimList(Rectangle[] walkLeft, Rectangle[] walkRight, 
 			Rectangle[] walkUp, Rectangle[] walkDown) {
 		

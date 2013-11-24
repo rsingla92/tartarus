@@ -71,10 +71,33 @@ public class GameRenderer extends CustomRenderer {
 					mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);	
 		}
 		
+				Point playerPosWorld = openGLToWorldCoords(mPlayer.getPosition().x, mPlayer.getPosition().y, 
+				mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
+				mWorldMap.getViewportHeight());
+		
+		if (BombVector.size()>0 && (playerPosWorld.x < BombVector.lastElement().getPosition().x-5 || 
+				playerPosWorld.x > BombVector.lastElement().getPosition().x +5) &&
+				(playerPosWorld.y > BombVector.lastElement().getPosition().y+5 || 
+				playerPosWorld.y < BombVector.lastElement().getPosition().y-5)){
+			BombVector.lastElement().activateBomb();
+		}	
+		
 		for (int i = 0; i < BombVector.size(); i ++ ){
-			BombVector.elementAt(i).getCurrentAnimation().animate();
+			Log.i("BOMB", " "+BombVector.elementAt(i).getDimensions().x + " " + BombVector.elementAt(i).getDimensions().y);
+			if (mPlayer.isCollision(BombVector.elementAt(i).getPosition().x, BombVector.elementAt(i).getPosition().y, 
+					BombVector.elementAt(i).getDimensions().x , BombVector.elementAt(i).getDimensions().y, 
+					mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
+					mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT) && BombVector.elementAt(i).isBombActivated())
+				
+				BombVector.elementAt(i).explodeBomb();
+			
+			if (BombVector.elementAt(i).isExploding()){
+				BombVector.elementAt(i).getCurrentAnimation().animate();
+			}
 			BombVector.elementAt(i).drawBomb(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
 					mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);
+			if (BombVector.elementAt(i).getCurrentAnimation().getFrameNumber() >= 9)
+				BombVector.remove(i);
 		}
 		
 		mPlayer.drawPlayer(getModelViewMatrix());
@@ -166,14 +189,25 @@ public class GameRenderer extends CustomRenderer {
 		super.onDoubleTap(x, y, width, height);
 		
 		if (mPlayer != null) { // TODO: need to also check if player has bombs
-			float pixelX = (x/width) * mWorldMap.getViewportWidth();
-			float pixelY = (y/height) * mWorldMap.getViewportHeight(); //+ mWorldMap.getViewportHeight();
-			Bomb b = new Bomb(getActivity(), 0.25f, 0.25f);
-			BombVector.add(b);
-			BombVector.lastElement().setPosition(new Point(pixelX + mWorldMap.getViewportX(), pixelY + mWorldMap.getViewportY()));
-			Log.i("TAP", "FX "+getFingerX() + " FY " + getFingerY() );
-			Log.i("TAP", "BOMBX " + BombVector.lastElement().getPosition().x + " BOMBY " + BombVector.lastElement().getPosition().y);
-			Log.i("TAP", "pix X " + pixelX + " pix Y " + pixelY);
+			Point converted = openGLToWorldCoords(mPlayer.getPosition().x, mPlayer.getPosition().y, 
+					mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
+					mWorldMap.getViewportHeight());
+			Point finger = openGLToWorldCoords(getFingerX(), getFingerY(), 
+					mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
+					mWorldMap.getViewportHeight());
+			Log.i("TAP", "player " + converted.x + " " + converted.y);
+			Log.i("TAP", "finger " + finger.x + " " + finger.y);
+			//Log.i("TAP", "player wh " + mPlayer.getCurrentFrameWidth() + " " + mPlayer.getCurrentFrameHeight());
+			
+			if (finger.x <= converted.x + 5 && finger.x >= converted.x - 5 && 
+					finger.y <= converted.y + 10 && finger.y >= converted.y - 10 ){
+			
+				Bomb b = new Bomb(getActivity(), 0.25f, 0.25f);
+				BombVector.add(b);
+				BombVector.lastElement().setPosition(new Point(converted.x, converted.y));
+				
+			}
+
 		}
 	}
 }
