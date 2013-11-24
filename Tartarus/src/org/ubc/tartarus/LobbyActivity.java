@@ -8,11 +8,13 @@ import org.ubc.tartarus.graphics.MenuRenderer;
 import org.ubc.tartarus.particle.Particle;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.KeyEvent;
 
 public class LobbyActivity extends Activity {
 	GLSurfaceView surfaceView; 
@@ -72,6 +74,29 @@ public class LobbyActivity extends Activity {
 		}
 		
 		super.onDestroy();
+	}
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    if ((keyCode == KeyEvent.KEYCODE_BACK)) { 
+	       // Send a disconnect message
+			ApplicationData dat = (ApplicationData) getApplication();
+			
+			if (dat.socketComm != null) {
+				try {
+					new OutMsgDisconnect(this).sendMessage();
+				} catch (MessageTypeMismatchException e) {
+					Log.e("LobbyActivity", "Message type mismatch sending disconnect message.");
+				}
+			} else {
+				Log.i("LobbyActivity", "Socket comm is null. Not sending a disconnect message.");
+			}
+			
+	    	Particle.setParticleImgLoaded(false);
+	    	this.finish();
+	        return true;
+	    }
+	    return super.onKeyDown(keyCode, event);
 	}
 	
 	@Override

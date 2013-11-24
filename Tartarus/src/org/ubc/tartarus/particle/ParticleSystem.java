@@ -88,6 +88,7 @@ public class ParticleSystem {
 		
 		if (!Particle.getParticleImgLoaded()) {
 			// Load particle image
+			Log.i("Particle", "Loading particle image!");
 			Particle.loadParticleImg(mContext, particleResId);
 		}
 		
@@ -262,8 +263,10 @@ public class ParticleSystem {
 			
 			if (!particles[i].isAlive()) {
 				// Particle now dead -- add to dead index list.
-				deadIndices[deadIndexCount] = i;
-				deadIndexCount++;
+				if (deadIndexCount < 0 || deadIndexCount >= mMaxParticles) {
+					deadIndices[deadIndexCount] = i;
+					deadIndexCount++;
+				}
 			}
 		}
 	}

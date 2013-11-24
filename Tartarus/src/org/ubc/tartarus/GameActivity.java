@@ -8,11 +8,19 @@ import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 import org.ubc.tartarus.particle.Particle;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.AssetFileDescriptor;
 import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.os.Bundle;
+import android.support.v4.app.NavUtils;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.PopupMenu;
 
 public class GameActivity extends Activity {
 
@@ -27,7 +35,7 @@ public class GameActivity extends Activity {
 		Character.CharacterType charType = (Character.CharacterType) super.getIntent().getExtras().getSerializable(Character.TYPE_INTENT);
 		surfaceView = new GameView(this, charType);
 		setContentView(surfaceView);
-		
+
 		//Play music here!
 		AssetFileDescriptor afd;
 		try {
@@ -48,21 +56,47 @@ public class GameActivity extends Activity {
 		
 	}
 	
-	@Override 
-	protected void onDestroy() {
-		ApplicationData dat = (ApplicationData) getApplication();
-		
-		if (dat.socketComm != null) {
-			try {
-				new OutMsgDisconnect(this).sendMessage();
-			} catch (MessageTypeMismatchException e) {
-				Log.e("GameActivity", "Message type mismatch sending disconnect message.");
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.main, menu);
+	    return true;
+	}
+	
+	@Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case android.R.id.home:
+            NavUtils.navigateUpFromSameTask(this);
+            return true;
+        case R.id.action_settings:
+        	Log.i("Menu", "Action Settings!");
+        	return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+	
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    if ((keyCode == KeyEvent.KEYCODE_BACK)) { 
+	       // Send a disconnect message
+			ApplicationData dat = (ApplicationData) getApplication();
+			
+			if (dat.socketComm != null) {
+				try {
+					new OutMsgDisconnect(this).sendMessage();
+				} catch (MessageTypeMismatchException e) {
+					Log.e("LobbyActivity", "Message type mismatch sending disconnect message.");
+				}
+			} else {
+				Log.i("LobbyActivity", "Socket comm is null. Not sending a disconnect message.");
 			}
-		} else {
-			Log.i("GameActivity", "Socket comm is null. Not sending a disconnect message.");
-		}
-		
-		super.onDestroy();
+			
+	    	Particle.setParticleImgLoaded(false);
+	    	this.finish();
+	        return true;
+	    }
+	    return super.onKeyDown(keyCode, event);
 	}
 	
 	@Override

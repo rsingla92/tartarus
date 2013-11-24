@@ -54,6 +54,12 @@ public class MenuRenderer extends CustomRenderer {
 	public void onDrawFrame(GL10 arg0) {
 		super.onDrawFrame(arg0);
 		
+		if (!Particle.getParticleImgLoaded()) {
+			// Load particle image
+			Log.i("Particle", "Loading particle image!");
+			Particle.loadParticleImg(getActivity(), R.drawable.particle);
+		}
+		
 		float[] copyMat = new float[16];
 		Matrix.setIdentityM(copyMat, 0);
 		Matrix.scaleM(copyMat, 0, 2 * getAspectRatio(), 2, 2);
@@ -129,6 +135,7 @@ public class MenuRenderer extends CustomRenderer {
 			if (joinCountdown <= 0) {
 				hitJoin = false;
 				joinCountdown = 1.0f;
+				mParticleSystem.makeNormalSystem();
 				mParticleSystem.endSpawning();
 
 				// Transition to game activity...
@@ -198,6 +205,7 @@ public class MenuRenderer extends CustomRenderer {
 				0.85098f, 0.0f, 0.0f, 1.0f, 0.2f, 0.2f, false, 0);
 		mCursor.setParticleSpeed(0, 0, 0);
 		
+		Log.i("Particle", "On surface created! Making new particle system...");
 		mParticleSystem = new ParticleSystem(getActivity(), 500, R.drawable.particle, 5);
 	}
 	
