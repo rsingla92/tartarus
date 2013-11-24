@@ -69,18 +69,25 @@ public class GameRenderer extends CustomRenderer {
 			GemArray[i].getCurrentAnimation().animate();
 			GemArray[i].drawGems(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
 					mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);	
+			
+			if (mPlayer.isCollision(GemArray[i].getPosition().x, GemArray[i].getPosition().y, 
+				GemArray[i].getScaleDimensions().x , GemArray[i].getScaleDimensions().y, 
+				mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
+				mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT)){
+				mPlayer.addPoints(10);
+				
+				// TODO: randomize the next position 
+				GemArray[i].setPosition(new Point (GemArray[i].getPosition().x + 1, GemArray[i].getPosition().y + 1));
+			}
 		}
 		
-				Point playerPosWorld = openGLToWorldCoords(mPlayer.getPosition().x, mPlayer.getPosition().y, 
+		if (BombVector.size() > 0 && !mPlayer.isCollision(BombVector.lastElement().getPosition().x, BombVector.lastElement().getPosition().y, 
+				BombVector.lastElement().getScaleDimensions().x , BombVector.lastElement().getScaleDimensions().y, 
 				mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
-				mWorldMap.getViewportHeight());
-		
-		if (BombVector.size()>0 && (playerPosWorld.x < BombVector.lastElement().getPosition().x-5 || 
-				playerPosWorld.x > BombVector.lastElement().getPosition().x +5) &&
-				(playerPosWorld.y > BombVector.lastElement().getPosition().y+5 || 
-				playerPosWorld.y < BombVector.lastElement().getPosition().y-5)){
+				mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT)){
+
 			BombVector.lastElement().activateBomb();
-		}	
+		}
 		
 		for (int i = 0; i < BombVector.size(); i ++ ){
 			Point pixelDimensions = BombVector.elementAt(i).getPixelDimensions(mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(),
