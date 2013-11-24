@@ -15,6 +15,8 @@ import android.util.Log;
 public class Bomb {
 	public enum BombAnimTypes{ EXPLODE, NUM_ANIM };
 	private static BitmapImg mBombImg;
+	private boolean activated = false;
+	private boolean exploding = false;
 	private Point mPosition;
 	private static int resId;
 	private float mWidth, mHeight;
@@ -55,6 +57,22 @@ public class Bomb {
 	
 	public static void setBombImgLoaded(boolean loaded) {
 		loadedBombImg = loaded;
+	}
+	
+	public void activateBomb(){
+		activated = true;
+	}
+	
+	public boolean isBombActivated(){
+		return activated;
+	}
+	
+	public void explodeBomb(){
+		exploding = true;
+	}
+	
+	public boolean isExploding(){
+		return exploding;
 	}
 	
 	// Modified to take in only a rotation animation list
@@ -110,6 +128,20 @@ public class Bomb {
 	
 	public Point getPosition(){
 		return mPosition;
+	}
+	
+	public Point getDimensions(){
+		Point bottomLeft = this.getCurrentAnimation().getCurrentFrame().bottomLeft;
+		Point topRight = this.getCurrentAnimation().getCurrentFrame().topRight;
+		Point refFrame = this.getRefFrame();
+			 
+		float width = (refFrame.x/refFrame.y)*mHeight;
+		float scaleWidth = width * ((topRight.x - bottomLeft.x)/refFrame.x);
+		float scaleHeight = mHeight * ((topRight.y - bottomLeft.y)/refFrame.y);
+			
+		Point scaleDimensions = new Point(scaleWidth, scaleHeight);
+		return scaleDimensions;
+		
 	}
 	
 	public void drawBomb(float[] modelViewMatrix, float ViewPortX, float ViewPortY, 
