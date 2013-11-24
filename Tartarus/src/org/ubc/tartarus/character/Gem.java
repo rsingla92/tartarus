@@ -112,6 +112,18 @@ public class Gem {
 		}
 	}
 	
+	public Point getScaleDimensions(){
+		Point bottomLeft = this.getCurrentAnimation().getCurrentFrame().bottomLeft;
+		Point topRight = this.getCurrentAnimation().getCurrentFrame().topRight;
+			 
+		float width = (refFrame.x/refFrame.y)*mHeight;
+		float scaleWidth = width * ((topRight.x - bottomLeft.x)/refFrame.x);
+		float scaleHeight = mHeight * ((topRight.y - bottomLeft.y)/refFrame.y);
+			
+		Point scaleDimensions = new Point(scaleWidth, scaleHeight);
+		return scaleDimensions;
+	}
+	
 	public void setCurrentAnimation(AnimTypes anim){
 		this.currentAnimation = anim.ordinal();
 	}

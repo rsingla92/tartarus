@@ -28,6 +28,7 @@ public class Player {
 	private float[] scaleMat;
 	private float[] mMVPMat;
 	private boolean reachableGoal = false;
+	private int score;
 	
 	private WorldMap mWorldMap;
 	
@@ -51,6 +52,7 @@ public class Player {
 		mHeight = height;
 		mWorldMap = worldMap;
 		moveMsg = new OutMsgMove(activity);
+		score = 0;
 		
 		// Get the correct character type.
 		Log.i("Player", "CharType: " + charType);
@@ -96,6 +98,18 @@ public class Player {
 	
 	public void setReachableGoal(boolean enable) {
 		reachableGoal = enable;
+	}
+	
+	public int getPoints(){
+		return score;
+	}
+	
+	public void addPoints(int points){
+		score += points;
+	}
+	
+	public void losePoints(int points){
+		score -= points;
 	}
 	
 	public Point getScaleDimensions() {

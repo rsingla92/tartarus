@@ -69,11 +69,17 @@ public class GameRenderer extends CustomRenderer {
 			GemArray[i].getCurrentAnimation().animate();
 			GemArray[i].drawGems(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
 					mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);	
-		}
-		
-				Point playerPosWorld = openGLToWorldCoords(mPlayer.getPosition().x, mPlayer.getPosition().y, 
+			
+			if (mPlayer.isCollision(GemArray[i].getPosition().x, GemArray[i].getPosition().y, 
+				GemArray[i].getScaleDimensions().x , GemArray[i].getScaleDimensions().y, 
 				mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
-				mWorldMap.getViewportHeight());
+				mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT)){
+				mPlayer.addPoints(10);
+				
+				// TODO: randomize the next position 
+				GemArray[i].setPosition(new Point (GemArray[i].getPosition().x + 1, GemArray[i].getPosition().y + 1));
+			}
+		}
 		
 		if (BombVector.size() > 0 && !mPlayer.isCollision(BombVector.lastElement().getPosition().x, BombVector.lastElement().getPosition().y, 
 				BombVector.lastElement().getScaleDimensions().x , BombVector.lastElement().getScaleDimensions().y, 
