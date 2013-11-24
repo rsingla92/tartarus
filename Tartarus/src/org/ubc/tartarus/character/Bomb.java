@@ -133,7 +133,6 @@ public class Bomb {
 	public Point getScaleDimensions(){
 		Point bottomLeft = this.getCurrentAnimation().getCurrentFrame().bottomLeft;
 		Point topRight = this.getCurrentAnimation().getCurrentFrame().topRight;
-		Point refFrame = this.getRefFrame();
 			 
 		float width = (refFrame.x/refFrame.y)*mHeight;
 		float scaleWidth = width * ((topRight.x - bottomLeft.x)/refFrame.x);
