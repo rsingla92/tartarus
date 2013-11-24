@@ -7,6 +7,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 import org.ubc.tartarus.ApplicationData;
 import org.ubc.tartarus.GameActivity;
+import org.ubc.tartarus.Player;
 import org.ubc.tartarus.R;
 import org.ubc.tartarus.particle.Particle;
 import org.ubc.tartarus.particle.ParticleSystem;
@@ -28,6 +29,26 @@ public class LobbyRenderer extends CustomRenderer {
 	
 	public static final int MATRIX_SIZE = 4;
 	public static final float CURSOR_ACCELERATION = 0.01f;
+	public static final int MAX_PLAYERS = 4;
+	
+	public static final int TOKEN_WIDTH = 100;
+	public static final int TOKEN_HEIGHT = 100;
+	
+	// Character box information
+	public static final Point NEKU_CENTRE = new Point(130.5f, 156f); 
+	public static final Point MAGUS_CENTRE = new Point(284.0f, 156.0f);
+	public static final Point MONSTER_CENTRE = new Point(437.5f, 156f);
+	public static final Point SERDIC_CENTRE = new Point(597.0f, 157.0f);
+	public static final Point ROOSTER_CENTRE = new Point(130.0f, 313f);
+	public static final Point STRIDER_CENTRE = new Point(283.5f, 313.0f);
+	public static final Point BEAT_CENTRE = new Point(438.5f, 312.5f);
+	public static final Point LOCK_CENTRE = new Point(596.0f, 313.0f);
+	
+	// Used to properly draw tokens.
+	public static final Point[] centreList = {
+		MAGUS_CENTRE, LOCK_CENTRE, MONSTER_CENTRE, ROOSTER_CENTRE, SERDIC_CENTRE, 
+		STRIDER_CENTRE, NEKU_CENTRE, BEAT_CENTRE
+	};
 	
 	private float readyX;
 	private float readyY;
@@ -40,6 +61,7 @@ public class LobbyRenderer extends CustomRenderer {
 	public volatile float mAngle;
 	
 	private BitmapImg lobbyBackground, titleImg, readyImg, backImg;
+	private BitmapImg tokenImg;
 
 	private ParticleSystem mParticleSystem;
 	
@@ -47,12 +69,22 @@ public class LobbyRenderer extends CustomRenderer {
 	private float cursorVelocityX, cursorVelocityY;
 	private boolean cursorXDirection, cursorYDirection;
 	private boolean hitReady = false;
-	private boolean pickedChar = false;
+	private boolean pickedChar = false, confirmedChar = false;
 	private float readyCountdown = 1.0f;
 	private Character.CharacterType charType = Character.CharacterType.NUM_TYPES;
+	private int playerId;
+	private int[] chosenChars;
 	
-	public LobbyRenderer(Activity activity) {
+	public LobbyRenderer(Activity activity, int playerId) {
 		super(activity);
+		
+		this.playerId = playerId;
+		chosenChars = new int[MAX_PLAYERS]; 
+		
+		for (int i = 0; i < MAX_PLAYERS; i++) {
+			// Each index corresponds to an ID - 1. 
+			chosenChars[i] = -1;
+		}
 	}
 	
 	@Override
@@ -168,6 +200,29 @@ public class LobbyRenderer extends CustomRenderer {
 			}
 		}
 		
+		Matrix.setIdentityM(scaleMat, 0);
+		scaleY = (TOKEN_HEIGHT / (float) lobbyBackground.getHeight()) * 2.0f;
+		scaleX = scaleY;		
+		
+		// Draw the tokens
+		for (int i = 0; i < MAX_PLAYERS; i++) {
+			if (chosenChars[i] != -1 && chosenChars[i] < centreList.length && chosenChars[i] >= 0) {
+				// Get the centre in pixel coordinates, then translate to openGL coordinates.
+				float transX = (-centreList[chosenChars[i]].x / lobbyBackground.getWidth()) * 2 * getAspectRatio() + 
+						(2*getAspectRatio())/2.0f;
+				float transY = (-centreList[chosenChars[i]].y / lobbyBackground.getHeight()) * 2.0f + 1.0f;
+				Matrix.setIdentityM(copyMat, 0);
+				Matrix.translateM(copyMat, 0, transX, transY, 0);
+				Matrix.scaleM(scaleMat, 0, scaleX, scaleY, 1);
+				Matrix.multiplyMM(copyMat, 0, copyMat.clone(), 0, scaleMat, 0);
+				Matrix.multiplyMM(copyMat, 0, getModelViewMatrix(), 0, copyMat.clone(), 0);
+				
+				float[] col = Player.getColorFromId(i + 1);
+				tokenImg.setColour(col[0], col[1], col[2], col[3]);
+				tokenImg.draw(copyMat);
+			}
+		}
+		
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
 		
@@ -195,6 +250,29 @@ public class LobbyRenderer extends CustomRenderer {
 		} else if (msg.getID() == IncomingMessageParser.InMessageType.MSG_CHAR_CHOSEN.getId()) {
 			// Character chosen handling -- make the character un-selectable.
 			Log.i("Msg", "Received Char Chosen Msg!");
+			byte[] dat = msg.getData(); 
+			
+			try {
+				byte player = dat[0];
+				byte charId = dat[1];
+				
+				Log.i("Msg", "Data received: " + dat[0] + ", " + dat[1]);
+				
+				if (player == playerId) {
+					if (charId == charType.ordinal()) {
+						// Check if we got the character we requested
+						chosenChars[player - 1] = charType.ordinal();
+						confirmedChar = true; 
+					} else {
+						Log.i("Msg", "Char type doesn't match.");
+					}
+				} else {
+					// Another player has chosen a character.
+					chosenChars[player - 1] = charId;
+				}
+			} catch (ArrayIndexOutOfBoundsException e) {
+				Log.e("LobbyRenderer", "Character chosen message not received correctly.");
+			}
 		}
 	}
 	
@@ -207,6 +285,7 @@ public class LobbyRenderer extends CustomRenderer {
 		titleImg = new BitmapImg(getActivity(), R.drawable.tart_title);
 		readyImg = new BitmapImg(getActivity(), R.drawable.ready); 
 		backImg = new BitmapImg(getActivity(), R.drawable.back); 
+		tokenImg = new BitmapImg(getActivity(), R.drawable.token);
 		
 		mCursor = new Particle(getActivity(), R.drawable.particle, 0, 0, 0,
 				0.85098f, 0.0f, 0.0f, 1.0f, 0.2f, 0.2f, false, 0);
@@ -238,8 +317,7 @@ public class LobbyRenderer extends CustomRenderer {
 		// check chars
 		
 		// neku w,h = 44.5,54
-		// neku centre = 130.5, 156
-		
+		// neku centre = 130.5, 156		
 		if (testBoundingBox(fx,fy, 130.5f,156f,44.5f,54f,width, height)){
 			charType = Character.CharacterType.NEKU;
 			Log.i("CHAR", "im neku");
@@ -304,6 +382,12 @@ public class LobbyRenderer extends CustomRenderer {
 		
 		if (pickedChar) {
 			// Send out a message that the character has been picked.
+			if (socketComm == null || socketComm.getSock() == null) {
+				confirmedChar = true;
+				playerId = 1;
+				chosenChars[playerId - 1] = charType.ordinal();
+			}
+			
 			OutMsgSelectChar selectCharMsg = new OutMsgSelectChar(getActivity());
 			try {
 				selectCharMsg.sendMessage((byte) charType.ordinal());
@@ -312,7 +396,7 @@ public class LobbyRenderer extends CustomRenderer {
 			}
 		}
 		
-		if (charType != Character.CharacterType.NUM_TYPES){
+		if (confirmedChar && charType != Character.CharacterType.NUM_TYPES){
 			if (fx >= readyX - readyWidth && fx <= readyX + readyWidth && 
 					fy >= readyY - readyHeight && fy <= readyY + readyHeight) {
 				// Touched join game
@@ -348,11 +432,9 @@ public class LobbyRenderer extends CustomRenderer {
 		
 		}
 		
-		
 		if (mParticleSystem != null) {
 			mParticleSystem.beginSpawning();
-		}
-		
+		} 
 	}
 
 	private boolean testBoundingBox (float fx, float fy, float x1, float y1, float width, float height, float widthScreen, float heightScreen){

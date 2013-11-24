@@ -106,7 +106,9 @@ public class ParticleSystem {
 	public void makeBurstSystem(float minAngle, float maxAngle) {
 		for (int i = 0; i < particles.length; i++) {
 			particles[i].setDead(true);
+			deadIndices[i] = i;
 		}
+		deadIndexCount = mMaxParticles;
 		
 		mType = Type.BURST;
 		

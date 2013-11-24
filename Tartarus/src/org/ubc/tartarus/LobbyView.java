@@ -17,10 +17,10 @@ public class LobbyView extends GLSurfaceView implements
 	CustomRenderer mRenderer;
 	private GestureDetectorCompat mGestureDetector; 
 	
-	public LobbyView(Activity activity) {
+	public LobbyView(Activity activity, int playerId) {
 		super(activity);
 		setEGLContextClientVersion(2);
-		mRenderer = new LobbyRenderer(activity);
+		mRenderer = new LobbyRenderer(activity, playerId);
 		setRenderer(mRenderer);
 		mGestureDetector = new GestureDetectorCompat(activity, this);
 	}

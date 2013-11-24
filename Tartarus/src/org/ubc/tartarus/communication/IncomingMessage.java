@@ -50,11 +50,6 @@ public class IncomingMessage {
 		return response;
 	}
 	
-	public static boolean handleCharChosen() {
-		
-		return true;
-	}
-	
 	public static boolean handleStart() {
 		
 		return true;

@@ -357,4 +357,30 @@ public class Player {
 			}
 		}
 	}
+	
+	public static float[] getColorFromId(int playerId) {
+		float[] playerCol = new float[4]; 
+		
+		playerCol[3] = 1.0f; 
+		
+		if (playerId == 1) {
+			playerCol[0] = 1.0f;
+			playerCol[1] = 0.0f;
+			playerCol[2] = 0.0f;
+		} else if (playerId == 2) {
+			playerCol[0] = 0.0f;
+			playerCol[1] = 1.0f;
+			playerCol[2] = 0.0f;
+		} else if (playerId == 3) {
+			playerCol[0] = 0.0f;
+			playerCol[1] = 0.0f;
+			playerCol[2] = 1.0f;
+		} else {
+			playerCol[0] = 1.0f;
+			playerCol[1] = 0.0f;
+			playerCol[2] = 1.0f;
+		}
+		
+		return playerCol;
+	}
 }

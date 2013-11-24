@@ -23,6 +23,8 @@ import android.widget.Toast;
 
 public class MenuRenderer extends CustomRenderer {
 
+	public static final String PLAYER_ID_INTENT = "PlayerID";
+	
 	public static final int MATRIX_SIZE = 4;
 	public static final float CURSOR_ACCELERATION = 0.01f;
 	
@@ -42,6 +44,7 @@ public class MenuRenderer extends CustomRenderer {
 	private boolean hitJoin = false;
 	private float joinCountdown = 1.0f;
 	private OutMsgJoin joinMsg = null; 
+	private int playerID = 0;
 	
 	public MenuRenderer(Activity activity) {
 		super(activity);
@@ -130,6 +133,7 @@ public class MenuRenderer extends CustomRenderer {
 
 				// Transition to game activity...
 				Intent intent = new Intent(getActivity(), LobbyActivity.class);
+				intent.putExtra(PLAYER_ID_INTENT, playerID);
 				getActivity().startActivity(intent);
 			}
 		}
@@ -172,6 +176,7 @@ public class MenuRenderer extends CustomRenderer {
 				// Successfully joined the game. 
 				// TODO: Set the player's ID-- this is in ret. 
 				Log.i("Msg", "Got a join response!");
+				playerID = ret;
 				mParticleSystem.makeSpiralSystem();
 				mParticleSystem.beginSpawning();
 				hitJoin = true;
@@ -221,7 +226,7 @@ public class MenuRenderer extends CustomRenderer {
 				fy >= joinY - joinHeight && fy <= joinY + joinHeight) {
 			// Touched join game
 			
-			if (socketComm == null) {
+			if (socketComm == null || socketComm.getSock() == null) {
 				// Not connected -- allow the player to join as a single player.
 				Log.i("MenuRenderer", "Not connected to a socket. Joining in single-player mode.");
 				mParticleSystem.makeSpiralSystem();

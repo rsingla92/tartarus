@@ -36,6 +36,10 @@ public class SocketComm {
 		};
 	}
 	
+	public Socket getSock() {
+		return mAppData.sock;
+	}
+	
 	public IncomingMessage getNextMessage() throws NoSuchElementException {
 	   return msgList.removeFirst();
 	}

@@ -1,5 +1,7 @@
 package org.ubc.tartarus.graphics;
 
+import java.net.Socket;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 

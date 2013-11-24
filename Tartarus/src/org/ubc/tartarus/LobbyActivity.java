@@ -4,6 +4,7 @@ import java.io.IOException;
 
 import org.ubc.tartarus.communication.OutMsgDisconnect;
 import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
+import org.ubc.tartarus.graphics.MenuRenderer;
 import org.ubc.tartarus.particle.Particle;
 
 import android.app.Activity;
@@ -21,8 +22,11 @@ public class LobbyActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		
+		int playerId = super.getIntent().getExtras().getInt(MenuRenderer.PLAYER_ID_INTENT);
+		
 		ApplicationData app = (ApplicationData) getApplication();
-		surfaceView = new LobbyView(this);
+		surfaceView = new LobbyView(this, playerId);
 		
 		setContentView(surfaceView);
 
