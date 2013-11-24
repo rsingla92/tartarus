@@ -88,6 +88,7 @@ public class ParticleSystem {
 		
 		if (!Particle.getParticleImgLoaded()) {
 			// Load particle image
+			Log.i("Particle", "Loading particle image!");
 			Particle.loadParticleImg(mContext, particleResId);
 		}
 		

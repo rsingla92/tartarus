@@ -198,6 +198,7 @@ public class MenuRenderer extends CustomRenderer {
 				0.85098f, 0.0f, 0.0f, 1.0f, 0.2f, 0.2f, false, 0);
 		mCursor.setParticleSpeed(0, 0, 0);
 		
+		Log.i("Particle", "On surface created! Making new particle system...");
 		mParticleSystem = new ParticleSystem(getActivity(), 500, R.drawable.particle, 5);
 	}
 	

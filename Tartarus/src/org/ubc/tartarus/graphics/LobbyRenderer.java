@@ -198,16 +198,15 @@ public class LobbyRenderer extends CustomRenderer {
 				mParticleSystem.endSpawning();
 				mParticleSystem.makeNormalSystem();
 			}
-		}
-		
-		Matrix.setIdentityM(scaleMat, 0);
-		scaleY = (TOKEN_HEIGHT / (float) lobbyBackground.getHeight()) * 2.0f;
-		scaleX = scaleY;		
+		}	
 		
 		// Draw the tokens
 		for (int i = 0; i < MAX_PLAYERS; i++) {
 			if (chosenChars[i] != -1 && chosenChars[i] < centreList.length && chosenChars[i] >= 0) {
 				// Get the centre in pixel coordinates, then translate to openGL coordinates.
+				Matrix.setIdentityM(scaleMat, 0);
+				scaleY = (TOKEN_HEIGHT / (float) lobbyBackground.getHeight()) * 2.0f;
+				scaleX = scaleY;	
 				float transX = (-centreList[chosenChars[i]].x / lobbyBackground.getWidth()) * 2 * getAspectRatio() + 
 						(2*getAspectRatio())/2.0f;
 				float transY = (-centreList[chosenChars[i]].y / lobbyBackground.getHeight()) * 2.0f + 1.0f;
@@ -401,7 +400,7 @@ public class LobbyRenderer extends CustomRenderer {
 					fy >= readyY - readyHeight && fy <= readyY + readyHeight) {
 				// Touched join game
 				// Send out a message that the character has been picked.
-				if (socketComm == null) {
+				if (socketComm == null || socketComm.getSock() == null) {
 					Log.i("LobbyRenderer", "Running in single-player mode, allowing you to join.");
 					mParticleSystem.makeSpiralSystem();
 					hitReady = true;
