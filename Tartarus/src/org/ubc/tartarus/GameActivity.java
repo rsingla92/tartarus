@@ -93,6 +93,7 @@ public class GameActivity extends Activity {
 			}
 			
 	    	Particle.setParticleImgLoaded(false);
+	    	
 	    	this.finish();
 	        return true;
 	    }
