@@ -13,12 +13,12 @@ extern Map map;
 
 unsigned char numPlayers = 0;
 
-static sPlayer playerDevTable[MAX_PLAYERS] =
+sPlayer playerDevTable[MAX_PLAYERS] =
 {
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0xff, 0, 0}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0, 0xff, 0}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0xff}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0x8f, 0, 0xff}}
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0xff, 0, 0}, {-1, -1, -1, -1}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0, 0xff, 0}, {-1, -1, -1, -1}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0xff}, {-1, -1, -1, -1}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0x8f, 0, 0xff}, {-1, -1, -1, -1}}
 };
 
 unsigned char doesPlayerExist(int player)
@@ -115,6 +115,7 @@ unsigned char addPlayer(int deviceId)
 
 	playerDevTable[playerId].deviceId = deviceId;
 	playerDevTable[playerId].state = JOINED;
+	generateGems(playerId);
 
 	numPlayers++;
 	return playerId;
@@ -126,7 +127,9 @@ void removePlayer(int deviceId)
 
 	if (playerId != -1)
 	{
+		printf("Removed player with device ID %d\n", deviceId);
 		playerDevTable[playerId].state = NOT_CONNECTED;
+		playerDevTable[playerId].chosen = 0;
 		numPlayers--;
 	}
 }
@@ -226,6 +229,17 @@ short getStoredX(int player)
 short getStoredY(int player)
 {
 	return playerDevTable[player].storedY;
+}
+
+void generateGems(unsigned char player)
+{
+	int i;
+	// Generate the gems for each quadrant
+	for (i = 0; i < NUM_GEMS_PER_PLAYER_PER_QUAD*4; i++)
+	{
+		int quad = i % 4 + 1;
+		playerDevTable[player].gemList[i] = getRandomPoint(quad);
+	}
 }
 
 void sendBroadcast(alt_up_rs232_dev* uart, GenericMsg* msg)

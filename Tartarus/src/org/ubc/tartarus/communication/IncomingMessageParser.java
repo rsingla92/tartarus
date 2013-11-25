@@ -7,7 +7,8 @@ public class IncomingMessageParser {
 		// Add any other messages here... 
 		MSG_JOIN_RESPONSE((byte) 0, 1),
 		MSG_START((byte) 1, 1),
-		MSG_CHAR_CHOSEN((byte) 2, 2);
+		MSG_CHAR_CHOSEN((byte) 2, 2),
+		MSG_GEM((byte) 3, -1);
 		
 		private byte id;
 		private int dataLen;
@@ -33,6 +34,8 @@ public class IncomingMessageParser {
 			return new IncomingMessage(InMessageType.MSG_START.getDataLen(), InMessageType.MSG_START.getId());
 		} else if (id == InMessageType.MSG_CHAR_CHOSEN.id) {
 			return new IncomingMessage(InMessageType.MSG_CHAR_CHOSEN.getDataLen(), InMessageType.MSG_CHAR_CHOSEN.getId());
+		} else if (id == InMessageType.MSG_GEM.id) {
+			return new IncomingMessage(InMessageType.MSG_GEM.getDataLen(), InMessageType.MSG_GEM.getId());
 		}
 		
 		return null;

@@ -7,67 +7,32 @@
 #include <string.h>
 #include "serialport.h"
 
-
-void startSerialReadInterrupt(alt_up_rs232_dev *rs232)
+int writeSerialData(FILE *rs232, unsigned char data)
 {
-	alt_up_rs232_enable_read_interrupt(rs232);
+	return fputc(data, rs232);
 }
 
-void stopSerialReadInterrupt(alt_up_rs232_dev *rs232)
+int readSerialData(FILE *rs232, unsigned char *data)
 {
-	alt_up_rs232_disable_read_interrupt(rs232);
+	int dat = fgetc(rs232);
+	*data = dat;
+	return dat;
 }
 
-int checkSerialParity(alt_u32 data_reg)
+int readSerialDataWait(FILE *rs232, unsigned char *data)
 {
-	return alt_up_rs232_check_parity(data_reg);
+	int c;
+	while ((c = fgetc(rs232)) == EOF);
+	*data = c;
+	return c;
 }
 
-unsigned getSerialUsedSpace(alt_up_rs232_dev *rs232)
+void sendRequestData(FILE *rs232)
 {
-	return alt_up_rs232_get_used_space_in_read_FIFO(rs232);
+	fputc(0, rs232);
 }
 
-unsigned getSerialFreeSpace(alt_up_rs232_dev *rs232)
-{
-	return alt_up_rs232_get_available_space_in_write_FIFO(rs232);
-}
-
-int writeSerialData(alt_up_rs232_dev *rs232, alt_u8 data)
-{
-	return alt_up_rs232_write_data(rs232, data);
-}
-
-int readSerialData(alt_up_rs232_dev *rs232, alt_u8 *data, alt_u8 *parity_error)
-{
-	return alt_up_rs232_read_data(rs232, data, parity_error);
-}
-
-int readSerialDataWait(alt_up_rs232_dev *rs232, alt_u8 *data, alt_u8 *parity_error)
-{
-	while(getSerialUsedSpace(rs232) == 0);
-	return alt_up_rs232_read_data(rs232, data, parity_error);
-}
-
-int readSerialFD(alt_fd* fd, char* ptr, int len)
-{
-	return alt_up_rs232_read_fd (fd, ptr, len);
-}
-
-int writeSerialFD(alt_fd* fd, const char* ptr, int len)
-{
-	return alt_up_rs232_write_fd (fd, ptr, len);
-}
-
-alt_up_rs232_dev* initSerialPort(const char* name) {
-	unsigned char data, parity;
-	alt_up_rs232_dev* new_dev = alt_up_rs232_open_dev(name);
-
-	/* Clear read buffer. */
-	while (alt_up_rs232_get_used_space_in_read_FIFO(new_dev)) {
-	   alt_up_rs232_read_data(new_dev, &data, &parity);
-	}
-
-	return new_dev;
+FILE* initSerialPort(const char* name) {
+	return fopen(name, "r+");
 }
 

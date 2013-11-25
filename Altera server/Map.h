@@ -29,6 +29,9 @@ typedef struct {
 
 } Map;
 
+typedef struct {
+	short x, y;
+} Point;
 // Constructor
 void makeMap( char*);
 
@@ -51,5 +54,6 @@ unsigned char isTileSolid(unsigned short tileId);
 int readShort(file_handle handle);
 void erasePositionAt(short absX, short absY);
 void drawPlayerAt(short absX, short absY, colour col);
+Point getRandomPoint(int quadNum);
 
 #endif

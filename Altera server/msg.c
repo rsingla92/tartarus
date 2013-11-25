@@ -1,12 +1,17 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "msg.h"
 #include "Map.h"
 #include "display.h"
 #include "player.h"
 
 extern Map map;
-extern alt_up_rs232_dev* uart_dev;
+extern FILE* uart_dev;
 extern unsigned char numPlayers;
+extern sPlayer playerDevTable[MAX_PLAYERS];
+
+static unsigned char gemsSent = 0;
+
 /*
 GAME_STATE getGameState(GameMsg g)
 {
@@ -260,7 +265,7 @@ int parseReadyMsg(GenericMsg* msg)
 
 	if(readyPlayers == numPlayers) {
 		printf("\nReady: %d\n", readyPlayers);
-		sendStartResponse(playerNo);
+		sendGemMsg(playerNo);
 	}
 }
 
@@ -310,13 +315,67 @@ void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
 
 	// Send the message ID
 	writeSerialData(uart, msgID);
+	printf("Message ID: %d\n", msgID);
 
 	// Send the rest of the data
 	for (i = 0; i < msg->msgLength_; i++) {
-		printf("Writing: %d\n", msg->msg_[i]);
+		printf("i: %d, Writing: %d\n", i, msg->msg_[i]);
 		writeSerialData(uart, msg->msg_[i]);
 	}
  }
+
+void parseGemAckMsg(GenericMsg* msg)
+{
+	gemsSent++;
+
+	if (gemsSent >= numPlayers)
+	{
+		printf("Sending start signal.\n");
+		sendStartResponse();
+	}
+}
+
+// Send all gem lists to the player with ID player_id.
+void sendGemMsg(int player_id)
+{
+	int err_code = 0;
+	GenericMsg gemMsg;
+	gemMsg.clientID_ =  getPlayerDevice(player_id, &err_code);
+
+	if (err_code == -1)
+	{
+		printf("Invalid player ID.\n");
+		return;
+	}
+
+	gemMsg.msgID_ = GEM_MSG;
+	// The extra 2 is for the header: number of gems and player ID.
+	gemMsg.msgLength_ = numPlayers*NUM_GEMS_PER_PLAYER_PER_QUAD*4*sizeof(Point)
+		+ 2*numPlayers;
+
+	gemMsg.msg_ = (unsigned char*) malloc(gemMsg.msgLength_);
+	int i, msgCounter;
+	msgCounter = 0;
+
+	for (i = 0; i < numPlayers; i++)
+	{
+		gemMsg.msg_[msgCounter++] = i+1;
+		gemMsg.msg_[msgCounter++] = NUM_GEMS_PER_PLAYER_PER_QUAD*4;
+
+		int j;
+		for (j = 0; j < gemMsg.msg_[msgCounter-1]; j++)
+		{
+			Point gem = playerDevTable[i].gemList[j];
+			gemMsg.msg_[msgCounter++] = (gem.x >> 8);
+			gemMsg.msg_[msgCounter++] = (gem.x & 0x00ff);
+			gemMsg.msg_[msgCounter++] = (gem.y >> 8);
+			gemMsg.msg_[msgCounter++] = (gem.y & 0x00ff);
+		}
+	}
+
+	writeMsg(uart_dev, &gemMsg);
+	free(gemMsg.msg_);
+}
 
 void sendCharacterChosenMsg(int player_id, unsigned char charID)
 {
@@ -355,14 +414,14 @@ void sendJoinResponse(int player_id, unsigned char response, unsigned char devID
 }
 
 //Ready response
-void sendStartResponse(int player_id)
+void sendStartResponse(void)
 {
 	// The player with ID player_id has
 	// selected the character with ID charID. Send a message
 	// to all devices indicating the player can no longer be chosen.
 	GenericMsg startMsg;
 	int err_code = 0;
-	startMsg.clientID_ = getPlayerDevice(player_id, &err_code); //Doesn't matter, since this is broadcast.
+	startMsg.clientID_ = 0; //Doesn't matter, since this is broadcast.
 
 	if (err_code == -1) return;
 
@@ -370,7 +429,7 @@ void sendStartResponse(int player_id)
 	startMsg.msgLength_ = 1;
 	startMsg.msg_ = (unsigned char*) malloc(startMsg.msgLength_);
 	startMsg.msg_[0] = 1;
-	writeMsg(uart_dev, &startMsg);
+	sendBroadcast(uart_dev, &startMsg);
 	free(startMsg.msg_);
 }
 

@@ -73,11 +73,11 @@ public class SocketComm {
 	public void sendMessage(byte data[]) {
 		// Create an array of bytes.  First byte will be the
 		// message length, and the next ones will be the message
-		byte buf[]; 
+	//	byte buf[]; 
 		
-	    buf = new byte[data.length + 1];
-		buf[0] = (byte) data.length; 
-		System.arraycopy(data, 0, buf, 1, data.length);
+	 //   buf = new byte[data.length + 1];
+//		buf[0] = (byte) data.length; 
+	//	System.arraycopy(data, 0, buf, 1, data.length);
 		
 		// Now send through the output stream of the socket
 		
@@ -90,7 +90,7 @@ public class SocketComm {
 			}
 			
 			try {
-				out.write(buf, 0, data.length + 1);
+				out.write(data, 0, data.length);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (NullPointerException e) {
@@ -119,9 +119,9 @@ public class SocketComm {
 			
 			if (sock == null) {
 				Log.i("TestSocket", "Could not connect... socket null!");
+			} else {
+				Log.i("TestSocket", "Connected!");
 			}
-			
-			Log.i("TestSocket", "Connected!");
 			return sock;
 		}
 		
@@ -141,6 +141,8 @@ public class SocketComm {
 
 					// See if any bytes are available from the Middleman
 					int bytes_avail = in.available();
+					int msgLen = 0;
+					
 					if (bytes_avail > 0) {
 						
 						// If so, read them in and create a sring
@@ -149,25 +151,29 @@ public class SocketComm {
 						
 						Log.i("Msg", "Available bytes: " + bytes_avail);
 						
-						// Read in the ID
 						in.read(buf);
-
-						if (buf.length > 1) {
-							IncomingMessage msg = IncomingMessageParser.getMessageFromID(buf[cur_pos++]);
-								
-							if (bytes_avail - 1 > 0) {								
-								msg.populateData(buf, cur_pos, bytes_avail - 1);
-								cur_pos += bytes_avail - 1; 
+						
+						while (cur_pos < bytes_avail) {
+							// Read the length first.
+							msgLen = buf[cur_pos++];
+							
+							if (msgLen >= 1) {
+								IncomingMessage msg = IncomingMessageParser.getMessageFromID(buf[cur_pos++]);
+									
+								if (msgLen - 1 > 0) {								
+									msg.populateData(buf, cur_pos, msgLen - 1);
+									cur_pos += msgLen - 1; 
+								}
+									
+								Message out_msg = new Message(); 
+								out_msg.obj = msg;
+								Log.i("Msg", "Sending msg from socketComm.");
+								socketMsgHandler.sendMessage(out_msg);
+							} 
+							else
+							{
+								Log.e("SocketComm", "Incoming message did not include an ID.");			
 							}
-								
-							Message out_msg = new Message(); 
-							out_msg.obj = msg;
-							Log.i("Msg", "Sending msg from socketComm.");
-							socketMsgHandler.sendMessage(out_msg);
-						} 
-						else
-						{
-							Log.e("SocketComm", "Incoming message did not include an ID.");			
 						}
 					}
 				} catch (IOException e) {

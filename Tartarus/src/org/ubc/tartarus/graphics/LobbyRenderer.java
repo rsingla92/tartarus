@@ -277,6 +277,17 @@ public class LobbyRenderer extends CustomRenderer {
 			} catch (ArrayIndexOutOfBoundsException e) {
 				Log.e("LobbyRenderer", "Character chosen message not received correctly.");
 			}
+		} else if (msg.getID() == IncomingMessageParser.InMessageType.MSG_GEM.getId()) {
+			Log.i("Msg", "Received Gem Msg!");
+			byte[] dat = msg.getData(); 
+			
+			try {
+				Log.i("LobbyRenderer", "Player ID: " + dat[0] + ", Number of Gems: " + dat[1]);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				Log.e("LobbyRenderer", "Message mismatch with Gem Msg");
+			}
+			
+			
 		}
 	}
 	

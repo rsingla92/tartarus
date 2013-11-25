@@ -8,7 +8,6 @@
 #include "sys/alt_alarm.h"
 #include "io.h"
 #include "sys/alt_timestamp.h"
-#include "altera_up_avalon_rs232.h"
 #include "state_machine.h"
 #include "audio.h"
 #include "msg.h"
@@ -25,7 +24,7 @@ int menuSoundBufLen;
 
 GenericMsg* msgHead = NULL;
 GenericMsg* msgTail = NULL;
-alt_up_rs232_dev* uart_dev;
+FILE* uart_dev;
 static int writeQueueCounter = 0;
 GenericMsg* writeMsgHead = NULL;
 GenericMsg* writeMsgTail = NULL;
@@ -36,50 +35,49 @@ extern Map map;
  * and puts them into a generic MSG struct.
  * Puts this generic struct into a messageQueue;
  */
-static int readSocket(alt_up_rs232_dev* uart)
+static int readSocket(FILE* uart)
 {
 	byte clientID = 0;
 	byte msgLength = 0;
 	byte msgID = 0;
-	byte parity;
 	byte packetLength = 0;
-
-	if (getSerialUsedSpace(uart) == 0)
-	{
-		//If nothing to read, then just return
-		return 0;
-	}
 
 	// Make element to add to queue
 	GenericMsg* newElement;
 
+	sendRequestData(uart);
+
 	// first byte
-	readSerialData(uart, &clientID, &parity);
-	printf("Got data from %x!\n", clientID);
+	readSerialData(uart, &clientID);
+	printf("Dat: %d\n", clientID);
+
+	// If nothing to read, return.
+	if (clientID == EOF) return 0;
 
 	// Read size
-	readSerialDataWait(uart, &packetLength, &parity);
+	readSerialDataWait(uart, &packetLength);
 	printf("Length of Packet: %d\n", packetLength);
 
-	int i;
-	for( i = 0; i < packetLength; i += msgLength + 3)
-	{
+	//int i;
+	//for( i = 0; i < packetLength; i += msgLength + 3)
+	//{
 		newElement = (GenericMsg*) malloc(sizeof(GenericMsg));
 		newElement->clientID_ = clientID;
 		newElement->next = NULL;
 
 		// HACK: Trying to get to the bottom of this...
-		byte throwaway;
-		readSerialDataWait(uart, &throwaway, &parity);
+		// Commented out because it was a problem with the old Middleman.
+		// byte throwaway;
+		// readSerialDataWait(uart, &throwaway);
 
 		//Message length...
-		readSerialDataWait(uart, &msgLength, &parity);
-		msgLength--; // We read in the type
-		newElement->msgLength_ = msgLength;
+	//	readSerialDataWait(uart, &msgLength);
+	//	msgLength--; // We read in the type
+		newElement->msgLength_ = packetLength--;
 		printf("Length: %d, ", newElement->msgLength_);
 
 		// Read in the message ID:
-		readSerialDataWait(uart, &msgID, &parity);
+		readSerialDataWait(uart, &msgID);
 		newElement->msgID_ = msgID;
 		printf("Type of message: %x, ", newElement->msgID_);
 
@@ -87,8 +85,8 @@ static int readSocket(alt_up_rs232_dev* uart)
 
 		int j;
 		printf("Data: ");
-		for (j = 0; j < msgLength; j++) {
-			readSerialDataWait(uart, &(newElement->msg_[j]), &parity);
+		for (j = 0; j < packetLength; j++) {
+			readSerialDataWait(uart, &(newElement->msg_[j]));
 			printf("%x, ", newElement->msg_[j]);
 		}
 
@@ -109,36 +107,10 @@ static int readSocket(alt_up_rs232_dev* uart)
 
 			msgTail = newElement;
 		}
-	}
+	//}
 
 	return 1;
 }
-
-/*
- static void sendMessage(alt_up_rs232_dev* uart, GenericMsg* msg) {
-
-	//Add to the queue
-	// If it is the first element then the queue is not set up
-	if( !writeMsgHead )
-	{
-		// Initialize the queue
-		writeMsgHead = newElement;
-		writeMsgTail = writeMsgHead;
-		writeQueueCounter++;
-	}
-	else
-	{
-		// Make current tail point to cur element if tail exists
-		if( writeMsgTail)
-		{
-			writeMsgTail->next = msg;
-		}
-
-		writeMsgTail = msg;
-		writeQueueCounter++;
-	}
- }
-*/
 
  static void resetQueue()
  {
@@ -176,6 +148,9 @@ static void parseNextMessage()
 			break;
 		case DISCONNECT:
 			parseDisconnectMsg(msgHead);
+			break;
+		case GEM_ACK:
+			parseGemAckMsg(msgHead);
 			break;
 		case TEST:
 			parseTestMsg(msgHead);

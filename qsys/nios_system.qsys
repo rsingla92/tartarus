@@ -48,7 +48,7 @@
    {
       datum baseAddress
       {
-         value = "17314992";
+         value = "17315024";
          type = "long";
       }
    }
@@ -56,7 +56,7 @@
    {
       datum baseAddress
       {
-         value = "17314976";
+         value = "17315008";
          type = "long";
       }
    }
@@ -72,7 +72,7 @@
    {
       datum baseAddress
       {
-         value = "17315048";
+         value = "17315080";
          type = "long";
       }
    }
@@ -80,7 +80,7 @@
    {
       datum baseAddress
       {
-         value = "17314960";
+         value = "17314992";
          type = "long";
       }
    }
@@ -88,7 +88,7 @@
    {
       datum baseAddress
       {
-         value = "17315040";
+         value = "17315072";
          type = "long";
       }
    }
@@ -96,15 +96,7 @@
    {
       datum baseAddress
       {
-         value = "17315064";
-         type = "long";
-      }
-   }
-   element rs232_0.avalon_rs232_slave
-   {
-      datum baseAddress
-      {
-         value = "17315056";
+         value = "17315088";
          type = "long";
       }
    }
@@ -249,19 +241,27 @@
          type = "int";
       }
    }
+   element rs232_0.s1
+   {
+      datum baseAddress
+      {
+         value = "17314912";
+         type = "long";
+      }
+   }
    element LEDs.s1
    {
       datum baseAddress
       {
-         value = "17314928";
+         value = "17314960";
          type = "long";
       }
    }
-   element sdram.s1
+   element buttons.s1
    {
       datum baseAddress
       {
-         value = "8388608";
+         value = "17314976";
          type = "long";
       }
    }
@@ -273,19 +273,11 @@
          type = "long";
       }
    }
-   element switches.s1
-   {
-      datum baseAddress
-      {
-         value = "17314912";
-         type = "long";
-      }
-   }
    element controller_output.s1
    {
       datum baseAddress
       {
-         value = "17315008";
+         value = "17315040";
          type = "long";
       }
    }
@@ -293,23 +285,7 @@
    {
       datum baseAddress
       {
-         value = "17315024";
-         type = "long";
-      }
-   }
-   element timer_2.s1
-   {
-      datum baseAddress
-      {
-         value = "17314880";
-         type = "long";
-      }
-   }
-   element buttons.s1
-   {
-      datum baseAddress
-      {
-         value = "17314944";
+         value = "17315056";
          type = "long";
       }
    }
@@ -318,6 +294,30 @@
       datum baseAddress
       {
          value = "17314848";
+         type = "long";
+      }
+   }
+   element sdram.s1
+   {
+      datum baseAddress
+      {
+         value = "8388608";
+         type = "long";
+      }
+   }
+   element switches.s1
+   {
+      datum baseAddress
+      {
+         value = "17314944";
+         type = "long";
+      }
+   }
+   element timer_2.s1
+   {
+      datum baseAddress
+      {
+         value = "17314880";
          type = "long";
       }
    }
@@ -410,10 +410,10 @@
  <parameter name="globalResetBus" value="false" />
  <parameter name="hdlLanguage" value="VERILOG" />
  <parameter name="maxAdditionalLatency" value="1" />
- <parameter name="projectName" value="DK.qpf" />
+ <parameter name="projectName" value="lights.qpf" />
  <parameter name="sopcBorderPoints" value="false" />
  <parameter name="systemHash" value="1" />
- <parameter name="timeStamp" value="1382552315766" />
+ <parameter name="timeStamp" value="1385348509752" />
  <parameter name="useTestBenchNamingPattern" value="false" />
  <instanceScript></instanceScript>
  <interface name="clk" internal="clk_0.clk_in" type="clock" dir="end" />
@@ -487,7 +487,7 @@
    dir="end" />
  <interface
    name="rs232_0_external_interface"
-   internal="rs232_0.external_interface"
+   internal="rs232_0.external_connection"
    type="conduit"
    dir="end" />
  <module kind="clock_source" version="12.0" enabled="1" name="clk_0">
@@ -589,7 +589,7 @@
   <parameter name="tightlyCoupledInstructionMaster2AddrWidth" value="1" />
   <parameter name="tightlyCoupledInstructionMaster3AddrWidth" value="1" />
   <parameter name="instSlaveMapParam"><![CDATA[<address-map><slave name='sdram.s1' start='0x800000' end='0x1000000' /><slave name='nios2_processor.jtag_debug_module' start='0x1082800' end='0x1083000' /></address-map>]]></parameter>
-  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='sdram.s1' start='0x800000' end='0x1000000' /><slave name='pixel_buffer.avalon_sram_slave' start='0x1000000' end='0x1080000' /><slave name='char_drawer.avalon_char_buffer_slave' start='0x1080000' end='0x1082000' /><slave name='nios2_processor.jtag_debug_module' start='0x1082800' end='0x1083000' /><slave name='sdcard_interface.avalon_sdcard_slave' start='0x1083000' end='0x1083400' /><slave name='timer_0.s1' start='0x1083400' end='0x1083420' /><slave name='timer_1.s1' start='0x1083420' end='0x1083440' /><slave name='timer_2.s1' start='0x1083440' end='0x1083460' /><slave name='switches.s1' start='0x1083460' end='0x1083470' /><slave name='LEDs.s1' start='0x1083470' end='0x1083480' /><slave name='buttons.s1' start='0x1083480' end='0x1083490' /><slave name='dma_buffer.avalon_control_slave' start='0x1083490' end='0x10834A0' /><slave name='audio_and_video_config.avalon_av_config_slave' start='0x10834A0' end='0x10834B0' /><slave name='audio_core.avalon_audio_slave' start='0x10834B0' end='0x10834C0' /><slave name='controller_output.s1' start='0x10834C0' end='0x10834D0' /><slave name='controller_input.s1' start='0x10834D0' end='0x10834E0' /><slave name='jtag_uart.avalon_jtag_slave' start='0x10834E0' end='0x10834E8' /><slave name='char_drawer.avalon_char_control_slave' start='0x10834E8' end='0x10834F0' /><slave name='rs232_0.avalon_rs232_slave' start='0x10834F0' end='0x10834F8' /><slave name='character_lcd_0.avalon_lcd_slave' start='0x10834F8' end='0x10834FA' /></address-map>]]></parameter>
+  <parameter name="dataSlaveMapParam"><![CDATA[<address-map><slave name='sdram.s1' start='0x800000' end='0x1000000' /><slave name='pixel_buffer.avalon_sram_slave' start='0x1000000' end='0x1080000' /><slave name='char_drawer.avalon_char_buffer_slave' start='0x1080000' end='0x1082000' /><slave name='nios2_processor.jtag_debug_module' start='0x1082800' end='0x1083000' /><slave name='sdcard_interface.avalon_sdcard_slave' start='0x1083000' end='0x1083400' /><slave name='timer_0.s1' start='0x1083400' end='0x1083420' /><slave name='timer_1.s1' start='0x1083420' end='0x1083440' /><slave name='timer_2.s1' start='0x1083440' end='0x1083460' /><slave name='rs232_0.s1' start='0x1083460' end='0x1083480' /><slave name='switches.s1' start='0x1083480' end='0x1083490' /><slave name='LEDs.s1' start='0x1083490' end='0x10834A0' /><slave name='buttons.s1' start='0x10834A0' end='0x10834B0' /><slave name='dma_buffer.avalon_control_slave' start='0x10834B0' end='0x10834C0' /><slave name='audio_and_video_config.avalon_av_config_slave' start='0x10834C0' end='0x10834D0' /><slave name='audio_core.avalon_audio_slave' start='0x10834D0' end='0x10834E0' /><slave name='controller_output.s1' start='0x10834E0' end='0x10834F0' /><slave name='controller_input.s1' start='0x10834F0' end='0x1083500' /><slave name='jtag_uart.avalon_jtag_slave' start='0x1083500' end='0x1083508' /><slave name='char_drawer.avalon_char_control_slave' start='0x1083508' end='0x1083510' /><slave name='character_lcd_0.avalon_lcd_slave' start='0x1083510' end='0x1083512' /></address-map>]]></parameter>
   <parameter name="clockFrequency" value="50000000" />
   <parameter name="deviceFamilyName" value="Cyclone II" />
   <parameter name="internalIrqMaskSystemInfo" value="63" />
@@ -917,19 +917,21 @@
   <parameter name="simDrivenValue" value="0" />
   <parameter name="width" value="8" />
  </module>
- <module
-   kind="altera_up_avalon_rs232"
-   version="12.0"
-   enabled="1"
-   name="rs232_0">
-  <parameter name="avalon_bus_type" value="Memory Mapped" />
-  <parameter name="clk_rate" value="50000000" />
+ <module kind="altera_avalon_uart" version="12.0" enabled="1" name="rs232_0">
   <parameter name="baud" value="115200" />
-  <parameter name="parity" value="None" />
-  <parameter name="data_bits" value="8" />
-  <parameter name="stop_bits" value="1" />
-  <parameter name="AUTO_CLOCK_RESET_CLOCK_RATE" value="50000000" />
-  <parameter name="AUTO_DEVICE_FAMILY" value="Cyclone II" />
+  <parameter name="clockRate" value="50000000" />
+  <parameter name="dataBits" value="8" />
+  <parameter name="fixedBaud" value="true" />
+  <parameter name="parity" value="NONE" />
+  <parameter name="simCharStream" value="" />
+  <parameter name="simInteractiveInputEnable" value="false" />
+  <parameter name="simInteractiveOutputEnable" value="false" />
+  <parameter name="simTrueBaud" value="false" />
+  <parameter name="stopBits" value="1" />
+  <parameter name="syncRegDepth" value="2" />
+  <parameter name="useCtsRts" value="false" />
+  <parameter name="useEopRegister" value="false" />
+  <parameter name="useRelativePathForSimFile" value="false" />
  </module>
  <connection
    kind="avalon"
@@ -979,7 +981,7 @@
    start="nios2_processor.data_master"
    end="switches.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x01083460" />
+  <parameter name="baseAddress" value="0x01083480" />
  </connection>
  <connection
    kind="avalon"
@@ -987,7 +989,7 @@
    start="nios2_processor.data_master"
    end="LEDs.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x01083470" />
+  <parameter name="baseAddress" value="0x01083490" />
  </connection>
  <connection
    kind="reset"
@@ -1005,7 +1007,7 @@
    start="nios2_processor.data_master"
    end="jtag_uart.avalon_jtag_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x010834e0" />
+  <parameter name="baseAddress" value="0x01083500" />
  </connection>
  <connection
    kind="interrupt"
@@ -1079,7 +1081,7 @@
    start="nios2_processor.data_master"
    end="character_lcd_0.avalon_lcd_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x010834f8" />
+  <parameter name="baseAddress" value="0x01083510" />
  </connection>
  <connection
    kind="reset"
@@ -1104,7 +1106,7 @@
    start="nios2_processor.data_master"
    end="buttons.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x01083480" />
+  <parameter name="baseAddress" value="0x010834a0" />
  </connection>
  <connection
    kind="reset"
@@ -1148,7 +1150,7 @@
    start="nios2_processor.data_master"
    end="dma_buffer.avalon_control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x01083490" />
+  <parameter name="baseAddress" value="0x010834b0" />
  </connection>
  <connection
    kind="reset"
@@ -1271,7 +1273,7 @@
    start="nios2_processor.data_master"
    end="char_drawer.avalon_char_control_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x010834e8" />
+  <parameter name="baseAddress" value="0x01083508" />
  </connection>
  <connection
    kind="avalon"
@@ -1433,7 +1435,7 @@
    start="nios2_processor.data_master"
    end="audio_and_video_config.avalon_av_config_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x010834a0" />
+  <parameter name="baseAddress" value="0x010834c0" />
  </connection>
  <connection
    kind="clock"
@@ -1456,7 +1458,7 @@
    start="nios2_processor.data_master"
    end="audio_core.avalon_audio_slave">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x010834b0" />
+  <parameter name="baseAddress" value="0x010834d0" />
  </connection>
  <connection
    kind="interrupt"
@@ -1486,7 +1488,7 @@
    start="nios2_processor.data_master"
    end="controller_output.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x010834c0" />
+  <parameter name="baseAddress" value="0x010834e0" />
  </connection>
  <connection
    kind="clock"
@@ -1499,7 +1501,7 @@
    start="nios2_processor.data_master"
    end="controller_input.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x010834d0" />
+  <parameter name="baseAddress" value="0x010834f0" />
  </connection>
  <connection
    kind="reset"
@@ -1511,34 +1513,30 @@
    version="12.0"
    start="nios2_processor.jtag_debug_module_reset"
    end="controller_input.reset" />
- <connection
-   kind="clock"
-   version="12.0"
-   start="clocks.sys_clk"
-   end="rs232_0.clock_reset" />
+ <connection kind="clock" version="12.0" start="clocks.sys_clk" end="rs232_0.clk" />
  <connection
    kind="reset"
    version="12.0"
    start="nios2_processor.jtag_debug_module_reset"
-   end="rs232_0.clock_reset_reset" />
+   end="rs232_0.reset" />
  <connection
    kind="reset"
    version="12.0"
    start="clk_0.clk_reset"
-   end="rs232_0.clock_reset_reset" />
+   end="rs232_0.reset" />
  <connection
    kind="avalon"
    version="12.0"
    start="nios2_processor.data_master"
-   end="rs232_0.avalon_rs232_slave">
+   end="rs232_0.s1">
   <parameter name="arbitrationPriority" value="1" />
-  <parameter name="baseAddress" value="0x010834f0" />
+  <parameter name="baseAddress" value="0x01083460" />
  </connection>
  <connection
    kind="interrupt"
    version="12.0"
    start="nios2_processor.d_irq"
-   end="rs232_0.interrupt">
+   end="rs232_0.irq">
   <parameter name="irqNumber" value="4" />
  </connection>
 </system>

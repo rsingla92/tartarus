@@ -7,10 +7,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include "sdcard.h"
+#include "random.h"
 
 Map map;
 
 static int initializeMap(void);
+
+static Point *quad1, *quad2, *quad3, *quad4;
+static int quad1Size, quad2Size, quad3Size, quad4Size;
 
 // Constructor
 void makeMap( char* mapF)
@@ -81,6 +85,14 @@ void drawPlayerAt(short absX, short absY, colour col)
 	draw_pixel(tileX, tileY, col);
 }
 
+static int insertQuadPoint(Point* quad, int* size, int col, int row)
+{
+	int curIndex = (*size)++;
+
+	quad[curIndex].x = col;
+	quad[curIndex].y = row;
+}
+
 // initialize:
 // Loads the map from the map file and stores it in the solid-map array.
 static int initializeMap(void)
@@ -92,6 +104,11 @@ static int initializeMap(void)
     readMapFileHeader(map_file);
 
     map.mapInfo = (unsigned char*) malloc(map.sizeInfo * sizeof(unsigned char));
+    quad1 = (Point*) malloc((map.sizeInfo/4)*sizeof(Point));
+    quad2 = (Point*) malloc((map.sizeInfo/4)*sizeof(Point));
+    quad3 = (Point*) malloc((map.sizeInfo/4)*sizeof(Point));
+    quad4 = (Point*) malloc((map.sizeInfo/4)*sizeof(Point));
+    quad1Size = quad2Size = quad3Size = quad4Size = 0;
 
     // Read the file
     int i;
@@ -99,6 +116,40 @@ static int initializeMap(void)
     {
     	// Set the solid map
         map.mapInfo[i] = isTileSolid(readShort(map_file));
+
+        if (map.mapInfo[i] == 0) {
+			int row = i / map.mapWidth;
+			int col = i % map.mapWidth;
+
+			if (row < map.mapWidth/2)
+			{
+				// Left half of map
+				if (col < map.mapHeight/2)
+				{
+					// Quadrant 1
+					insertQuadPoint(quad1, &quad1Size, col, row);
+				}
+				else
+				{
+					// Quadrant 3
+					insertQuadPoint(quad3, &quad3Size, col, row);
+				}
+			}
+			else
+			{
+				// Right half
+				if (col < map.mapHeight/2)
+				{
+					// Quadrant 2
+					insertQuadPoint(quad2, &quad2Size, col, row);
+				}
+				else
+				{
+					// Quadrant 4
+					insertQuadPoint(quad4, &quad4Size, col, row);
+				}
+			}
+        }
     }
 
     // Close the file
@@ -106,6 +157,37 @@ static int initializeMap(void)
 
     return 1;
 
+}
+
+Point getRandomPoint(int quadNum)
+{
+	Point* quad;
+	int quadSize;
+
+	switch(quadNum)
+	{
+		case 1:
+			quad = quad1;
+			quadSize = quad1Size;
+			break;
+		case 2:
+			quad = quad2;
+			quadSize = quad2Size;
+			break;
+		case 3:
+			quad = quad3;
+			quadSize = quad3Size;
+			break;
+		case 4:
+		default:
+			quad = quad4;
+			quadSize = quad4Size;
+			break;
+
+	}
+
+	int rand = nextRand() % quadSize;
+	return quad[rand];
 }
 
 int readShort(file_handle handle)
