@@ -12,4 +12,5 @@ public class ApplicationData extends Application {
 	public Socket sock = null;
 	public SocketComm socketComm = null;
 	public ArrayList<Gem> gemList = null;
+	public int playerId = -1;
 }

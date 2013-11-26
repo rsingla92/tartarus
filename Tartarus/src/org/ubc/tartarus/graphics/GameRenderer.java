@@ -21,7 +21,10 @@ import org.ubc.tartarus.character.Gem;
 import org.ubc.tartarus.character.Gem.GemType;
 import org.ubc.tartarus.communication.IncomingMessage;
 import org.ubc.tartarus.communication.IncomingMessageParser;
+import org.ubc.tartarus.communication.OutMsgGemPicked;
+import org.ubc.tartarus.communication.OutMsgMove;
 import org.ubc.tartarus.communication.SocketComm;
+import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 import org.ubc.tartarus.map.MapParser;
 import org.ubc.tartarus.map.WorldMap;
 import org.ubc.tartarus.particle.ParticleSystem;
@@ -59,14 +62,17 @@ public class GameRenderer extends CustomRenderer {
 	private CharacterType charType;
 	private ArrayList<Gem> GemArray;
 	private Vector<Bomb> BombVector;
+	private int playerID;
+	private OutMsgGemPicked gemMsg;
 	
 	public GameRenderer(Activity activity, CharacterType charType) {
 		super(activity);
 		this.charType = charType;
-		
+
 		ApplicationData app = (ApplicationData) getActivity().getApplication();
 		this.GemArray = app.gemList;
-		
+		this.playerID = app.playerId;
+		this.gemMsg = new OutMsgGemPicked(activity);
 		Log.i("GameRenderer", "Size of gem array: " + GemArray.size());
 	}
 	
@@ -88,11 +94,21 @@ public class GameRenderer extends CustomRenderer {
 				GemArray.get(i).getScaleDimensions().x , GemArray.get(i).getScaleDimensions().y, 
 				mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
 				mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT)){
-				mPlayer.addPoints(10);
 				
-				// TODO: Check if this is the player's gem. Send message to DE2 indicating this gem is gone. 
-				// Send broadcast to all players so they can remove this gem.
-			
+				if (playerID-1 == GemArray.get(i).getGemType().ordinal()){
+
+					gemMsg.setMessage((short)(GemArray.get(i).getPosition().x/16), (short)(GemArray.get(i).getPosition().y/16));
+					
+					try {
+						gemMsg.sendMessage();
+					} catch (MessageTypeMismatchException e) {
+						Log.e("Gem", "Message Type Mismatch!");
+					}
+					
+					mPlayer.addPoints(10);
+					GemArray.remove(i);
+					
+				}
 			}
 		}
 		

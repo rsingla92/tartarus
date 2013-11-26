@@ -123,6 +123,10 @@ public class Gem implements Serializable {
 		mGemImg = new BitmapImg(activity, this.getResourceId());
 	}
 	
+	public GemType getGemType(){
+		return this.type;
+	}
+	
 	public Point getScaleDimensions(){
 		Point bottomLeft = this.getCurrentAnimation().getCurrentFrame().bottomLeft;
 		Point topRight = this.getCurrentAnimation().getCurrentFrame().topRight;

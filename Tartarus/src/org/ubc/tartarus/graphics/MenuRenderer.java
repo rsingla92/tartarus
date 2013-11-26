@@ -5,6 +5,7 @@ import java.util.NoSuchElementException;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
+import org.ubc.tartarus.ApplicationData;
 import org.ubc.tartarus.LobbyActivity;
 import org.ubc.tartarus.R;
 import org.ubc.tartarus.communication.IncomingMessage;
@@ -178,6 +179,10 @@ public class MenuRenderer extends CustomRenderer {
 				// TODO: Set the player's ID-- this is in ret. 
 				Log.i("Msg", "Got a join response!");
 				playerID = ret;
+				
+				ApplicationData dat = (ApplicationData) getActivity().getApplication();
+				dat.playerId = playerID;
+				
 				mParticleSystem.makeSpiralSystem();
 				mParticleSystem.beginSpawning();
 				hitJoin = true;
