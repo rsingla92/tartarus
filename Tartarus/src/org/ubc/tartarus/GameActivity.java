@@ -1,10 +1,13 @@
 package org.ubc.tartarus;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.ubc.tartarus.character.Character;
+import org.ubc.tartarus.character.Gem;
 import org.ubc.tartarus.communication.OutMsgDisconnect;
 import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
+import org.ubc.tartarus.graphics.GameRenderer;
 import org.ubc.tartarus.particle.Particle;
 
 import android.app.Activity;
@@ -33,6 +36,7 @@ public class GameActivity extends Activity {
 		super.onCreate(savedInstanceState);
 		
 		Character.CharacterType charType = (Character.CharacterType) super.getIntent().getExtras().getSerializable(Character.TYPE_INTENT);
+
 		surfaceView = new GameView(this, charType);
 		setContentView(surfaceView);
 
@@ -94,7 +98,9 @@ public class GameActivity extends Activity {
 			
 	    	Particle.setParticleImgLoaded(false);
 	    	
-	    	this.finish();
+	    	Intent intent = new Intent(this, MainActivity.class);
+	    	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	    	startActivity(intent);
 	        return true;
 	    }
 	    return super.onKeyDown(keyCode, event);

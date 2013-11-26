@@ -16,6 +16,11 @@ static int initializeMap(void);
 static Point *quad1, *quad2, *quad3, *quad4;
 static int quad1Size, quad2Size, quad3Size, quad4Size;
 
+void testCreateGems(void)
+{
+
+}
+
 // Constructor
 void makeMap( char* mapF)
 {
@@ -78,14 +83,12 @@ void drawPlayerAt(short absX, short absY, colour col)
 	int tileX = absX / TILE_WIDTH;
 	int tileY = absY / TILE_HEIGHT;
 
-	printf("Tile X: %d, Tile Y: %d\n", tileX, tileY);
 	if( tileX < 0 || tileY < 0 || tileX >= map.mapWidth || tileY >= map.mapHeight) return;
 
-	printf("Drawing pixel, with colour (%d, %d, %d)\n", col.r, col.g, col.b);
 	draw_pixel(tileX, tileY, col);
 }
 
-static int insertQuadPoint(Point* quad, int* size, int col, int row)
+static int insertQuadPoint(Point* quad, int* size, unsigned short col, unsigned short row)
 {
 	int curIndex = (*size)++;
 
@@ -118,8 +121,8 @@ static int initializeMap(void)
         map.mapInfo[i] = isTileSolid(readShort(map_file));
 
         if (map.mapInfo[i] == 0) {
-			int row = i / map.mapWidth;
-			int col = i % map.mapWidth;
+			unsigned char row = i / map.mapWidth;
+			unsigned char col = i % map.mapWidth;
 
 			if (row < map.mapWidth/2)
 			{

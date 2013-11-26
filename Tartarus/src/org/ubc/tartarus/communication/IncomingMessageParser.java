@@ -1,5 +1,7 @@
 package org.ubc.tartarus.communication;
 
+import android.util.Log;
+
 public class IncomingMessageParser {
 
 	public enum InMessageType {
@@ -35,9 +37,11 @@ public class IncomingMessageParser {
 		} else if (id == InMessageType.MSG_CHAR_CHOSEN.id) {
 			return new IncomingMessage(InMessageType.MSG_CHAR_CHOSEN.getDataLen(), InMessageType.MSG_CHAR_CHOSEN.getId());
 		} else if (id == InMessageType.MSG_GEM.id) {
+			Log.i("Msg", "Got the Gem message!");
 			return new IncomingMessage(InMessageType.MSG_GEM.getDataLen(), InMessageType.MSG_GEM.getId());
 		}
 		
+		Log.i("Msg", "Invalid message received.");
 		return null;
 	}
 }

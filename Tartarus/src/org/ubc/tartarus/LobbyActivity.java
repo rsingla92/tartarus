@@ -93,7 +93,9 @@ public class LobbyActivity extends Activity {
 			}
 			
 	    	Particle.setParticleImgLoaded(false);
-	    	this.finish();
+	    	Intent intent = new Intent(this, MainActivity.class);
+	    	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	    	startActivity(intent);
 	        return true;
 	    }
 	    return super.onKeyDown(keyCode, event);

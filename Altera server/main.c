@@ -176,7 +176,7 @@ int main(void) {
 	uart_dev = initSerialPort("/dev/rs232_0");
 
 	alt_timestamp_start();
-	sdcard_handle *sd_dev = init_sdcard();
+	//sdcard_handle *sd_dev = init_sdcard(); //TODO: REMOVE COMMENT
 //	initAudio();
 
 	printf("Initializing display...\n");
@@ -185,20 +185,21 @@ int main(void) {
 
 	clear_display();
 
-	if (sd_dev == NULL)
-		return 1;
+	/* TODO: UNCOMMENT BELOW LINES */
+	//if (sd_dev == NULL) //TODO: REMOVE COMMENT
+	//	return 1; //TODO: REMOVE COMMENT
 
-	printf("Creating map!\n");
+	//printf("Creating map!\n");
 
-	makeMap("tmap1.txt");
-	printf("Drawing map! Width: %d, Height: %d\n", map.mapWidth, map.mapHeight);
-	drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
+	//makeMap("tmap1.txt");
+	//printf("Drawing map! Width: %d, Height: %d\n", map.mapWidth, map.mapHeight);
+	//drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
 
-	printf("Swapping buffers!\n");
-	swap_buffers();
-	drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
+	//printf("Swapping buffers!\n");
+	//swap_buffers();
+	//drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
 
-	printf("Drawn!\n");
+	//printf("Drawn!\n");
 	seed(alt_timestamp());
 
 	while (true)

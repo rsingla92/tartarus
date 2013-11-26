@@ -11,6 +11,7 @@ extern unsigned char numPlayers;
 extern sPlayer playerDevTable[MAX_PLAYERS];
 
 static unsigned char gemsSent = 0;
+static unsigned char readyPlayers = 0;
 
 /*
 GAME_STATE getGameState(GameMsg g)
@@ -243,6 +244,13 @@ int parseJoinMsg(GenericMsg* msg)
 int parseDisconnectMsg(GenericMsg *msg)
 {
     printf("Disconnect Message\n");
+    int player = findPlayerByDevice(msg->clientID_);
+
+    if (player != -1)
+    {
+    	if(playerDevTable[player].state == PLAYER_READY) readyPlayers--;
+    }
+
     removePlayer(msg->clientID_);
 }
 
@@ -251,7 +259,6 @@ int parseReadyMsg(GenericMsg* msg)
 	// No data with this message.
 	printf("Ready message!");
 	int playerNo = findPlayerByDevice(msg->clientID_);
-	static unsigned char readyPlayers = 0;
 
 	if (playerNo == -1)
 	{
@@ -287,7 +294,7 @@ int parseSelectCharMsg(GenericMsg* msg)
 		}
 		else
 		{
-			printf("Another character already chose character %d\n", msg->msg_[0]);
+			printf("Player already chose character %d\n", msg->msg_[0]);
 		}
 	}
 }
@@ -319,9 +326,13 @@ void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
 
 	// Send the rest of the data
 	for (i = 0; i < msg->msgLength_; i++) {
-		printf("i: %d, Writing: %d\n", i, msg->msg_[i]);
+		printf("i: %d, Writing: %d, ", i, msg->msg_[i]);
 		writeSerialData(uart, msg->msg_[i]);
 	}
+
+    printf("\n");
+
+	fflush(uart);
  }
 
 void parseGemAckMsg(GenericMsg* msg)
@@ -363,7 +374,7 @@ void sendGemMsg(int player_id)
 		gemMsg.msg_[msgCounter++] = NUM_GEMS_PER_PLAYER_PER_QUAD*4;
 
 		int j;
-		for (j = 0; j < gemMsg.msg_[msgCounter-1]; j++)
+		for (j = 0; j < NUM_GEMS_PER_PLAYER_PER_QUAD*4; j++)
 		{
 			Point gem = playerDevTable[i].gemList[j];
 			gemMsg.msg_[msgCounter++] = (gem.x >> 8);

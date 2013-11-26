@@ -1,5 +1,7 @@
 package org.ubc.tartarus.character;
 
+import java.io.Serializable;
+
 import org.ubc.tartarus.graphics.BitmapImg;
 import org.ubc.tartarus.utils.Point;
 import org.ubc.tartarus.utils.Rectangle;
@@ -10,11 +12,14 @@ import android.app.Activity;
 import android.opengl.Matrix;
 import android.util.Log;
 
-public class Gem {
+public class Gem implements Serializable {
 	public enum AnimTypes{ ROTATE, NUM_ANIM }
 	
-	public enum GemType { BLUE, ORANGE, GREEN, YELLOW, NUM_TYPES }
+	public enum GemType {ORANGE, GREEN, BLUE, YELLOW, NUM_TYPES }
 	GemType type;
+	
+	public static final float GEM_WIDTH = 0.2f;
+	public static final float GEM_HEIGHT = 0.2f;
 	
 	public static final String GEM_INTENT = "GemType";
 	private BitmapImg mGemImg;
@@ -24,6 +29,7 @@ public class Gem {
 	private float[] scaleMat;
 	private float[] modelMat;
 	private float[] mMVPMat;
+	private Activity activity;
 	
 	// bottom left and top right in that order
 	public static final Rectangle[] blue = {
@@ -72,22 +78,23 @@ public class Gem {
 	}
 	
 	// Modified to take in only a rotation animation list
-	public Gem(Activity activity, GemType g,float height,float width){
+	public Gem(Activity activity, GemType g, float x, float y){
 				
 		this.animList = new Animation[AnimTypes.NUM_ANIM.ordinal()];
 		mMVPMat = new float[16];
 		animList[0] = new Animation();
 		modelMat = new float[16];
 		scaleMat = new float[16];
-		mHeight = height;
-		mWidth = width;
+		mHeight = GEM_HEIGHT;
+		mWidth = GEM_WIDTH;
+		this.activity = activity;
 		
 		this.currentAnimation = 0;
 		this.setRefFrame((int)(yellow[3].topRight.x - yellow[3].bottomLeft.x), 
 				(int)(yellow[3].topRight.y - yellow[3].bottomLeft.y));
 		setResource(R.drawable.gems);
-		mGemImg = new BitmapImg(activity, this.getResourceId());
-		this.mPosition = new Point (32,32);
+
+		this.mPosition = new Point (x, y);
 	
 		type = g;
 		
@@ -110,6 +117,10 @@ public class Gem {
 			populateAnimList(blue);
 				break;
 		}
+	}
+	
+	public void loadGemImage() {
+		mGemImg = new BitmapImg(activity, this.getResourceId());
 	}
 	
 	public Point getScaleDimensions(){

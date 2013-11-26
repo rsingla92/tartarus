@@ -54,12 +54,6 @@ public class MenuRenderer extends CustomRenderer {
 	public void onDrawFrame(GL10 arg0) {
 		super.onDrawFrame(arg0);
 		
-		if (!Particle.getParticleImgLoaded()) {
-			// Load particle image
-			Log.i("Particle", "Loading particle image!");
-			Particle.loadParticleImg(getActivity(), R.drawable.particle);
-		}
-		
 		float[] copyMat = new float[16];
 		Matrix.setIdentityM(copyMat, 0);
 		Matrix.scaleM(copyMat, 0, 2 * getAspectRatio(), 2, 2);

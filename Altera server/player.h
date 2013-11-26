@@ -17,7 +17,8 @@
 #define VIEWPORT_WIDTH 		240
 #define VIEWPORT_HEIGHT		128
 
-#define NUM_GEMS_PER_PLAYER_PER_QUAD	1
+// for testing:
+#define NUM_GEMS_PER_PLAYER_PER_QUAD	10
 
 typedef enum { NOT_CONNECTED, JOINED, PLAYER_READY, PLAYING, DEAD } playerState;
 

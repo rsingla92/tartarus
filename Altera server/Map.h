@@ -30,7 +30,7 @@ typedef struct {
 } Map;
 
 typedef struct {
-	short x, y;
+	unsigned short x, y;
 } Point;
 // Constructor
 void makeMap( char*);

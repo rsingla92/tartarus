@@ -1,8 +1,11 @@
 package org.ubc.tartarus;
 
+import java.util.ArrayList;
+
 import org.ubc.tartarus.graphics.CustomRenderer;
 import org.ubc.tartarus.graphics.GameRenderer;
 import org.ubc.tartarus.character.Character;
+import org.ubc.tartarus.character.Gem;
 
 import android.app.Activity;
 import android.content.Context;

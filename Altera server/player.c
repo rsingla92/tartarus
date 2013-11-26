@@ -18,7 +18,7 @@ sPlayer playerDevTable[MAX_PLAYERS] =
 		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0xff, 0, 0}, {-1, -1, -1, -1}},
 		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0, 0xff, 0}, {-1, -1, -1, -1}},
 		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0xff}, {-1, -1, -1, -1}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0x8f, 0, 0xff}, {-1, -1, -1, -1}}
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0xe3, 0xff, 0x42}, {-1, -1, -1, -1}}
 };
 
 unsigned char doesPlayerExist(int player)
@@ -93,7 +93,7 @@ short getViewportY(int player)
 
 unsigned char addPlayer(int deviceId)
 {
-	if (numPlayers >= MAX_PLAYERS) return -1;
+	if (numPlayers >= MAX_PLAYERS || numPlayers < 0) return -1;
 
 	unsigned char playerId;
 
@@ -130,6 +130,7 @@ void removePlayer(int deviceId)
 		printf("Removed player with device ID %d\n", deviceId);
 		playerDevTable[playerId].state = NOT_CONNECTED;
 		playerDevTable[playerId].chosen = 0;
+		playerDevTable[playerId].deviceId = 0;
 		numPlayers--;
 	}
 }
@@ -155,7 +156,10 @@ int setPlayerReady(int player)
 
 int updatePlayerChar(int player, unsigned char charType)
 {
-	if (player < 0 || player >= MAX_PLAYERS || !doesPlayerExist(player)) return;
+	if (player < 0 || player >= MAX_PLAYERS || !doesPlayerExist(player)) {
+		printf("Player not valid!\n");
+		return 0;
+	}
 
 	int i;
 	for (i = 0; i < MAX_PLAYERS; i++)
@@ -165,6 +169,7 @@ int updatePlayerChar(int player, unsigned char charType)
 			   playerDevTable[i].chosen &&
 			   playerDevTable[i].character == charType)
 	   {
+		   printf("Player %d already chose character %d\n", i, playerDevTable[i].character);
 		   return 0;
 	   }
 	}
@@ -180,7 +185,8 @@ int findPlayerByDevice(unsigned char deviceId)
 	int i;
 	for (i = 0; i < numPlayers; i++)
 	{
-		if (playerDevTable[i].deviceId == deviceId) return i;
+		if (playerDevTable[i].deviceId == deviceId &&
+				playerDevTable[i].state != NOT_CONNECTED) return i;
 	}
 
 	return -1;
@@ -235,10 +241,12 @@ void generateGems(unsigned char player)
 {
 	int i;
 	// Generate the gems for each quadrant
+	printf("Generating Gems: ");
 	for (i = 0; i < NUM_GEMS_PER_PLAYER_PER_QUAD*4; i++)
 	{
 		int quad = i % 4 + 1;
 		playerDevTable[player].gemList[i] = getRandomPoint(quad);
+		printf("Gem %d: (%d, %d), ", i, playerDevTable[player].gemList[i].x, playerDevTable[player].gemList[i].y);
 	}
 }
 

@@ -106,7 +106,7 @@ public class SocketComm {
 		@Override
 		protected Socket doInBackground(Void... voids) {
 			Socket sock = null;
-			String ip = "192.168.1.115";
+			String ip = "192.168.1.101";
 			
 			Log.i("TestSocket", "Trying to connect!");
 			try {
@@ -155,11 +155,18 @@ public class SocketComm {
 						
 						while (cur_pos < bytes_avail) {
 							// Read the length first.
-							msgLen = buf[cur_pos++];
+							msgLen = buf[cur_pos++] & 0x00FF;
+							Log.i("Msg", "Got message of length " + msgLen);
 							
 							if (msgLen >= 1) {
 								IncomingMessage msg = IncomingMessageParser.getMessageFromID(buf[cur_pos++]);
 									
+								Log.i("Msg", "Message ID: " + buf[1]);
+								if (msg == null) {
+									Log.e("SocketComm", "Invalid message received.");
+									break;
+								}
+								
 								if (msgLen - 1 > 0) {								
 									msg.populateData(buf, cur_pos, msgLen - 1);
 									cur_pos += msgLen - 1; 

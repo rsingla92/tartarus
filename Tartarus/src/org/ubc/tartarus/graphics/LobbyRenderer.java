@@ -1,5 +1,7 @@
 package org.ubc.tartarus.graphics;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 import javax.microedition.khronos.egl.EGLConfig;
@@ -13,8 +15,11 @@ import org.ubc.tartarus.particle.Particle;
 import org.ubc.tartarus.particle.ParticleSystem;
 import org.ubc.tartarus.utils.Point;
 import org.ubc.tartarus.character.Character;
+import org.ubc.tartarus.character.Gem;
+import org.ubc.tartarus.character.Gem.GemType;
 import org.ubc.tartarus.communication.IncomingMessage;
 import org.ubc.tartarus.communication.IncomingMessageParser;
+import org.ubc.tartarus.communication.OutMsgGemAck;
 import org.ubc.tartarus.communication.OutMsgReady;
 import org.ubc.tartarus.communication.OutMsgSelectChar;
 import org.ubc.tartarus.communication.SocketComm;
@@ -75,11 +80,14 @@ public class LobbyRenderer extends CustomRenderer {
 	private int playerId;
 	private int[] chosenChars;
 	
+	private ArrayList<Gem> gemList;
+	
 	public LobbyRenderer(Activity activity, int playerId) {
 		super(activity);
 		
 		this.playerId = playerId;
 		chosenChars = new int[MAX_PLAYERS]; 
+		gemList = new ArrayList<Gem>();
 		
 		for (int i = 0; i < MAX_PLAYERS; i++) {
 			// Each index corresponds to an ID - 1. 
@@ -90,11 +98,6 @@ public class LobbyRenderer extends CustomRenderer {
 	@Override
 	public void onDrawFrame(GL10 arg0) {
 		super.onDrawFrame(arg0);
-		
-		if (!Particle.getParticleImgLoaded()) {
-			// Load particle image
-			Particle.loadParticleImg(getActivity(), R.drawable.particle);
-		}
 		
 		float[] copyMat = new float[16];
 		Matrix.setIdentityM(copyMat, 0);
@@ -191,6 +194,10 @@ public class LobbyRenderer extends CustomRenderer {
 				// Transition to game activity...
 				Intent intent = new Intent(getActivity(), GameActivity.class);
 				intent.putExtra(Character.TYPE_INTENT, charType);
+				
+				ApplicationData app = (ApplicationData) getActivity().getApplication();
+				app.gemList = gemList;
+				
 				getActivity().startActivity(intent);
 			}
 		}
@@ -250,6 +257,7 @@ public class LobbyRenderer extends CustomRenderer {
 			// Transition to the game
 			mParticleSystem.makeSpiralSystem();
 			mParticleSystem.beginSpawning();
+			Log.i("LobbyRenderer", "Got a MSG_START!");
 			hitReady = true;
 		} else if (msg.getID() == IncomingMessageParser.InMessageType.MSG_CHAR_CHOSEN.getId()) {
 			// Character chosen handling -- make the character un-selectable.
@@ -287,7 +295,46 @@ public class LobbyRenderer extends CustomRenderer {
 				Log.e("LobbyRenderer", "Message mismatch with Gem Msg");
 			}
 			
+			generateGems(dat);
 			
+			try {
+				new OutMsgGemAck(getActivity()).sendMessage();
+			} catch (MessageTypeMismatchException e) {
+				Log.e("LobbyRenderer", "Sending gem acknowledgment error.");
+			}
+		}
+	}
+	
+	private void generateGems(byte buf[]) 
+	{
+		ByteBuffer bb = ByteBuffer.wrap(buf);
+		
+		try {
+			int count = 0;
+			
+			while (count < buf.length) 
+			{
+				int currentPlayerId = bb.get(); 
+				int numGems = bb.get(); 
+				count += 2;
+				Log.i("LobbyRenderer", "Player: " + currentPlayerId + ", Number of Gems: " + numGems);
+				
+				for (int i = 0; i < numGems; i++) 
+				{
+					int x = bb.getShort() & 0x00FF;
+					int y = bb.getShort() & 0x00FF;
+					
+					x *= GameRenderer.TILE_WIDTH;
+					y *= GameRenderer.TILE_HEIGHT;
+					
+					Log.i("LobbyRenderer", "Gem " + i + ": (" + x + ", " + y + ")");
+					count += 4; 
+					
+					gemList.add(new Gem(getActivity(), GemType.values()[currentPlayerId], x, y));
+				}
+			}
+		} catch (IndexOutOfBoundsException e) {
+			Log.e("LobbyRenderer", "Error parsing gem message.");
 		}
 	}
 	
@@ -438,7 +485,7 @@ public class LobbyRenderer extends CustomRenderer {
 					fy >= backY - backHeight && fy <= backY + backHeight) {
 				// Touched join game
 				mParticleSystem.makeSpiralSystem();
-				hitReady = true;
+				//hitReady = true;
 			}
 			else {	
 				mParticleSystem.makeNormalSystem();

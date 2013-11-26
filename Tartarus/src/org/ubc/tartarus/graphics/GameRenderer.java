@@ -1,5 +1,6 @@
 package org.ubc.tartarus.graphics;
 
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
@@ -33,6 +34,11 @@ import android.util.Log;
 public class GameRenderer extends CustomRenderer {
 
 	public static final int MATRIX_SIZE = 4;
+	public static final int TILE_WIDTH = 16;
+	public static final int TILE_HEIGHT = 16;
+	public static final int VIEWPORT_WIDTH = 240;
+	public static final int VIEWPORT_HEIGHT = 128;
+	public static final String GEM_INTENT = "GemIntent";
 	
 	public volatile float mAngle;
 	
@@ -51,11 +57,17 @@ public class GameRenderer extends CustomRenderer {
 	private Player mPlayer;
 	private WorldMap mWorldMap;
 	private CharacterType charType;
-	private Gem[] GemArray;
+	private ArrayList<Gem> GemArray;
 	private Vector<Bomb> BombVector;
+	
 	public GameRenderer(Activity activity, CharacterType charType) {
 		super(activity);
 		this.charType = charType;
+		
+		ApplicationData app = (ApplicationData) getActivity().getApplication();
+		this.GemArray = app.gemList;
+		
+		Log.i("GameRenderer", "Size of gem array: " + GemArray.size());
 	}
 	
 	@Override
@@ -65,19 +77,22 @@ public class GameRenderer extends CustomRenderer {
 		mWorldMap.drawViewport(getModelViewMatrix(), VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
 		mPlayer.onUpdate(VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
 		
-		for (int i = 0; i < GemArray.length; i ++ ){
-			GemArray[i].getCurrentAnimation().animate();
-			GemArray[i].drawGems(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
+		//Log.i("LobbyRenderer", "Gem Array Size: " + GemArray.size());
+		
+		for (int i = 0; i < GemArray.size(); i ++ ){
+			GemArray.get(i).getCurrentAnimation().animate();
+			GemArray.get(i).drawGems(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
 					mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);	
 			
-			if (mPlayer.isCollision(GemArray[i].getPosition().x, GemArray[i].getPosition().y, 
-				GemArray[i].getScaleDimensions().x , GemArray[i].getScaleDimensions().y, 
+			if (mPlayer.isCollision(GemArray.get(i).getPosition().x, GemArray.get(i).getPosition().y, 
+				GemArray.get(i).getScaleDimensions().x , GemArray.get(i).getScaleDimensions().y, 
 				mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
 				mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT)){
 				mPlayer.addPoints(10);
 				
-				// TODO: randomize the next position 
-				GemArray[i].setPosition(new Point (GemArray[i].getPosition().x + 1, GemArray[i].getPosition().y + 1));
+				// TODO: Check if this is the player's gem. Send message to DE2 indicating this gem is gone. 
+				// Send broadcast to all players so they can remove this gem.
+			
 			}
 		}
 		
@@ -142,17 +157,21 @@ public class GameRenderer extends CustomRenderer {
 		//mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 240, 128, 0, 0);
 		MapParser.TileMap map = MapParser.readMapFromFile(getActivity(), R.raw.tartarus_map1);
 		
-		mWorldMap = new WorldMap(getActivity(), R.drawable.tileset1, 1, 36, 16, 16, 240, 128, 0, 0);
+		mWorldMap = new WorldMap(getActivity(), R.drawable.tileset1, 1, 36, TILE_WIDTH, TILE_HEIGHT, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, 0, 0);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
 
 		mPlayer = new Player(getActivity(), 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, charType);
 		mParticleSystem = new ParticleSystem(getActivity(), 100, R.drawable.particle, 1, Type.MOTION, stagnantColourList);
+		
 		if (!Bomb.getBombImgLoaded()){
 			Bomb.loadBombImg(getActivity(), R.drawable.bomb);
 			Bomb.setBombImgLoaded(true);
 		}
-		GemArray = new Gem[1]; // HOW MANY GEMS
-		GemArray[0] = new Gem(getActivity(),GemType.BLUE,0.2f,0.2f);
+		
+		for (int i = 0; i < GemArray.size(); i++) {
+			GemArray.get(i).loadGemImage();
+		}
+		
 		BombVector = new Vector<Bomb>();
 	}
 
