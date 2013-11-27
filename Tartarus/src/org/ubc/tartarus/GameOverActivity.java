@@ -83,6 +83,22 @@ public class GameOverActivity extends Activity {
 	}
 	
 	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+	    if ((keyCode == KeyEvent.KEYCODE_BACK)) { 
+	       // Send a disconnect message
+			ApplicationData dat = (ApplicationData) getApplication();
+			
+	    	Particle.setParticleImgLoaded(false);
+	    	
+	    	Intent intent = new Intent(this, MainActivity.class);
+	    	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+	    	startActivity(intent);
+	        return true;
+	    }
+	    return super.onKeyDown(keyCode, event);
+	}
+	
+	@Override
 	protected void onPause() {
 		super.onPause();
 		// When we resume, we have to reload the particle bitmap.

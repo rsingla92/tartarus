@@ -84,16 +84,6 @@ public class LobbyActivity extends Activity {
 	       // Send a disconnect message
 			ApplicationData dat = (ApplicationData) getApplication();
 			
-			if (dat.socketComm != null) {
-				try {
-					new OutMsgDisconnect(this).sendMessage();
-				} catch (MessageTypeMismatchException e) {
-					Log.e("LobbyActivity", "Message type mismatch sending disconnect message.");
-				}
-			} else {
-				Log.i("LobbyActivity", "Socket comm is null. Not sending a disconnect message.");
-			}
-			
 	    	Particle.setParticleImgLoaded(false);
 	    	Intent intent = new Intent(this, MainActivity.class);
 	    	intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

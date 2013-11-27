@@ -30,10 +30,13 @@ public class GameOverRenderer extends CustomRenderer {
 	public static final int MATRIX_SIZE = 4;
 	public static final float CURSOR_ACCELERATION = 0.01f;
 
+	public static final int MAX_PLAYERS = 4;
+	
 	public volatile float mAngle;
 	
 	private BitmapImg menuBackground;
-
+	private BitmapImg playerImgs[];
+	
 	private ParticleSystem mParticleSystem;
 	
 	private Particle mCursor;
@@ -48,7 +51,6 @@ public class GameOverRenderer extends CustomRenderer {
 		this.playerInfo = playerInfo;
 		Log.i("GameOverRenderer", "Player Info Size: " + playerInfo.size());
 		positions = new float[4];
-
 	}
 	
 	@Override
@@ -107,19 +109,29 @@ public class GameOverRenderer extends CustomRenderer {
 		// %x = 0.101108 *getAspectRatio()*2
 		// %y = 0.127358 
 		
+		float scaleX = 0.41551f;
+		float scaleY = 0.23585f;
+		float diff = 0.05f + scaleY / 2; 
+		float startX = 0.101108f * getAspectRatio() * 2; 
+		float startY = 0.127358f;
 		
+		float[] scaleMat = new float[16];
 		
-//		// Transformations for title image. 
-//		float[] scaleMat = new float[16];
-//		Matrix.setIdentityM(scaleMat, 0);
-//		Matrix.setIdentityM(copyMat, 0);
-//		float scaleX = (2 * getAspectRatio()) / 4.0f; 
-//		//float scaleY = scaleX * ( ((float) titleImg.getHeight()) / titleImg.getWidth());
-//		Matrix.translateM(copyMat, 0, 0, 0.75f, 0);
-//		//Matrix.scaleM(scaleMat, 0, scaleX, scaleY, 1);
-//		Matrix.multiplyMM(copyMat, 0, copyMat.clone(), 0, scaleMat, 0);
-//		Matrix.multiplyMM(copyMat, 0, getModelViewMatrix(), 0, copyMat.clone(), 0);
-//		//titleImg.draw(copyMat);
+		for (int i = 0; i < playerInfo.size() / 2; i++)
+		{
+			int playerID = playerInfo.get(2*i); 
+			int score = playerInfo.get(2*i+1); 
+			
+			Matrix.setIdentityM(scaleMat, 0);
+			Matrix.setIdentityM(copyMat, 0);
+			Matrix.translateM(copyMat, 0, startX, startY - diff * i, 0);
+			Matrix.scaleM(scaleMat, 0, scaleX, scaleY, 1);
+			Matrix.multiplyMM(copyMat, 0, copyMat.clone(), 0, scaleMat, 0);
+			Matrix.multiplyMM(copyMat, 0, getModelViewMatrix(), 0, copyMat.clone(), 0);
+			
+			Log.i("GameOverRenderer", "PlayerID: " + playerID);
+			playerImgs[playerID-1].draw(copyMat);
+		}
 		
 		mCursor.setParticlePosition(mCursor.getParticleXPos() + cursorVelocityX, mCursor.getParticleYPos() + cursorVelocityY, 0);
 		mCursor.drawParticle(getModelViewMatrix());
@@ -135,7 +147,12 @@ public class GameOverRenderer extends CustomRenderer {
 		super.onSurfaceCreated(arg0, arg1);
 		
 		menuBackground = new BitmapImg(getActivity(), R.drawable.img_tartarus_gameover);
-		
+		playerImgs = new BitmapImg[MAX_PLAYERS];
+		playerImgs[0] = new BitmapImg(getActivity(), R.drawable.player1);
+		playerImgs[1] = new BitmapImg(getActivity(), R.drawable.player2);
+		playerImgs[2] = new BitmapImg(getActivity(), R.drawable.player3);
+		playerImgs[3] = new BitmapImg(getActivity(), R.drawable.player4);
+				
 		mCursor = new Particle(getActivity(), R.drawable.particle, 0, 0, 0,
 				0.85098f, 0.0f, 0.0f, 1.0f, 0.2f, 0.2f, false, 0);
 		mCursor.setParticleSpeed(0, 0, 0);
