@@ -3,6 +3,7 @@ package org.ubc.tartarus;
 import java.io.IOException;
 import java.util.Timer;
 
+import org.ubc.tartarus.character.Bomb;
 import org.ubc.tartarus.communication.OutMsgDisconnect;
 import org.ubc.tartarus.communication.SocketComm;
 import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
@@ -65,6 +66,7 @@ public class MainActivity extends Activity {
 		super.onPause();
 		// When we resume, we have to reload the particle bitmap.
 		Particle.setParticleImgLoaded(false);
+		Bomb.setBombImgLoaded(false);
 		player.pause();
 	}
 	
