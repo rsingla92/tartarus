@@ -1,12 +1,16 @@
 package org.ubc.tartarus.graphics;
 
+import java.nio.ByteBuffer;
 import java.util.NoSuchElementException;
+import java.util.Vector;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import org.ubc.tartarus.GameOverActivity;
 import org.ubc.tartarus.R;
+import org.ubc.tartarus.communication.IncomingMessage;
+import org.ubc.tartarus.communication.IncomingMessageParser;
 import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 import org.ubc.tartarus.particle.Particle;
 import org.ubc.tartarus.particle.ParticleSystem;
@@ -35,9 +39,11 @@ public class GameOverRenderer extends CustomRenderer {
 	private float cursorVelocityX, cursorVelocityY;
 	private boolean cursorXDirection, cursorYDirection;
 	private int playerID = 0;
+	private Vector<Integer> playerInfo;
 	
 	public GameOverRenderer(Activity activity) {
 		super(activity);
+		playerInfo = new Vector<Integer>();
 	}
 	
 	@Override
@@ -84,6 +90,10 @@ public class GameOverRenderer extends CustomRenderer {
 			}			
 		}
 		
+		if (playerInfo != null){
+			Log.i("Game Over", "draw player images");
+		}
+		
 //		// Transformations for title image. 
 //		float[] scaleMat = new float[16];
 //		Matrix.setIdentityM(scaleMat, 0);
@@ -98,13 +108,39 @@ public class GameOverRenderer extends CustomRenderer {
 		
 		mCursor.setParticlePosition(mCursor.getParticleXPos() + cursorVelocityX, mCursor.getParticleYPos() + cursorVelocityY, 0);
 		mCursor.drawParticle(getModelViewMatrix());
-		
-		
+
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
 		
 	}
 
+	void parseMsg(IncomingMessage msg){
+		playerInfo = handleGameOverMessage(msg);
+		if (playerInfo == null) return;
+		
+	}
+	
+	public static Vector<Integer> handleGameOverMessage(IncomingMessage msg) {
+		Vector<Integer> playerInfo = null;
+		if (msg.getID() == IncomingMessageParser.InMessageType.MSG_GAME_OVER.getId()) return playerInfo;
+		// 12 bytes in msg
+		
+		playerInfo = new Vector<Integer>();
+		ByteBuffer bb = ByteBuffer.wrap(msg.getData());
+		byte playerID;
+		short playerScore; 
+		
+		for (int i = 0; i < msg.getLength()/3; i++){
+			playerID = msg.getID();
+			playerScore = bb.getShort();
+
+			playerInfo.add(new Integer(playerID));
+			playerInfo.add(new Integer(playerScore));
+			
+		}
+
+		return playerInfo;
+	}
 	
 	
 	@Override

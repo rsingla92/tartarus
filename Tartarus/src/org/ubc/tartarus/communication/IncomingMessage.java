@@ -1,5 +1,9 @@
 package org.ubc.tartarus.communication;
 
+import java.nio.ByteBuffer;
+import java.util.Vector;
+
+import android.annotation.SuppressLint;
 import android.util.Log;
 
 public class IncomingMessage {
@@ -50,6 +54,7 @@ public class IncomingMessage {
 		return response;
 	}
 	
+
 	public static boolean handleStart() {
 		
 		return true;

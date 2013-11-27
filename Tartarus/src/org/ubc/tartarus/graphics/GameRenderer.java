@@ -166,6 +166,9 @@ public class GameRenderer extends CustomRenderer {
 		{
 			// Received an update gem message.
 			Log.i("GameRenderer", "Received an update gem message!");
+		} else if (msg.getID() == IncomingMessageParser.InMessageType.MSG_GAME_OVER.getId()){
+			// Received an update gem message.
+			Log.i("GameRenderer", "Received a Game Over message!");
 		}
 	}
 	
