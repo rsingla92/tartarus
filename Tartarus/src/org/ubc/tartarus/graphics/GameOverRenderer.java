@@ -40,10 +40,13 @@ public class GameOverRenderer extends CustomRenderer {
 	private boolean cursorXDirection, cursorYDirection;
 	private int playerID = 0;
 	private Vector<Integer> playerInfo;
+	private float[] positions;
 	
 	public GameOverRenderer(Activity activity) {
 		super(activity);
 		playerInfo = new Vector<Integer>();
+		positions = new float[4];
+
 	}
 	
 	@Override
@@ -92,7 +95,17 @@ public class GameOverRenderer extends CustomRenderer {
 		
 		if (playerInfo != null){
 			Log.i("Game Over", "draw player images");
+			
 		}
+		
+		// centre: 288 158 
+		// 150 by 50 scale width = 0.41551 height = 0.23585
+		// big dim = 722 424
+		// diff = 0.05
+		// %x = 0.101108 *getAspectRatio()*2
+		// %y = 0.127358 
+		
+		
 		
 //		// Transformations for title image. 
 //		float[] scaleMat = new float[16];
