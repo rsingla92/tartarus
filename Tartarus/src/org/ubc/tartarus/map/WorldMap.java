@@ -223,8 +223,12 @@ public class WorldMap {
 	 */
 	public boolean isTileSolid(int tileId) {
 		if (tileId == 11 || tileId == 28 || tileId == 29 || tileId == 34 ||(tileId >= 36 && tileId <= 63) ||
-				tileId == 61 || tileId == 62 || (tileId >= 72 && tileId <= 79) || (tileId >= 180 && tileId <= 183) ||
-				(tileId >= 288 && tileId <= 295) || tileId == 329 || (tileId >= 398 && tileId <= 400) || (tileId >= 468 && tileId <= 478) ||
+				tileId == 61 || tileId == 62 || (tileId >= 72 && tileId <= 79) || (tileId >= 128 && tileId <= 140) ||
+				(tileId >= 164 && tileId <= 176) || (tileId >= 180 && tileId <= 215) || (tileId >= 234 && tileId <= 251) || (tileId >= 296 && tileId <= 299) ||
+				(tileId >= 288 && tileId <= 295) || (tileId >= 305 && tileId <= 323) || tileId == 329 || tileId == 333 || tileId == 334 ||
+				(tileId >= 338 && tileId <= 347) || (tileId >= 349 && tileId <= 359) || (tileId >= 374 && tileId <= 381) ||
+				(tileId >= 391 && tileId <= 395) || (tileId >= 398 && tileId <= 400) || (tileId >= 426 && tileId <= 431) ||
+				(tileId >= 456 && tileId <= 460) || (tileId >= 462 && tileId <= 467) || (tileId >= 468 && tileId <= 478) || (tileId >= 492 && tileId <= 497) ||
 				(tileId >= 504 && tileId <= 521) || (tileId >= 540 && tileId <= 555) || (tileId >= 597 && tileId <= 600) ||
 				(tileId >= 648 && tileId <= 677) || (tileId >= 699 && tileId <= 711) || (tileId >= 720 && tileId <= 738) ||
 				(tileId >= 756 && tileId <= 757) || (tileId >= 792 && tileId <= 797) || tileId == 801 || tileId == 806 ||

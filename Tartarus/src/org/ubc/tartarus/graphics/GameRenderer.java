@@ -93,9 +93,9 @@ public class GameRenderer extends CustomRenderer {
 			if (mPlayer.isCollision(GemArray.get(i).getPosition().x, GemArray.get(i).getPosition().y, 
 				GemArray.get(i).getScaleDimensions().x , GemArray.get(i).getScaleDimensions().y, 
 				mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
-				mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT)){
+				mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT)) {
 				
-				if (playerID-1 == GemArray.get(i).getGemType().ordinal()){
+				if (playerID-1 == GemArray.get(i).getGemType().ordinal()) {
 
 					gemMsg.setMessage((short)(GemArray.get(i).getPosition().x/16), (short)(GemArray.get(i).getPosition().y/16));
 					
@@ -162,7 +162,11 @@ public class GameRenderer extends CustomRenderer {
 	}
 
 	void parseMsg(IncomingMessage msg) {
-		// Nothing for now...
+		if (msg.getID() == IncomingMessageParser.InMessageType.MSG_UPDATE_GEM.getId())
+		{
+			// Received an update gem message.
+			Log.i("GameRenderer", "Received an update gem message!");
+		}
 	}
 	
 	@Override

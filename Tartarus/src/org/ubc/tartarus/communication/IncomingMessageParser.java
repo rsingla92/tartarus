@@ -10,7 +10,8 @@ public class IncomingMessageParser {
 		MSG_JOIN_RESPONSE((byte) 0, 1),
 		MSG_START((byte) 1, 1),
 		MSG_CHAR_CHOSEN((byte) 2, 2),
-		MSG_GEM((byte) 3, -1);
+		MSG_GEM((byte) 3, -1),
+		MSG_UPDATE_GEM((byte) 4, 9);
 		
 		private byte id;
 		private int dataLen;
