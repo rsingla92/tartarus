@@ -10,7 +10,8 @@ public class IncomingMessageParser {
 		MSG_JOIN_RESPONSE((byte) 0, 1),
 		MSG_START((byte) 1, 1),
 		MSG_CHAR_CHOSEN((byte) 2, 2),
-		MSG_GEM((byte) 3, -1);
+		MSG_GEM((byte) 3, -1),
+		MSG_UPDATE_GEM((byte) 4, 9);
 		
 		private byte id;
 		private int dataLen;
@@ -39,6 +40,8 @@ public class IncomingMessageParser {
 		} else if (id == InMessageType.MSG_GEM.id) {
 			Log.i("Msg", "Got the Gem message!");
 			return new IncomingMessage(InMessageType.MSG_GEM.getDataLen(), InMessageType.MSG_GEM.getId());
+		} else if (id == InMessageType.MSG_UPDATE_GEM.id) {
+			return new IncomingMessage(InMessageType.MSG_UPDATE_GEM.getDataLen(), InMessageType.MSG_UPDATE_GEM.getId());
 		}
 		
 		Log.i("Msg", "Invalid message received.");

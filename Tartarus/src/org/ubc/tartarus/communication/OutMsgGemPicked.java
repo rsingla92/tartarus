@@ -35,5 +35,3 @@ public class OutMsgGemPicked extends OutgoingMessage {
 			this.newMsg = true;
 		}
 	}
-
-}
