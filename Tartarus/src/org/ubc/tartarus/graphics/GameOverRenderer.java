@@ -6,11 +6,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import org.ubc.tartarus.GameOverActivity;
-import org.ubc.tartarus.LobbyActivity;
 import org.ubc.tartarus.R;
-import org.ubc.tartarus.communication.IncomingMessage;
-import org.ubc.tartarus.communication.IncomingMessageParser;
-import org.ubc.tartarus.communication.OutMsgJoin;
 import org.ubc.tartarus.exceptions.MessageTypeMismatchException;
 import org.ubc.tartarus.particle.Particle;
 import org.ubc.tartarus.particle.ParticleSystem;
@@ -22,32 +18,25 @@ import android.opengl.Matrix;
 import android.util.Log;
 import android.widget.Toast;
 
-public class MenuRenderer extends CustomRenderer {
+public class GameOverRenderer extends CustomRenderer {
 
 	public static final String PLAYER_ID_INTENT = "PlayerID";
 	
 	public static final int MATRIX_SIZE = 4;
 	public static final float CURSOR_ACCELERATION = 0.01f;
-	
-	private float joinX;
-	private float joinY;
-	private float joinWidth, joinHeight;
-	
+
 	public volatile float mAngle;
 	
-	private BitmapImg menuBackground, titleImg, joinImg;
+	private BitmapImg menuBackground;
 
 	private ParticleSystem mParticleSystem;
 	
 	private Particle mCursor;
 	private float cursorVelocityX, cursorVelocityY;
 	private boolean cursorXDirection, cursorYDirection;
-	private boolean hitJoin = false;
-	private float joinCountdown = 1.0f;
-	private OutMsgJoin joinMsg = null; 
 	private int playerID = 0;
 	
-	public MenuRenderer(Activity activity) {
+	public GameOverRenderer(Activity activity) {
 		super(activity);
 	}
 	
@@ -95,107 +84,35 @@ public class MenuRenderer extends CustomRenderer {
 			}			
 		}
 		
-		// Transformations for title image. 
-		float[] scaleMat = new float[16];
-		Matrix.setIdentityM(scaleMat, 0);
-		Matrix.setIdentityM(copyMat, 0);
-		float scaleX = (2 * getAspectRatio()) / 4.0f; 
-		float scaleY = scaleX * ( ((float) titleImg.getHeight()) / titleImg.getWidth());
-		Matrix.translateM(copyMat, 0, 0, 0.75f, 0);
-		Matrix.scaleM(scaleMat, 0, scaleX, scaleY, 1);
-		Matrix.multiplyMM(copyMat, 0, copyMat.clone(), 0, scaleMat, 0);
-		Matrix.multiplyMM(copyMat, 0, getModelViewMatrix(), 0, copyMat.clone(), 0);
-		titleImg.draw(copyMat);
-		
-		// Transformations for join image. 
-		joinX = (getAspectRatio()/2.0f);
-		joinY = 0.4f;
-		Matrix.setIdentityM(scaleMat, 0);
-		Matrix.setIdentityM(copyMat, 0);
-		scaleX = (2 * getAspectRatio()) / 4.0f; 
-		scaleY = scaleX * ( ((float) joinImg.getHeight()) / joinImg.getWidth());
-		joinWidth = scaleX;
-		joinHeight = scaleY;
-		Matrix.translateM(copyMat, 0, joinX, joinY, 0);
-		Matrix.scaleM(scaleMat, 0, scaleX, scaleY, 1);
-		Matrix.multiplyMM(copyMat, 0, copyMat.clone(), 0, scaleMat, 0);
-		Matrix.multiplyMM(copyMat, 0, getModelViewMatrix(), 0, copyMat.clone(), 0);
-		joinImg.draw(copyMat);
+//		// Transformations for title image. 
+//		float[] scaleMat = new float[16];
+//		Matrix.setIdentityM(scaleMat, 0);
+//		Matrix.setIdentityM(copyMat, 0);
+//		float scaleX = (2 * getAspectRatio()) / 4.0f; 
+//		//float scaleY = scaleX * ( ((float) titleImg.getHeight()) / titleImg.getWidth());
+//		Matrix.translateM(copyMat, 0, 0, 0.75f, 0);
+//		//Matrix.scaleM(scaleMat, 0, scaleX, scaleY, 1);
+//		Matrix.multiplyMM(copyMat, 0, copyMat.clone(), 0, scaleMat, 0);
+//		Matrix.multiplyMM(copyMat, 0, getModelViewMatrix(), 0, copyMat.clone(), 0);
+//		//titleImg.draw(copyMat);
 		
 		mCursor.setParticlePosition(mCursor.getParticleXPos() + cursorVelocityX, mCursor.getParticleYPos() + cursorVelocityY, 0);
 		mCursor.drawParticle(getModelViewMatrix());
 		
-		if (hitJoin) {
-			joinCountdown -= 0.005f; 
-			if (joinCountdown <= 0) {
-				hitJoin = false;
-				joinCountdown = 1.0f;
-				mParticleSystem.makeNormalSystem();
-				mParticleSystem.endSpawning();
-
-				// Transition to game activity...
-				Intent intent = new Intent(getActivity(), LobbyActivity.class);
-				//Intent intent = new Intent(getActivity(), GameOverActivity.class);
-				intent.putExtra(PLAYER_ID_INTENT, playerID);
-				getActivity().startActivity(intent);
-			}
-		}
 		
 		mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
 		mParticleSystem.drawParticles(getModelViewMatrix());
 		
-		try {
-			while (true) {
-				if (socketComm == null) {
-					Log.i("Msg", "SocketComm is NULL!!");
-					break;
-				}
-				
-				IncomingMessage msg = socketComm.getNextMessage();
-				parseMsg(msg);
-			}
-		} catch(NoSuchElementException e) {
-			// Intentionally empty
-		}
 	}
 
-	void parseMsg(IncomingMessage msg) {
-		if (msg.getID() == IncomingMessageParser.InMessageType.MSG_JOIN_RESPONSE.getId()) 
-		{
-			int ret = IncomingMessage.handleJoinResponse(msg);
-			
-			if (ret == -1) {
-				Log.e("MenuRenderer", "Failure to parse join response.");
-			} else if (ret == 0) {
-				// Send a message indicating that the player cannot join yet.
-				getActivity().runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						Toast.makeText(getActivity(), "The Lobby is full. Please wait until the next game is available.",
-								Toast.LENGTH_LONG).show();
-					}
-				});
-			} else {
-				// Successfully joined the game. 
-				// TODO: Set the player's ID-- this is in ret. 
-				Log.i("Msg", "Got a join response!");
-				playerID = ret;
-				mParticleSystem.makeSpiralSystem();
-				mParticleSystem.beginSpawning();
-				hitJoin = true;
-			}
-		}
-	}
+	
 	
 	@Override
 	public void onSurfaceCreated(GL10 arg0, EGLConfig arg1) {
 		// Load shaders for all BitmapImg objects.
 		super.onSurfaceCreated(arg0, arg1);
 		
-		joinMsg = new OutMsgJoin(getActivity());
-		menuBackground = new BitmapImg(getActivity(), R.drawable.img_tartarus_menu);
-		titleImg = new BitmapImg(getActivity(), R.drawable.tart_title);
-		joinImg = new BitmapImg(getActivity(), R.drawable.join_game);
+		menuBackground = new BitmapImg(getActivity(), R.drawable.img_tartarus_gameover);
 		
 		mCursor = new Particle(getActivity(), R.drawable.particle, 0, 0, 0,
 				0.85098f, 0.0f, 0.0f, 1.0f, 0.2f, 0.2f, false, 0);
@@ -223,32 +140,6 @@ public class MenuRenderer extends CustomRenderer {
 		mCursor.setParticlePosition(getFingerX(), getFingerY(), 0);
 		cursorVelocityX = cursorVelocityY = 0; 
 		
-		float fx = getFingerX();
-		float fy = getFingerY();
-		
-		if (fx >= joinX - joinWidth && fx <= joinX + joinWidth && 
-				fy >= joinY - joinHeight && fy <= joinY + joinHeight) {
-			// Touched join game
-			
-			if (socketComm == null || socketComm.getSock() == null) {
-				// Not connected -- allow the player to join as a single player.
-				Log.i("MenuRenderer", "Not connected to a socket. Joining in single-player mode.");
-				mParticleSystem.makeSpiralSystem();
-				hitJoin = true;
-			}
-			else 
-			{
-				try {
-					joinMsg.sendMessage();
-				} catch (MessageTypeMismatchException e) {
-					Log.i("MenuRenderer", "Could not send a join!");
-				}
-			}
-		} else {
-			mParticleSystem.makeNormalSystem();
-			hitJoin = false;
-		}
-		
 		if (mParticleSystem != null) {
 			mParticleSystem.beginSpawning();
 		}
@@ -258,7 +149,7 @@ public class MenuRenderer extends CustomRenderer {
 	public void onReleaseTouch() {
 		super.onReleaseTouch();
 		
-		if (mParticleSystem != null && !hitJoin) {
+		if (mParticleSystem != null) {
 			mParticleSystem.endSpawning();	
 		}
 	}
