@@ -10,6 +10,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 import org.ubc.tartarus.ApplicationData;
+import org.ubc.tartarus.GameOverActivity;
 import org.ubc.tartarus.Player;
 import org.ubc.tartarus.R;
 
@@ -33,6 +34,7 @@ import org.ubc.tartarus.particle.ParticleSystem.Type;
 import org.ubc.tartarus.utils.Point;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.util.Log;
 
 public class GameRenderer extends CustomRenderer {
@@ -65,6 +67,7 @@ public class GameRenderer extends CustomRenderer {
 	private Vector<Bomb> BombVector;
 	private int playerID;
 	private OutMsgGemPicked gemMsg;
+	private Point startViewport;
 	
 	public GameRenderer(Activity activity, CharacterType charType) {
 		super(activity);
@@ -73,6 +76,7 @@ public class GameRenderer extends CustomRenderer {
 		ApplicationData app = (ApplicationData) getActivity().getApplication();
 		this.GemArray = app.gemList;
 		this.playerID = app.playerId;
+		this.startViewport = app.startPos;
 		this.gemMsg = new OutMsgGemPicked(activity);
 		Log.i("GameRenderer", "Size of gem array: " + GemArray.size());
 	}
@@ -163,8 +167,7 @@ public class GameRenderer extends CustomRenderer {
 	}
 
 	void parseMsg(IncomingMessage msg) {
-		if (msg.getID() == IncomingMessageParser.InMessageType.MSG_UPDATE_GEM.getId())
-		{
+		if (msg.getID() == IncomingMessageParser.InMessageType.MSG_UPDATE_GEM.getId()) {
 			// Received an update gem message.
 			Log.i("GameRenderer", "Received an update gem message!");
 			ByteBuffer bb = ByteBuffer.wrap(msg.getData());
@@ -175,7 +178,35 @@ public class GameRenderer extends CustomRenderer {
 			short oldY = (short) (bb.getShort() & 0xFFFF);
 			Log.i("GameRenderer", "Got new value for gem: (" + newX + ", " + newY + "), Old: (" + oldX + ", " + oldY + ")");
 			deleteGem(newX, newY, oldX, oldY);
+		} else if (msg.getID() == IncomingMessageParser.InMessageType.MSG_GAME_OVER.getId()) {
+			// Received an update gem message.
+			Log.i("GameRenderer", "Received a Game Over message!");
+			Vector<Integer> playerInfo = handleGameOverMessage(msg);
+			
+			// Transition to game over activity.
+			Intent gameOverIntent = new Intent(getActivity(), GameOverActivity.class);
+			gameOverIntent.putExtra(GameOverActivity.RANKS_INTENT, playerInfo);
+			getActivity().startActivity(gameOverIntent);
 		}
+	}
+	
+	public static Vector<Integer> handleGameOverMessage(IncomingMessage msg) {
+		Vector<Integer> playerInfo = new Vector<Integer>();
+		int numPlayers = msg.getData().length / 3;
+		ByteBuffer bb = ByteBuffer.wrap(msg.getData());
+		byte playerID;
+		short playerScore; 
+		
+		for (int i = 0; i < numPlayers; i++){
+			playerID = bb.get();
+			playerScore = (short)(bb.getShort() & 0xFFFF);
+
+			Log.i("GameRenderer", "Player ID: " + playerID + ", Score: " + playerScore);
+			playerInfo.add(Integer.valueOf(playerID));
+			playerInfo.add(Integer.valueOf(playerScore));	
+		}
+
+		return playerInfo;
 	}
 	
 	public void deleteGem(short newX, short newY, short oldX, short oldY) {
@@ -199,7 +230,8 @@ public class GameRenderer extends CustomRenderer {
 		//mWorldMap = new WorldMap(getContext(), R.drawable.tileset3, 1, 25, 16, 16, 240, 128, 0, 0);
 		MapParser.TileMap map = MapParser.readMapFromFile(getActivity(), R.raw.tartarus_map1);
 		
-		mWorldMap = new WorldMap(getActivity(), R.drawable.tileset1, 1, 36, TILE_WIDTH, TILE_HEIGHT, VIEWPORT_WIDTH, VIEWPORT_HEIGHT, 0, 0);
+		mWorldMap = new WorldMap(getActivity(), R.drawable.tileset1, 1, 36, TILE_WIDTH, TILE_HEIGHT, VIEWPORT_WIDTH, 
+				VIEWPORT_HEIGHT, (int) startViewport.x, (int) startViewport.y);
 		mWorldMap.loadTileMap(map.tiles, map.worldWidth, map.worldHeight);
 
 		mPlayer = new Player(getActivity(), 0, 0, 0.3f, 0.3f, 0.02f, mWorldMap, charType);
