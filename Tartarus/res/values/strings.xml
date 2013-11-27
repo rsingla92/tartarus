@@ -6,5 +6,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="game_activity_name">Tartarus</string>
      <string name="lobby_activity_name">Lobby</string>
+     <string name="game_over_activity_name">Game Over</string>
 
 </resources>

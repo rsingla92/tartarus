@@ -300,6 +300,16 @@ public class LobbyRenderer extends CustomRenderer {
 			} catch (MessageTypeMismatchException e) {
 				Log.e("LobbyRenderer", "Sending gem acknowledgment error.");
 			}
+		} else if (msg.getID() == IncomingMessageParser.InMessageType.PLAYER_POS_MSG.getId()) {
+			Log.i("LobbyRenderer", "Received Player Pos Message!");
+			ByteBuffer bb = ByteBuffer.wrap(msg.getData());
+			
+			short x = (short) (bb.getShort() & 0xFFFF);
+			short y = (short) (bb.getShort() & 0xFFFF);
+			
+			ApplicationData dat = (ApplicationData) getActivity().getApplication();
+			dat.startPos = new Point(x, y); 
+			Log.i("LobbyRenderer", "Created new point at: (" + x + ", " + y + ")");
 		}
 	}
 	

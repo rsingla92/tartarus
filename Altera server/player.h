@@ -17,6 +17,10 @@
 #define VIEWPORT_WIDTH 		240
 #define VIEWPORT_HEIGHT		128
 
+#define POINTS_PER_GEM      10
+// Testing:
+#define MAX_POINTS          10
+
 // for testing:
 #define NUM_GEMS_PER_PLAYER_PER_QUAD	10
 

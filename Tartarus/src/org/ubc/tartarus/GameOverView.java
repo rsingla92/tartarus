@@ -1,5 +1,8 @@
 package org.ubc.tartarus;
 
+import java.util.ArrayList;
+import java.util.Vector;
+
 import org.ubc.tartarus.graphics.CustomRenderer;
 import org.ubc.tartarus.graphics.GameOverRenderer;
 
@@ -15,11 +18,13 @@ public class GameOverView extends GLSurfaceView implements
 						GestureDetector.OnGestureListener {
 	CustomRenderer mRenderer;
 	private GestureDetectorCompat mGestureDetector; 
+	private ArrayList<Integer> playerInfo;
 	
-	public GameOverView(Activity activity) {
+	public GameOverView(Activity activity, ArrayList<Integer> playerInfo) {
 		super(activity);
 		setEGLContextClientVersion(2);
-		mRenderer = new GameOverRenderer(activity);
+		this.playerInfo = playerInfo;
+		mRenderer = new GameOverRenderer(activity, playerInfo);
 		setRenderer(mRenderer);
 		mGestureDetector = new GestureDetectorCompat(activity, this);
 	}

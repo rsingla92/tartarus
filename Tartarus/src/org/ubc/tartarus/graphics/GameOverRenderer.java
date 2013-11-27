@@ -1,6 +1,7 @@
 package org.ubc.tartarus.graphics;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Vector;
 
@@ -39,12 +40,13 @@ public class GameOverRenderer extends CustomRenderer {
 	private float cursorVelocityX, cursorVelocityY;
 	private boolean cursorXDirection, cursorYDirection;
 	private int playerID = 0;
-	private Vector<Integer> playerInfo;
+	private ArrayList<Integer> playerInfo;
 	private float[] positions;
-	
-	public GameOverRenderer(Activity activity) {
+
+	public GameOverRenderer(Activity activity, ArrayList<Integer> playerInfo) {
 		super(activity);
-		playerInfo = new Vector<Integer>();
+		this.playerInfo = playerInfo;
+		Log.i("GameOverRenderer", "Player Info Size: " + playerInfo.size());
 		positions = new float[4];
 
 	}
@@ -126,35 +128,6 @@ public class GameOverRenderer extends CustomRenderer {
 		mParticleSystem.drawParticles(getModelViewMatrix());
 		
 	}
-
-	void parseMsg(IncomingMessage msg){
-		playerInfo = handleGameOverMessage(msg);
-		if (playerInfo == null) return;
-		
-	}
-	
-	public static Vector<Integer> handleGameOverMessage(IncomingMessage msg) {
-		Vector<Integer> playerInfo = null;
-		if (msg.getID() == IncomingMessageParser.InMessageType.MSG_GAME_OVER.getId()) return playerInfo;
-		// 12 bytes in msg
-		
-		playerInfo = new Vector<Integer>();
-		ByteBuffer bb = ByteBuffer.wrap(msg.getData());
-		byte playerID;
-		short playerScore; 
-		
-		for (int i = 0; i < msg.getLength()/3; i++){
-			playerID = msg.getID();
-			playerScore = bb.getShort();
-
-			playerInfo.add(new Integer(playerID));
-			playerInfo.add(new Integer(playerScore));
-			
-		}
-
-		return playerInfo;
-	}
-	
 	
 	@Override
 	public void onSurfaceCreated(GL10 arg0, EGLConfig arg1) {

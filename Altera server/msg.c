@@ -12,171 +12,14 @@ extern sPlayer playerDevTable[MAX_PLAYERS];
 static unsigned char gemsSent = 0;
 static unsigned char readyPlayers = 0;
 
-/*
-GAME_STATE getGameState(GameMsg g)
-{
-    return g.gameState_;
-}
+struct Point;
 
-void setGameState(GameMsg g, GAME_STATE gs)
-{
-    g.gameState_ = gs;
-}
-
-unsigned char getID(GameMsg g)
-{
-    return g.id_;
-}
-
-void setID(GameMsg g, int id)
-{
-    g.id_ = id;
-}
-
-// Used to decline more people from joining
-unsigned char isGameStart(GameMsg g)
-{
-    return (g.gameStart_ == GAME_STARTED);
-}
-
-// Begin the game!
-void setGameStart(GameMsg g)
-{
-    g.gameStart_ = GAME_STARTED;
-}
-
-// Determines if someone has requested a game
-unsigned char isGameRequested(GameMsg g)
-{
-    return (g.gameRequest_ == GAME_REQUESTED);
-}
-
-// Has a player joined the game?
-unsigned char getPlayerJoin(GameMsg g, int player)
-{
-    // Do some bitmasking to determine if the specified
-    // player has joined.
-
-    // Player is either 0, 1, 2, 3
-    if( player > 3 || player < 1 ) return;
-
-    return (g.lobbyState_ >> player) & 0x01;
-}
-
-// Has a player said they're ready?
-unsigned char getPlayerReady(GameMsg g, int player)
-{
-    // Do smome bitmasking to determined if the specified player
-    // has signalled ready.
-
-    // Player is either 0, 1, 2, 3
-    if( player > 3 || player < 0 ) return;
-
-    return (g.lobbyState_ >> (player+4)) & 0x01;
-}
-
-// Tell others a player joiend
-void setPlayerJoin(GameMsg g, int player)
-{
-    // Set the specified bit to indicate a player has joined
-    switch(player)
-    {
-    case FIRST_PLAYER:
-        g.lobbyState_ |= 1 << 1;
-        break;
-    case SECOND_PLAYER:
-        g.lobbyState_ |= 1 << 2;
-        break;
-    case THIRD_PLAYER:
-        g.lobbyState_ |= 1 << 3;
-        break;
-    case FOURTH_PLAYER:
-        g.lobbyState_ |= 1 << 4;
-        break;
-    default:
-        break;
-    }
-}
-
-// Indicate that a player is ready
-void setPlayerReady(GameMsg g, int player)
-{
-    // Set the specified bit to indicate a player is ready
-    switch(player)
-    {
-    case FIRST_PLAYER:
-        g.lobbyState_ |= 1 << 5;
-        break;
-    case SECOND_PLAYER:
-        g.lobbyState_ |= 1 << 6;
-        break;
-    case THIRD_PLAYER:
-        g.lobbyState_ |= 1 << 7;
-        break;
-    case FOURTH_PLAYER:
-        g.lobbyState_ |= 1 << 8;
-        break;
-    default:
-        break;
-    }
-}
-
-// Can we begin the game?!
-unsigned char areAllPlayersReady(GameMsg g)
-{
-    if( numPlayers > 3 || numPlayers < 1 ) return 0;
-
-    int checkVal = 0;
-    switch(numPlayers)
-    {
-    case 1:
-        checkVal = ONE_READY;
-        break;
-    case 2:
-        checkVal = TWO_READY;
-        break;
-    case 3:
-        checkVal = THREE_READY;
-        break;
-    case 4:
-        checkVal = FOUR_READY;
-        break;
-    default:
-        break;
-    }
-
-    return (g.lobbyState_ == checkVal);
-}
-
-// Determine power up type
-POWER_UP_TYPE getPowerUpType(PowerUpMsg p)
-{
-    return p.type_;
-}
-
-void setPowerUpType(PowerUpMsg p, POWER_UP_TYPE type)
-{
-    p.type_ = type;
-}
-
-unsigned char getAffectedPlayers(PowerUpMsg p)
-{
-    return p.players_;
-}
-
-void setCapturedFlags(MoveMsg m, unsigned char flagsCaptured)
-{
-    m.flagsCaptured_ = flagsCaptured;
-}
-
-void setCapturedFlag(MoveMsg m, int flagID)
-{
-    // Set the bit for the specified flag
-    if( flagID > 3 || flagID < 1 ) return;
-
-    m.flagsCaptured_ |= 1 << flagID;
-}
-*/
+static Point startingList[4] = {
+	{0, 0},
+	{4880, 0},
+	{0, 3712},
+	{4880, 3712}
+};
 
 int makeTestMsg(GenericMsg* msg)
 {
@@ -313,13 +156,22 @@ int parseGemPicked(GenericMsg *msg)
    Point newGem = respawnGem(row, col, playerID);
 
    // Add points to player
-   playerDevTable[playerID].points += 10;
+   playerDevTable[playerID].points += POINTS_PER_GEM;
 
-   // Send an update gem message
-   Point oldGem;
-   oldGem.x = col;
-   oldGem.y = row;
-   sendUpdateGemMsg(playerID, newGem, oldGem);
+   if (playerDevTable[playerID].points >= MAX_POINTS)
+   {
+	   printf("Sending game over message!\n");
+	   sendGameOverMsg();
+   }
+   else
+   {
+	   // Send an update gem message
+	   printf("Sending re-spawn message!\n");
+	   Point oldGem;
+	   oldGem.x = col;
+	   oldGem.y = row;
+	   sendUpdateGemMsg(playerID, newGem, oldGem);
+   }
 }
 
 void sendUpdateGemMsg(int player_id, Point newGem, Point oldGem)
@@ -393,7 +245,8 @@ void parseGemAckMsg(GenericMsg* msg)
 
 	if (gemsSent >= numPlayers)
 	{
-		printf("Sending start signal.\n");
+		printf("Sending player position, then start signal.\n");
+		sendPlayerPosMsg();
 		sendStartResponse();
 	}
 }
@@ -496,6 +349,75 @@ void sendStartResponse(void)
 	startMsg.msg_[0] = 1;
 	sendBroadcast(uart_dev, &startMsg);
 	free(startMsg.msg_);
+}
+
+void sendGameOverMsg(void)
+{
+	int i, j;
+	int rank[4] = {-1, -1, -1, -1};
+	int score[4] = {0, 0, 0, 0};
+
+	for (i = 0; i < numPlayers; i++)
+	{
+		int max = 0;
+
+		for (j = 0; j < 4; j++)
+		{
+			if (playerDevTable[j].state != NOT_CONNECTED && playerDevTable[j].points >= max)
+			{
+				max = playerDevTable[j].points;
+				rank[i] = j;
+				score[i] = max;
+			}
+		}
+
+		playerDevTable[rank[i]].points = -1;
+	}
+
+	GenericMsg gameOver;
+
+	gameOver.clientID_ = 0; //Doesn't matter, since this is broadcast.
+	gameOver.msgID_ = GAME_OVER_MSG;
+	gameOver.msgLength_ = 3 * numPlayers;
+	gameOver.msg_ = (unsigned char*) malloc(gameOver.msgLength_);
+
+	printf("Game Over Length: %d\n", gameOver.msgLength_);
+
+	for (i = 0; i < numPlayers; i++)
+	{
+		gameOver.msg_[i*3] = (rank[i] + 1) & 0x00FF;
+		gameOver.msg_[i*3 + 1] = (score[i] >> 8) & 0x00FF;
+		gameOver.msg_[i*3 + 2] = score[i] & 0x00FF;
+		printf("Game Over Msg: %d, %d, %d\n", gameOver.msg_[i*3], gameOver.msg_[i*3+1], gameOver.msg_[i*3+2]);
+	}
+
+	sendBroadcast(uart_dev, &gameOver);
+	free(gameOver.msg_);
+
+}
+
+void sendPlayerPosMsg(void)
+{
+	int i;
+	for (i = 0; i < 4; i++)
+	{
+		if (playerDevTable[i].state == NOT_CONNECTED) continue;
+
+		GenericMsg playerPos;
+		playerPos.clientID_ = playerDevTable[i].deviceId;
+		playerPos.msgID_ = PLAYER_POS_MSG;
+		playerPos.msgLength_ = 4;
+		playerPos.msg_ = (unsigned char*) malloc(playerPos.msgLength_);
+		playerPos.msg_[0] = (startingList[i].x >> 8) & 0x00FF;
+		playerPos.msg_[1] = startingList[i].x & 0x00FF;
+		playerPos.msg_[2] = (startingList[i].y >> 8) & 0x00FF;
+		playerPos.msg_[3] = startingList[i].y & 0x00FF;
+		printf("Sending player %d position, Bytes: %d, %d, %d, %d\n", i, playerPos.msg_[0], playerPos.msg_[1],
+				playerPos.msg_[2], playerPos.msg_[3]);
+
+		writeMsg(uart_dev, &playerPos);
+		free(playerPos.msg_);
+	}
 }
 
 unsigned int getInt(unsigned char* buf, int offset)

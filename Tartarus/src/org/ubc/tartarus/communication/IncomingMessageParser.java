@@ -12,7 +12,8 @@ public class IncomingMessageParser {
 		MSG_CHAR_CHOSEN((byte) 2, 2),
 		MSG_GEM((byte) 3, -1),
 		MSG_UPDATE_GEM((byte) 4, 9),
-		MSG_GAME_OVER((byte)5, 12);
+		MSG_GAME_OVER((byte)5, 12),
+		PLAYER_POS_MSG((byte)6, 4);
 		
 		private byte id;
 		private int dataLen;
@@ -45,6 +46,8 @@ public class IncomingMessageParser {
 			return new IncomingMessage(InMessageType.MSG_UPDATE_GEM.getDataLen(), InMessageType.MSG_UPDATE_GEM.getId());
 		} else if (id == InMessageType.MSG_GAME_OVER.id) {
 			return new IncomingMessage(InMessageType.MSG_GAME_OVER.getDataLen(), InMessageType.MSG_GAME_OVER.getId());
+		} else if (id == InMessageType.PLAYER_POS_MSG.id) {
+			return new IncomingMessage(InMessageType.PLAYER_POS_MSG.getDataLen(), InMessageType.PLAYER_POS_MSG.getId());
 		}
 		
 		Log.i("Msg", "Invalid message received.");

@@ -1,6 +1,8 @@
 package org.ubc.tartarus;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Vector;
 
 import org.ubc.tartarus.particle.Particle;
 
@@ -37,20 +39,23 @@ import android.widget.PopupMenu;
 
 public class GameOverActivity extends Activity {
 
+	public static final String RANKS_INTENT = "RANKS_INTENT";
 	GLSurfaceView surfaceView;
 	MediaPlayer player;
 	String songName = "gameover.mp3";	
+	private ArrayList<Integer> playerInfo;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		playerInfo = (ArrayList<Integer>) super.getIntent().getExtras().getSerializable(RANKS_INTENT);
 		ApplicationData app = (ApplicationData) getApplication();
-		surfaceView = new GameOverView(this);
+		surfaceView = new GameOverView(this, playerInfo);
+		
+		Log.i("GameOverActivity", "Player Info Size: " + playerInfo.size());
 		
 		setContentView(surfaceView);
-		this.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-		
 		Particle.setParticleImgLoaded(false);
 		
 		//Play music here!
@@ -73,7 +78,7 @@ public class GameOverActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
-		getMenuInflater().inflate(R.menu.game_over, menu);
+		getMenuInflater().inflate(R.menu.main, menu);
 		return true;
 	}
 	

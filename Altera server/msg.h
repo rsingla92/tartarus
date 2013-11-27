@@ -23,10 +23,7 @@
 #define FOUR_READY 0x11111111
 
 typedef enum { JOIN, READY, MOVE, SELECT_CHAR, DISCONNECT, GEM_ACK, GEM_PICKED, TEST } IN_MSG_TYPE ;
-typedef enum { JOIN_RESPONSE, START, CHAR_CHOSEN_MSG, GEM_MSG, UPDATE_GEM} OUT_MSG_TYPE ;
-//typedef enum { NO_GAME, INITAL, WAITING, READY, PLAYING, WIN, LOSE } GAME_STATE;
-//typedef enum {FREEZE_ALL, FREEZE_ONE, SLOW_ALL, SLOW_ONE, FAST_ONE, RESTART_ONE, RESTART_ALL} POWER_UP_TYPE;
-
+typedef enum { JOIN_RESPONSE, START, CHAR_CHOSEN_MSG, GEM_MSG, UPDATE_GEM, GAME_OVER_MSG, PLAYER_POS_MSG} OUT_MSG_TYPE ;
 //typedef unsigned char unsigned char;
 
 /* Generic message structure for queuing messages */
@@ -50,38 +47,6 @@ typedef struct MoveMsg{
 
 } MoveMsg;
 
-/* TO DO: Load Msg Struct */
-
-/*GAME_STATE getGameState(GameMsg g);
-void setGameState(GameMsg g, GAME_STATE gs);
-unsigned char getID(GameMsg g);
-void setID(GameMsg g, int id);
-unsigned char isGameStart(GameMsg g);
-void setGameStart(GameMsg g);
-unsigned char isGameRequested(GameMsg g);
-unsigned char getPlayerJoin(GameMsg g, int player);
-unsigned char getPlayerReady(GameMsg g, int player);
-void setPlayerJoin(GameMsg g, int player);
-void setPlayerReady(GameMsg g, int player);
-unsigned char areAllPlayersReady(GameMsg g);
-
-POWER_UP_TYPE getPowerUpType(PowerUpMsg p);
-void setPowerUpType(PowerUpMsg p, POWER_UP_TYPE type);
-unsigned char getAffectedPlayers(PowerUpMsg p);
-void setAffectedPlayers(PowerUpMsg p, int numPlayers);
-*/
-
-/*
-int getPositionX(MoveMsg m);
-int getPositionY(MoveMsg m);
-unsigned char getCapturedFlags(MoveMsg m);
-
-void setPositionX(MoveMsg m,  int x);
-void setPositionY(MoveMsg m,  int y);
-void setCapturedFlags(MoveMsg m, unsigned char flagsCaptured);
-void setCapturedFlag(MoveMsg m, int flagID);
-*/
-
 /*
  * The following helper functions are for
  * receiving messages:
@@ -99,6 +64,8 @@ void sendJoinResponse(int player_id, unsigned char response,  unsigned char devI
 void sendStartResponse(void);
 void sendGemMsg(int player_id);
 void sendUpdateGemMsg(int player_id, Point newGem, Point oldGem);
+void sendGameOverMsg(void);
+void sendPlayerPosMsg(void);
 
 void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg);
 
