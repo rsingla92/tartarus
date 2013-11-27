@@ -22,7 +22,9 @@ int readSerialData(FILE *rs232, unsigned char *data)
 int readSerialDataWait(FILE *rs232, unsigned char *data)
 {
 	int c;
-	while ((c = fgetc(rs232)) == EOF);
+	while ((c = fgetc(rs232)) == EOF) {
+		printf("Eof Loop!\n");
+	}
 	*data = c;
 	return c;
 }

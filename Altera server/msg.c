@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "msg.h"
-#include "Map.h"
 #include "display.h"
 #include "player.h"
 
@@ -270,6 +269,8 @@ int parseReadyMsg(GenericMsg* msg)
 	}
 	// Send a broadcast message indicating that this player is now ready.
 
+	printf("Player %d is ready!\n", playerNo);
+
 	if(readyPlayers == numPlayers) {
 		printf("\nReady: %d\n", readyPlayers);
 		sendGemMsg(playerNo);
@@ -299,6 +300,53 @@ int parseSelectCharMsg(GenericMsg* msg)
 	}
 }
 
+int parseGemPicked(GenericMsg *msg)
+{
+   int playerID = findPlayerByDevice(msg->clientID_);
+   int gemType = playerID - 1;
+
+   if (msg->msgLength_ < 4) return -1;
+
+   unsigned short row = getShort(msg->msg_, 0);
+   unsigned short col = getShort(msg->msg_, 2);
+
+   Point newGem = respawnGem(row, col, playerID);
+
+   // Add points to player
+   playerDevTable[playerID].points += 10;
+
+   // Send an update gem message
+   Point oldGem;
+   oldGem.x = col;
+   oldGem.y = row;
+   sendUpdateGemMsg(playerID, newGem, oldGem);
+}
+
+void sendUpdateGemMsg(int player_id, Point newGem, Point oldGem)
+{
+	GenericMsg updateGemMsg;
+	updateGemMsg.clientID_ = 0; //Doesn't matter, since this is broadcast.
+	updateGemMsg.msgID_ = UPDATE_GEM;
+	updateGemMsg.msgLength_ = 9;
+	updateGemMsg.msg_ = (unsigned char*) malloc(updateGemMsg.msgLength_);
+	updateGemMsg.msg_[0] = (unsigned char) (player_id); // Sending the GEM type.
+	updateGemMsg.msg_[1] = newGem.x >> 8;
+	updateGemMsg.msg_[2] = newGem.x & 0x00FF;
+	updateGemMsg.msg_[3] = newGem.y >> 8;
+	updateGemMsg.msg_[4] = newGem.y & 0x00FF;
+	updateGemMsg.msg_[5] = oldGem.x >> 8;
+	updateGemMsg.msg_[6] = oldGem.x & 0x00FF;
+	updateGemMsg.msg_[7] = oldGem.y >> 8;
+	updateGemMsg.msg_[8] = oldGem.y & 0x00FF;
+
+	printf("Printing msg (update gem msg): ");
+	int i;
+	for (i = 0; i < 9; i++) printf("%d, ", updateGemMsg.msg_[i]);
+
+	sendBroadcast(uart_dev, &updateGemMsg);
+	free(updateGemMsg.msg_);
+}
+
 int parseTestMsg(GenericMsg* msg)
 {
 	printf("Received test message from %d! Length: %d\n", msg->clientID_, msg->msgLength_);
@@ -308,7 +356,7 @@ int parseTestMsg(GenericMsg* msg)
 void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
 {
 	byte clientID = msg->clientID_;
-	byte msgLength = msg->msgLength_ + 1; // An extra 1 for the ID.
+	unsigned short msgLength = msg->msgLength_ + 1; // An extra 1 for the ID.
 	byte msgID = msg->msgID_;
 	int i = 0;
 
@@ -317,7 +365,11 @@ void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg)
 	printf("Writing data to %x!\n", clientID);
 
 	// write size (the size of the message)
-	writeSerialData(uart, msgLength);
+	byte lengthMSB = msgLength >> 8;
+	byte lengthLSB = msgLength & 0x00FF;
+
+	writeSerialData(uart, lengthMSB);
+	writeSerialData(uart, lengthLSB);
 	printf("Length of Message: %d\n", msgLength);
 
 	// Send the message ID
@@ -364,6 +416,8 @@ void sendGemMsg(int player_id)
 	gemMsg.msgLength_ = numPlayers*NUM_GEMS_PER_PLAYER_PER_QUAD*4*sizeof(Point)
 		+ 2*numPlayers;
 
+	printf("Gem Message Length: %d, NumPlayers: %d\n", gemMsg.msgLength_, numPlayers);
+
 	gemMsg.msg_ = (unsigned char*) malloc(gemMsg.msgLength_);
 	int i, msgCounter;
 	msgCounter = 0;
@@ -384,7 +438,7 @@ void sendGemMsg(int player_id)
 		}
 	}
 
-	writeMsg(uart_dev, &gemMsg);
+	sendBroadcast(uart_dev, &gemMsg);
 	free(gemMsg.msg_);
 }
 

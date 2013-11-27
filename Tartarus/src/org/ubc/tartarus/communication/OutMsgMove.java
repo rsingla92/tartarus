@@ -31,7 +31,7 @@ public class OutMsgMove extends OutgoingMessage {
 	}
 	
 	public void setMessage(short x, short y) {
-		if (Math.abs(storeX - x) >= 4 || Math.abs(storeY - y) >= 4) {
+		if (Math.abs(storeX - x) >= 16 || Math.abs(storeY - y) >= 16) {
 			newMsg = true;
 			storeX = x;
 			storeY = y;

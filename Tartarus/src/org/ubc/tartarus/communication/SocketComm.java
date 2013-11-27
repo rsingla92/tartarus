@@ -155,7 +155,11 @@ public class SocketComm {
 						
 						while (cur_pos < bytes_avail) {
 							// Read the length first.
-							msgLen = buf[cur_pos++] & 0x00FF;
+							int msgLenMSB = buf[cur_pos++] & 0x00FF;
+							int msgLenLSB = buf[cur_pos++] & 0x00FF;
+							
+							msgLen = ((msgLenMSB << 8) | msgLenLSB) & 0xFFFF;
+							
 							Log.i("Msg", "Got message of length " + msgLen);
 							
 							if (msgLen >= 1) {

@@ -6,6 +6,8 @@
 #ifndef MSG_H
 #define MSG_H
 
+#include "Map.h"
+
 #include "altera_up_avalon_rs232.h"
 
 #define GAME_STARTED 1
@@ -20,8 +22,8 @@
 #define THREE_READY 0x01110111
 #define FOUR_READY 0x11111111
 
-typedef enum { JOIN, READY, MOVE, SELECT_CHAR, DISCONNECT, GEM_ACK, TEST } IN_MSG_TYPE ;
-typedef enum { JOIN_RESPONSE, START, CHAR_CHOSEN_MSG, GEM_MSG} OUT_MSG_TYPE ;
+typedef enum { JOIN, READY, MOVE, SELECT_CHAR, DISCONNECT, GEM_ACK, GEM_PICKED, TEST } IN_MSG_TYPE ;
+typedef enum { JOIN_RESPONSE, START, CHAR_CHOSEN_MSG, GEM_MSG, UPDATE_GEM} OUT_MSG_TYPE ;
 //typedef enum { NO_GAME, INITAL, WAITING, READY, PLAYING, WIN, LOSE } GAME_STATE;
 //typedef enum {FREEZE_ALL, FREEZE_ONE, SLOW_ALL, SLOW_ONE, FAST_ONE, RESTART_ONE, RESTART_ALL} POWER_UP_TYPE;
 
@@ -30,7 +32,7 @@ typedef enum { JOIN_RESPONSE, START, CHAR_CHOSEN_MSG, GEM_MSG} OUT_MSG_TYPE ;
 /* Generic message structure for queuing messages */
 struct gMsg {
 	unsigned char msgID_;
-	unsigned char msgLength_;
+	unsigned short msgLength_;
 	unsigned char clientID_;
 	unsigned char* msg_;
 
@@ -90,11 +92,13 @@ int parseReadyMsg(GenericMsg* msg);
 int parseTestMsg(GenericMsg* msg);
 int parseSelectCharMsg(GenericMsg* msg);
 int parseDisconnectMsg(GenericMsg *msg);
+int parseGemPicked(GenericMsg *msg);
 
 void sendCharacterChosenMsg(int player_id, unsigned char charID);
 void sendJoinResponse(int player_id, unsigned char response,  unsigned char devID);
 void sendStartResponse(void);
 void sendGemMsg(int player_id);
+void sendUpdateGemMsg(int player_id, Point newGem, Point oldGem);
 
 void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg);
 

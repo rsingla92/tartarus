@@ -30,6 +30,7 @@ typedef struct
 	unsigned char deviceId;
 	unsigned char character;
 	unsigned char chosen;
+	int points;
 	colour playerCol;
 	Point gemList[NUM_GEMS_PER_PLAYER_PER_QUAD*4];
 } sPlayer;
@@ -56,5 +57,6 @@ int updatePlayerChar(int player, unsigned char charType);
 void getPlayerColour(int player, colour* col);
 void sendBroadcastExclusive(alt_up_rs232_dev* uart, GenericMsg* msg, int excluded_player);
 void sendBroadcast(alt_up_rs232_dev* uart, GenericMsg* msg);
+Point respawnGem(short row, short col, unsigned char playerID);
 
 #endif /* PLAYER_H_ */

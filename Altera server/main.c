@@ -40,7 +40,9 @@ static int readSocket(FILE* uart)
 	byte clientID = 0;
 	byte msgLength = 0;
 	byte msgID = 0;
-	byte packetLength = 0;
+	byte lengthMSB = 0;
+	byte lengthLSB = 0;
+	unsigned short packetLength = 0;
 
 	// Make element to add to queue
 	GenericMsg* newElement;
@@ -52,62 +54,56 @@ static int readSocket(FILE* uart)
 	printf("Dat: %d\n", clientID);
 
 	// If nothing to read, return.
-	if (clientID == EOF) return 0;
+	if (clientID == EOF) {
+		printf("Got an EOF!!\n");
+		return 0;
+	}
 
 	// Read size
-	readSerialDataWait(uart, &packetLength);
+	readSerialData(uart, &lengthMSB);
+	readSerialData(uart, &lengthLSB);
+
+	packetLength = (lengthMSB << 8) | lengthLSB;
 	printf("Length of Packet: %d\n", packetLength);
 
-	//int i;
-	//for( i = 0; i < packetLength; i += msgLength + 3)
-	//{
-		newElement = (GenericMsg*) malloc(sizeof(GenericMsg));
-		newElement->clientID_ = clientID;
-		newElement->next = NULL;
+	newElement = (GenericMsg*) malloc(sizeof(GenericMsg));
+	newElement->clientID_ = clientID;
+	newElement->next = NULL;
 
-		// HACK: Trying to get to the bottom of this...
-		// Commented out because it was a problem with the old Middleman.
-		// byte throwaway;
-		// readSerialDataWait(uart, &throwaway);
+	newElement->msgLength_ = packetLength--;
+	printf("Length: %d, ", newElement->msgLength_);
 
-		//Message length...
-	//	readSerialDataWait(uart, &msgLength);
-	//	msgLength--; // We read in the type
-		newElement->msgLength_ = packetLength--;
-		printf("Length: %d, ", newElement->msgLength_);
+	// Read in the message ID:
+	readSerialData(uart, &msgID);
+	newElement->msgID_ = msgID;
+	printf("Type of message: %x, ", newElement->msgID_);
 
-		// Read in the message ID:
-		readSerialDataWait(uart, &msgID);
-		newElement->msgID_ = msgID;
-		printf("Type of message: %x, ", newElement->msgID_);
+	newElement->msg_ = (byte*) malloc(sizeof(newElement->msgLength_));
 
-		newElement->msg_ = (byte*) malloc(sizeof(newElement->msgLength_));
+	int j;
+	printf("Data: ");
+	for (j = 0; j < packetLength; j++) {
+		readSerialData(uart, &(newElement->msg_[j]));
+		printf("%x, ", newElement->msg_[j]);
+	}
 
-		int j;
-		printf("Data: ");
-		for (j = 0; j < packetLength; j++) {
-			readSerialDataWait(uart, &(newElement->msg_[j]));
-			printf("%x, ", newElement->msg_[j]);
-		}
-
-		// If it is the first element then the queue is not set up
-		if( !msgHead )
+	// If it is the first element then the queue is not set up
+	if( !msgHead )
+	{
+		// Initialize the queue
+		msgHead = newElement;
+		msgTail = msgHead;
+	}
+	else
+	{
+		// Make current tail point to cur element if tail exists
+		if( msgTail)
 		{
-			// Initialize the queue
-			msgHead = newElement;
-			msgTail = msgHead;
+			msgTail->next = newElement;
 		}
-		else
-		{
-			// Make current tail point to cur element if tail exists
-			if( msgTail)
-			{
-				msgTail->next = newElement;
-			}
 
-			msgTail = newElement;
-		}
-	//}
+		msgTail = newElement;
+	}
 
 	return 1;
 }
@@ -152,6 +148,9 @@ static void parseNextMessage()
 		case GEM_ACK:
 			parseGemAckMsg(msgHead);
 			break;
+		case GEM_PICKED:
+			parseGemPicked(msgHead);
+			break;
 		case TEST:
 			parseTestMsg(msgHead);
 			break;
@@ -176,7 +175,7 @@ int main(void) {
 	uart_dev = initSerialPort("/dev/rs232_0");
 
 	alt_timestamp_start();
-	//sdcard_handle *sd_dev = init_sdcard(); //TODO: REMOVE COMMENT
+	sdcard_handle *sd_dev = init_sdcard(); //TODO: REMOVE COMMENT
 //	initAudio();
 
 	printf("Initializing display...\n");
@@ -185,28 +184,27 @@ int main(void) {
 
 	clear_display();
 
-	/* TODO: UNCOMMENT BELOW LINES */
-	//if (sd_dev == NULL) //TODO: REMOVE COMMENT
-	//	return 1; //TODO: REMOVE COMMENT
+	if (sd_dev == NULL)
+		return 1;
 
-	//printf("Creating map!\n");
+	printf("Creating map!\n");
 
-	//makeMap("tmap1.txt");
-	//printf("Drawing map! Width: %d, Height: %d\n", map.mapWidth, map.mapHeight);
-	//drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
+	makeMap("tmap1.txt");
+    printf("Drawing map! Width: %d, Height: %d\n", map.mapWidth, map.mapHeight);
+	drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
 
 	//printf("Swapping buffers!\n");
-	//swap_buffers();
-	//drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
+	swap_buffers();
+	drawMapPortion(0, 0, map.mapWidth, map.mapHeight);
 
-	//printf("Drawn!\n");
+	printf("Drawn!\n");
 	seed(alt_timestamp());
 
 	while (true)
 	{
 		readSocket(uart_dev);
 		parseNextMessage();
-		runState();
+		//runState();
 	}
 
 	return 0;

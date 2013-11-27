@@ -21,8 +21,8 @@ public class OutMsgGemPicked extends OutgoingMessage {
 		if (!newMsg) return; // No need to send if there is no new message ready.
 		
 		ByteBuffer buffer = ByteBuffer.allocate(4);
-		buffer.putShort(row);
 		buffer.putShort(column);
+		buffer.putShort(row);
 		byte buf[] = buffer.array();
 		Log.i("TestSocket", "Sent row: " + row + ", Sent col: + " + column);
 		sendMessage(OutMessageType.MSG_GEM_PICKED, buf);

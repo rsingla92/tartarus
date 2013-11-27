@@ -1,5 +1,6 @@
 package org.ubc.tartarus.graphics;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 import java.util.Vector;
@@ -166,6 +167,27 @@ public class GameRenderer extends CustomRenderer {
 		{
 			// Received an update gem message.
 			Log.i("GameRenderer", "Received an update gem message!");
+			ByteBuffer bb = ByteBuffer.wrap(msg.getData());
+			byte playerId = bb.get(); 
+			short newX = (short) (bb.getShort() & 0xFFFF); 
+			short newY = (short) (bb.getShort() & 0xFFFF);
+			short oldX = (short) (bb.getShort() & 0xFFFF); 
+			short oldY = (short) (bb.getShort() & 0xFFFF);
+			Log.i("GameRenderer", "Got new value for gem: (" + newX + ", " + newY + "), Old: (" + oldX + ", " + oldY + ")");
+			deleteGem(newX, newY, oldX, oldY);
+		}
+	}
+	
+	public void deleteGem(short newX, short newY, short oldX, short oldY) {
+		for (int i = 0; i < GemArray.size(); i++) {
+			int gemX = (int) (GemArray.get(i).getPosition().x / TILE_WIDTH);
+			int gemY = (int) (GemArray.get(i).getPosition().y / TILE_HEIGHT);
+			
+			Log.i("GameRenderer", "GemX: " + gemX + ", gemY: " + gemY);
+			if (gemX == oldX && gemY == oldY) {
+				GemArray.get(i).setPosition(new Point(newX, newY));
+				break;
+			}
 		}
 	}
 	

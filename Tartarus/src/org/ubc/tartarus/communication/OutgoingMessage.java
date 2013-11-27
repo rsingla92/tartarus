@@ -49,13 +49,16 @@ public class OutgoingMessage {
 		byte[] data = null;
 		
 		if (dat == null) {
-			data = new byte[2];
-			data[0] = (byte) 1; 
-			data[1] = msgType.getId();
+			data = new byte[3];
+			data[0] = (byte) 0; 
+			data[1] = (byte) 1;
+			data[2] = msgType.getId();
 		} else {
-			data = new byte[dat.length + 2]; 
-			data[0] = (byte) (dat.length + 1); // The type and data
-			data[1] = msgType.getId();
+			data = new byte[dat.length + 3];
+			int msgLen = dat.length + 1;
+			data[0] = (byte) ((msgLen >> 8) & 0x00FF); // MSB of length
+			data[1] = (byte) (msgLen & 0x00FF); // LSB of lenth
+			data[2] = msgType.getId();
 		}
 		
 		if (dat != null) {
@@ -63,7 +66,7 @@ public class OutgoingMessage {
 				throw new MessageTypeMismatchException("OutgoingMessage");
 			}
 			
-			System.arraycopy(dat, 0, data, 2, dat.length);
+			System.arraycopy(dat, 0, data, 3, dat.length);
 		}
 		
 		if (app.socketComm != null) {

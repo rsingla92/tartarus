@@ -32,6 +32,7 @@ typedef struct {
 typedef struct {
 	unsigned short x, y;
 } Point;
+
 // Constructor
 void makeMap( char*);
 
@@ -55,5 +56,6 @@ int readShort(file_handle handle);
 void erasePositionAt(short absX, short absY);
 void drawPlayerAt(short absX, short absY, colour col);
 Point getRandomPoint(int quadNum);
+int getQuadrant(short row, short col);
 
 #endif

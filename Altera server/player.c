@@ -15,10 +15,10 @@ unsigned char numPlayers = 0;
 
 sPlayer playerDevTable[MAX_PLAYERS] =
 {
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0xff, 0, 0}, {-1, -1, -1, -1}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0, 0xff, 0}, {-1, -1, -1, -1}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0xff}, {-1, -1, -1, -1}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, {0xe3, 0xff, 0x42}, {-1, -1, -1, -1}}
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, 0, {0xff, 0, 0}, {-1, -1, -1, -1}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0xff, 0}, {-1, -1, -1, -1}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0xff}, {-1, -1, -1, -1}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, 0, {0xe3, 0xff, 0x42}, {-1, -1, -1, -1}}
 };
 
 unsigned char doesPlayerExist(int player)
@@ -95,6 +95,10 @@ unsigned char addPlayer(int deviceId)
 {
 	if (numPlayers >= MAX_PLAYERS || numPlayers < 0) return -1;
 
+	unsigned char oldId = findPlayerByDevice(deviceId);
+
+	if (oldId != -1 && playerDevTable[oldId].state != NOT_CONNECTED) return -1;
+
 	unsigned char playerId;
 
 	if (playerDevTable[numPlayers].state == NOT_CONNECTED)
@@ -108,7 +112,7 @@ unsigned char addPlayer(int deviceId)
 		for (i = 0; i < MAX_PLAYERS &&
 			playerDevTable[i].state != NOT_CONNECTED; i++);
 
-		if (i >= MAX_PLAYERS || playerDevTable[i].state == NOT_CONNECTED) return -1;
+		if (i >= MAX_PLAYERS || playerDevTable[i].state != NOT_CONNECTED) return -1;
 
 		playerId = i;
 	}
@@ -149,6 +153,11 @@ unsigned char playersReady(void)
 int setPlayerReady(int player)
 {
 	if (player < 0 || player >= MAX_PLAYERS || !doesPlayerExist(player)) return 0;
+
+	if (playerDevTable[player].state == PLAYER_READY) {
+		printf("Player already ready!");
+		return 0;
+	}
 
 	playerDevTable[player].state = PLAYER_READY;
 	return 1;
@@ -247,7 +256,20 @@ void generateGems(unsigned char player)
 		int quad = i % 4 + 1;
 		playerDevTable[player].gemList[i] = getRandomPoint(quad);
 		printf("Gem %d: (%d, %d), ", i, playerDevTable[player].gemList[i].x, playerDevTable[player].gemList[i].y);
+	    // TODO: Remove
+		colour col;
+		col.r = 0xff;
+		col.g = 0;
+		col.b = 0xff;
+		draw_pixel(playerDevTable[player].gemList[i].x, playerDevTable[player].gemList[i].y, col);
 	}
+}
+
+Point respawnGem(short row, short col, unsigned char playerID)
+{
+	int newQuad = (getQuadrant(row, col) + 1) % 4;
+
+	return getRandomPoint(newQuad);
 }
 
 void sendBroadcast(alt_up_rs232_dev* uart, GenericMsg* msg)

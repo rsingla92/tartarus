@@ -271,16 +271,14 @@ public class LobbyRenderer extends CustomRenderer {
 				Log.i("Msg", "Data received: " + dat[0] + ", " + dat[1]);
 				
 				if (player == playerId) {
-					if (charId == charType.ordinal()) {
-						// Check if we got the character we requested
-						chosenChars[player - 1] = charType.ordinal();
-						confirmedChar = true; 
-					} else {
-						Log.i("Msg", "Char type doesn't match.");
-					}
+					charType = Character.CharacterType.values()[charId];
+					chosenChars[player - 1] = charType.ordinal();
+					confirmedChar = true; 
+					Log.i("Msg", "Character confirmed");
 				} else {
 					// Another player has chosen a character.
 					chosenChars[player - 1] = charId;
+					Log.i("Msg", "Character " + player + " has chosen character.");
 				}
 			} catch (ArrayIndexOutOfBoundsException e) {
 				Log.e("LobbyRenderer", "Character chosen message not received correctly.");
@@ -290,7 +288,7 @@ public class LobbyRenderer extends CustomRenderer {
 			byte[] dat = msg.getData(); 
 			
 			try {
-				Log.i("LobbyRenderer", "Player ID: " + dat[0] + ", Number of Gems: " + dat[1]);
+				Log.i("LobbyRenderer", "Gem Type: " + dat[0] + ", Number of Gems: " + dat[1]);
 			} catch (ArrayIndexOutOfBoundsException e) {
 				Log.e("LobbyRenderer", "Message mismatch with Gem Msg");
 			}
@@ -330,7 +328,7 @@ public class LobbyRenderer extends CustomRenderer {
 					Log.i("LobbyRenderer", "Gem " + i + ": (" + x + ", " + y + ")");
 					count += 4; 
 					
-					gemList.add(new Gem(getActivity(), GemType.values()[currentPlayerId], x, y));
+					gemList.add(new Gem(getActivity(), GemType.values()[currentPlayerId - 1], x, y));
 				}
 			}
 		} catch (IndexOutOfBoundsException e) {
@@ -378,10 +376,12 @@ public class LobbyRenderer extends CustomRenderer {
 		
 		// check chars
 		
+		Character.CharacterType type = Character.CharacterType.NEKU; 
+		
 		// neku w,h = 44.5,54
 		// neku centre = 130.5, 156		
 		if (testBoundingBox(fx,fy, 130.5f,156f,44.5f,54f,width, height)){
-			charType = Character.CharacterType.NEKU;
+			type = Character.CharacterType.NEKU;
 			Log.i("CHAR", "im neku");
 			pickedChar = true;
 		}
@@ -389,7 +389,7 @@ public class LobbyRenderer extends CustomRenderer {
 		// magus w,h = 44,54
 		// magus centre = 284, 156
 		else if (testBoundingBox(fx,fy, 284f,156f,44f,54f, width, height)){
-			charType = Character.CharacterType.MAGUS;
+			type = Character.CharacterType.MAGUS;
 			Log.i("CHAR", "im magus");
 			pickedChar = true;
 		}
@@ -397,7 +397,7 @@ public class LobbyRenderer extends CustomRenderer {
 		// monster w,h = 48.5,54
 		// monster centre = 437.5,156
 		else if (testBoundingBox(fx,fy, 437.5f,156f,48.5f,54f,width, height)){
-			charType = Character.CharacterType.MONSTER;
+			type = Character.CharacterType.MONSTER;
 			Log.i("CHAR", "im a monster");
 			pickedChar = true;
 		}
@@ -405,7 +405,7 @@ public class LobbyRenderer extends CustomRenderer {
 		// serdic w,h = 42,55
 		// serdic centre = 597,157
 		else if (testBoundingBox(fx,fy, 597f,157f,42f,55f,width, height)){
-			charType = Character.CharacterType.SERDIC;
+			type = Character.CharacterType.SERDIC;
 			Log.i("CHAR", "im Ser Dic");
 			pickedChar = true;
 		}
@@ -413,7 +413,7 @@ public class LobbyRenderer extends CustomRenderer {
 		// rooster w,h = 43,54
 		// rooster centre = 130,313
 		else if (testBoundingBox(fx,fy, 130f,313f,43f,54f,width, height)){
-			charType = Character.CharacterType.ROOSTER;
+			type = Character.CharacterType.ROOSTER;
 			Log.i("CHAR", "im a rooster");
 			pickedChar = true;
 		}
@@ -421,7 +421,7 @@ public class LobbyRenderer extends CustomRenderer {
 		// strider w,h = 42.5,54
 		// strider centre = 283.5,313
 		else if (testBoundingBox(fx,fy, 283.5f,313f,42.5f,54f,width, height)){
-			charType = Character.CharacterType.STRIDER;
+			type = Character.CharacterType.STRIDER;
 			Log.i("CHAR", "im strider");
 			pickedChar = true;
 		}
@@ -429,7 +429,7 @@ public class LobbyRenderer extends CustomRenderer {
 		// beat w,h = 48.5,54.5
 		// beat centre =438.5,312.5 
 		else if (testBoundingBox(fx,fy, 438.5f,312.5f,48.5f,54.5f,width, height)){
-			charType = Character.CharacterType.BEAT;
+			type = Character.CharacterType.BEAT;
 			Log.i("CHAR", "im beat");
 			pickedChar = true;
 		}
@@ -437,7 +437,7 @@ public class LobbyRenderer extends CustomRenderer {
 		// lock w,h = 47,54
 		// lock centre = 596,313
 		else if (testBoundingBox(fx,fy, 596f,313f,47f,54f,width, height)){
-			charType = Character.CharacterType.LOCK;
+			type = Character.CharacterType.LOCK;
 			Log.i("CHAR", "im lock");
 			pickedChar = true;
 		}
@@ -447,12 +447,14 @@ public class LobbyRenderer extends CustomRenderer {
 			if (socketComm == null || socketComm.getSock() == null) {
 				confirmedChar = true;
 				playerId = 1;
-				chosenChars[playerId - 1] = charType.ordinal();
+				chosenChars[playerId - 1] = type.ordinal();
 			}
+			
+			pickedChar = false;
 			
 			OutMsgSelectChar selectCharMsg = new OutMsgSelectChar(getActivity());
 			try {
-				selectCharMsg.sendMessage((byte) charType.ordinal());
+				selectCharMsg.sendMessage((byte) type.ordinal());
 			} catch (MessageTypeMismatchException e) {
 				Log.e("LobbyRenderer", "Could not send Select Character Message.");
 			}
