@@ -22,8 +22,8 @@
 #define THREE_READY 0x01110111
 #define FOUR_READY 0x11111111
 
-typedef enum { JOIN, READY, MOVE, SELECT_CHAR, DISCONNECT, GEM_ACK, GEM_PICKED, TEST } IN_MSG_TYPE ;
-typedef enum { JOIN_RESPONSE, START, CHAR_CHOSEN_MSG, GEM_MSG, UPDATE_GEM, GAME_OVER_MSG, PLAYER_POS_MSG} OUT_MSG_TYPE ;
+typedef enum { JOIN, READY, MOVE, SELECT_CHAR, DISCONNECT, GEM_ACK, GEM_PICKED, BOMB_PLANTED, BOMB_HIT, TEST } IN_MSG_TYPE ;
+typedef enum { JOIN_RESPONSE, START, CHAR_CHOSEN_MSG, GEM_MSG, UPDATE_GEM, GAME_OVER_MSG, PLAYER_POS_MSG, UPDATE_BOMB} OUT_MSG_TYPE ;
 //typedef unsigned char unsigned char;
 
 /* Generic message structure for queuing messages */
@@ -58,6 +58,8 @@ int parseTestMsg(GenericMsg* msg);
 int parseSelectCharMsg(GenericMsg* msg);
 int parseDisconnectMsg(GenericMsg *msg);
 int parseGemPicked(GenericMsg *msg);
+void parseBombPlanted(GenericMsg *msg);
+void parseBombHit(GenericMsg *msg);
 
 void sendCharacterChosenMsg(int player_id, unsigned char charID);
 void sendJoinResponse(int player_id, unsigned char response,  unsigned char devID);
@@ -66,6 +68,7 @@ void sendGemMsg(int player_id);
 void sendUpdateGemMsg(int player_id, Point newGem, Point oldGem);
 void sendGameOverMsg(void);
 void sendPlayerPosMsg(void);
+void sendUpdateBombMsg(int player_id, unsigned short x, unsigned short y, unsigned char create);
 
 void writeMsg(alt_up_rs232_dev* uart, GenericMsg* msg);
 
