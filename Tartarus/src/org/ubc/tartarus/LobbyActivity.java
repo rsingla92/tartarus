@@ -34,7 +34,26 @@ public class LobbyActivity extends Activity {
 		
 		setContentView(surfaceView);
 
-		Toast.makeText(getContext(), "You are player " + playerID + "!", Toast.LENGTH_LONG).show();
+		String s = "Welcome, ";
+		switch(playerId) {
+			case 1:
+				s += "RED";
+				break;
+			case 2:
+				s += "GREEN";
+				break;
+			case 3:
+				s += "BLUE";
+				break;
+			case 4:
+			default:
+				s += "YELLOW";
+				break;
+			
+		}
+		
+		s += " player!"; 
+		Toast.makeText(getContext(), s, Toast.LENGTH_LONG).show();
 
 		//Play Music here
 		AssetFileDescriptor afd;
