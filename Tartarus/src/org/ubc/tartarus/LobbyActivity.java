@@ -16,6 +16,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.Toast;
 
 public class LobbyActivity extends Activity {
 	GLSurfaceView surfaceView; 
@@ -32,6 +33,8 @@ public class LobbyActivity extends Activity {
 		surfaceView = new LobbyView(this, playerId);
 		
 		setContentView(surfaceView);
+
+		Toast.makeText(getContext(), "You are player " + playerID + "!", Toast.LENGTH_LONG).show();
 
 		//Play Music here
 		AssetFileDescriptor afd;
