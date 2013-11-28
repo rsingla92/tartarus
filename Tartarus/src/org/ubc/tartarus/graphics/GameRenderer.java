@@ -218,6 +218,25 @@ public class GameRenderer extends CustomRenderer {
 			Intent gameOverIntent = new Intent(getActivity(), GameOverActivity.class);
 			gameOverIntent.putExtra(GameOverActivity.RANKS_INTENT, playerInfo);
 			getActivity().startActivity(gameOverIntent);
+		} else if(msg.getID()== IncomingMessageParser.InMessageType.MSG_UPDATE_BOMB_MESSAGE.getId()){
+			Log.i("GameRenderer", "Received a Bomb message!");
+			ByteBuffer bb = ByteBuffer.wrap(msg.getData());
+			byte bombCreate = (byte) (bb.get() & 1);
+			short bombX = (short)(bb.getShort() & 0xFFFF);
+			short bombY = (short)(bb.getShort() & 0xFFFF);
+			Point p = new Point (bombX, bombY);
+			if (bombCreate == 1){
+				Bomb b = new Bomb (getActivity(),0.25f, 0.25f);
+				b.setPosition(p);
+				BombVector.add(b);
+			}
+			else if (bombCreate == 0){
+				for (int i = 0; i < BombVector.size(); i++){
+					if (BombVector.elementAt(i).getPosition() == p)
+						BombVector.remove(i);
+				}
+			}
+			
 		}
 	}
 	
