@@ -457,6 +457,7 @@ public class LobbyRenderer extends CustomRenderer {
 			if (socketComm == null || socketComm.getSock() == null) {
 				confirmedChar = true;
 				playerId = 1;
+				charType = type;
 				chosenChars[playerId - 1] = type.ordinal();
 			}
 			

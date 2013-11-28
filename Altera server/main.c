@@ -14,6 +14,7 @@
 #include "random.h"
 #include "serialport.h"
 #include "Map.h"
+#include <errno.h>
 
 #define NUM_FILES 0
 
@@ -51,6 +52,9 @@ static int readSocket(FILE* uart)
 
 	// first byte
 	readSerialData(uart, &clientID);
+
+	if (errno == EWOULDBLOCK) return 0;
+
 	printf("Dat: %d\n", clientID);
 
 	// If nothing to read, return.
@@ -151,6 +155,12 @@ static void parseNextMessage()
 		case GEM_PICKED:
 			parseGemPicked(msgHead);
 			break;
+		case BOMB_PLANTED:
+			parseBombPlanted(msgHead);
+			break;
+		case BOMB_HIT:
+			parseBombHit(msgHead);
+			break;
 		case TEST:
 			parseTestMsg(msgHead);
 			break;
@@ -173,6 +183,10 @@ static void parseNextMessage()
 int main(void) {
 	//Init RS232
 	uart_dev = initSerialPort("/dev/rs232_0");
+
+	// Set it to non-blocking
+	// 4 is the SET_FLAGS constant, and 0x4000 is non_blocking
+	fcntl(uart_dev, 4, 0x4000);
 
 	alt_timestamp_start();
 	sdcard_handle *sd_dev = init_sdcard(); //TODO: REMOVE COMMENT

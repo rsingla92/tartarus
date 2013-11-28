@@ -19,7 +19,7 @@
 
 #define POINTS_PER_GEM      10
 // Testing:
-#define MAX_POINTS          10
+#define MAX_POINTS          100
 
 // for testing:
 #define NUM_GEMS_PER_PLAYER_PER_QUAD	10

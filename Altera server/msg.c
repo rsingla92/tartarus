@@ -420,6 +420,59 @@ void sendPlayerPosMsg(void)
 	}
 }
 
+void sendUpdateBombMsg(int player_id, unsigned short x, unsigned short y, unsigned char create)
+{
+	GenericMsg updateBombMsg;
+	updateBombMsg.clientID_ = 0; //Doesn't matter, since this is broadcast.
+	updateBombMsg.msgID_ = UPDATE_BOMB;
+	updateBombMsg.msgLength_ = 5;
+	updateBombMsg.msg_ = (unsigned char*) malloc(updateBombMsg.msgLength_);
+	updateBombMsg.msg_[0] = (unsigned char) (create); // Send with create or destroy code.
+	updateBombMsg.msg_[1] = x >> 8;
+	updateBombMsg.msg_[2] = x & 0x00FF;
+	updateBombMsg.msg_[3] = y >> 8;
+	updateBombMsg.msg_[4] = y & 0x00FF;
+
+	printf("Printing msg (update bomb msg): ");
+	int i;
+	for (i = 0; i < 9; i++) printf("%d, ", updateBombMsg.msg_[i]);
+
+	// Send message to everyone except the player the planted/triggered the bomb.
+	sendBroadcastExclusive(uart_dev, &updateBombMsg, player_id);
+	free(updateBombMsg.msg_);
+}
+
+void parseBombPlanted(GenericMsg *msg)
+{
+	   int playerID = findPlayerByDevice(msg->clientID_);
+
+	   if (msg->msgLength_ < 4) return -1;
+
+	   unsigned short x = getShort(msg->msg_, 0);
+	   unsigned short y = getShort(msg->msg_, 2);
+
+	   printf("Got a bomb planted message!\n");
+	   // Send bomb planted message.
+	   sendUpdateBombMsg(playerID, x, y, 1);
+}
+
+void parseBombHit(GenericMsg *msg)
+{
+	   int playerID = findPlayerByDevice(msg->clientID_);
+
+	   if (msg->msgLength_ < 4) return -1;
+
+	   unsigned short x = getShort(msg->msg_, 0);
+	   unsigned short y = getShort(msg->msg_, 2);
+
+	   // Remove from player
+	   if (playerDevTable[playerID].points > 0) {
+		   playerDevTable[playerID].points -= POINTS_PER_GEM;
+	   }
+
+	   sendUpdateBombMsg(playerID, x, y, 0);
+}
+
 unsigned int getInt(unsigned char* buf, int offset)
 {
 	unsigned int val = 0;
