@@ -16,6 +16,7 @@ import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.widget.Toast;
 
 public class LobbyActivity extends Activity {
 	GLSurfaceView surfaceView; 
@@ -32,6 +33,27 @@ public class LobbyActivity extends Activity {
 		surfaceView = new LobbyView(this, playerId);
 		
 		setContentView(surfaceView);
+
+		String s = "Welcome, ";
+		switch(playerId) {
+			case 1:
+				s += "RED";
+				break;
+			case 2:
+				s += "GREEN";
+				break;
+			case 3:
+				s += "BLUE";
+				break;
+			case 4:
+			default:
+				s += "YELLOW";
+				break;
+			
+		}
+		
+		s += " player!"; 
+		Toast.makeText(this, s, Toast.LENGTH_LONG).show();
 
 		//Play Music here
 		AssetFileDescriptor afd;

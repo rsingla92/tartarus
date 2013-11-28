@@ -23,6 +23,8 @@ import org.ubc.tartarus.character.Gem;
 import org.ubc.tartarus.character.Gem.GemType;
 import org.ubc.tartarus.communication.IncomingMessage;
 import org.ubc.tartarus.communication.IncomingMessageParser;
+import org.ubc.tartarus.communication.OutMsgBombHit;
+import org.ubc.tartarus.communication.OutMsgBombPlanted;
 import org.ubc.tartarus.communication.OutMsgGemPicked;
 import org.ubc.tartarus.communication.OutMsgMove;
 import org.ubc.tartarus.communication.SocketComm;
@@ -36,6 +38,7 @@ import org.ubc.tartarus.utils.Point;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
 
 public class GameRenderer extends CustomRenderer {
 
@@ -67,6 +70,8 @@ public class GameRenderer extends CustomRenderer {
 	private Vector<Bomb> BombVector;
 	private int playerID;
 	private OutMsgGemPicked gemMsg;
+	private OutMsgBombPlanted bombPlantedMsg;
+	private OutMsgBombHit bombHitMsg;
 	private Point startViewport;
 	
 	public GameRenderer(Activity activity, CharacterType charType) {
@@ -78,6 +83,8 @@ public class GameRenderer extends CustomRenderer {
 		this.playerID = app.playerId;
 		this.startViewport = app.startPos;
 		this.gemMsg = new OutMsgGemPicked(activity);
+		this.bombPlantedMsg = new OutMsgBombPlanted(activity);
+		this.bombHitMsg = new OutMsgBombHit(activity);
 		Log.i("GameRenderer", "Size of gem array: " + GemArray.size());
 	}
 	
@@ -101,7 +108,12 @@ public class GameRenderer extends CustomRenderer {
 				mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT)) {
 				
 				if (playerID-1 == GemArray.get(i).getGemType().ordinal()) {
-
+					getActivity().runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							Toast.makeText(getActivity(), "+10 points", Toast.LENGTH_SHORT).show();
+						}
+					});
 					gemMsg.setMessage((short)(GemArray.get(i).getPosition().x/16), (short)(GemArray.get(i).getPosition().y/16));
 					
 					try {
@@ -117,32 +129,51 @@ public class GameRenderer extends CustomRenderer {
 			}
 		}
 		
-		if (BombVector.size() > 0 && !mPlayer.isCollision(BombVector.lastElement().getPosition().x, BombVector.lastElement().getPosition().y, 
-				BombVector.lastElement().getScaleDimensions().x , BombVector.lastElement().getScaleDimensions().y, 
-				mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
-				mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT)){
-
-			BombVector.lastElement().activateBomb();
-		}
-		
 		for (int i = 0; i < BombVector.size(); i ++ ){
 			Point pixelDimensions = BombVector.elementAt(i).getPixelDimensions(mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(),
 					VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
 			Log.i("BOMB", " "+ pixelDimensions.x + " " + pixelDimensions.y);
-			if (mPlayer.isCollision(BombVector.elementAt(i).getPosition().x, BombVector.elementAt(i).getPosition().y, 
-					pixelDimensions.x , pixelDimensions.y, 
-					mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
-					mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT) && BombVector.elementAt(i).isBombActivated())
-				
-				BombVector.elementAt(i).explodeBomb();
-			
-			if (BombVector.elementAt(i).isExploding()){
-				BombVector.elementAt(i).getCurrentAnimation().animate();
+			if (BombVector.elementAt(i).isVisible()){
+				BombVector.elementAt(i).drawBomb(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
+						mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);
 			}
-			BombVector.elementAt(i).drawBomb(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
-					mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);
-			if (BombVector.elementAt(i).getCurrentAnimation().getFrameNumber() >= 9)
-				BombVector.remove(i);
+			if (BombVector.elementAt(i).whatTimeIsIt() > 0){
+				BombVector.elementAt(i).decrementTime();
+				if (BombVector.elementAt(i).whatTimeIsIt() == 0)
+					BombVector.elementAt(i).activateBomb();
+			}
+			else {
+				if (mPlayer.isCollision(BombVector.elementAt(i).getPosition().x, BombVector.elementAt(i).getPosition().y, 
+						pixelDimensions.x , pixelDimensions.y, 
+						mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
+						mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT) && BombVector.elementAt(i).isBombActivated()){
+					
+					BombVector.elementAt(i).explodeBomb();
+					BombVector.elementAt(i).setVisible(true);
+					getActivity().runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							Toast.makeText(getActivity(), "-10 points", Toast.LENGTH_SHORT).show();
+						}
+					});
+					
+					bombHitMsg.setMessage((short)(BombVector.elementAt(i).getPosition().x/16), (short)(BombVector.elementAt(i).getPosition().y/16));
+					
+					try {
+						bombHitMsg.sendMessage();
+					} catch (MessageTypeMismatchException e) {
+						Log.e("Bomb", "Message Type Mismatch!");
+					}
+					mPlayer.losePoints(10);
+				}
+				
+				if (BombVector.elementAt(i).isExploding()){
+					BombVector.elementAt(i).getCurrentAnimation().animate();
+				}
+				
+				if (BombVector.elementAt(i).getCurrentAnimation().getFrameNumber() >= 9)
+					BombVector.remove(i);
+			}
 		}
 		
 		mPlayer.drawPlayer(getModelViewMatrix());
@@ -187,6 +218,25 @@ public class GameRenderer extends CustomRenderer {
 			Intent gameOverIntent = new Intent(getActivity(), GameOverActivity.class);
 			gameOverIntent.putExtra(GameOverActivity.RANKS_INTENT, playerInfo);
 			getActivity().startActivity(gameOverIntent);
+		} else if(msg.getID()== IncomingMessageParser.InMessageType.MSG_UPDATE_BOMB_MESSAGE.getId()){
+			Log.i("GameRenderer", "Received a Bomb message!");
+			ByteBuffer bb = ByteBuffer.wrap(msg.getData());
+			byte bombCreate = (byte) (bb.get() & 1);
+			short bombX = (short)(bb.getShort() & 0xFFFF);
+			short bombY = (short)(bb.getShort() & 0xFFFF);
+			Point p = new Point (bombX, bombY);
+			if (bombCreate == 1){
+				Bomb b = new Bomb (getActivity(),0.25f, 0.25f);
+				b.setPosition(p);
+				BombVector.add(b);
+			}
+			else if (bombCreate == 0){
+				for (int i = 0; i < BombVector.size(); i++){
+					if (BombVector.elementAt(i).getPosition() == p)
+						BombVector.remove(i);
+				}
+			}
+			
 		}
 	}
 	
@@ -308,6 +358,15 @@ public class GameRenderer extends CustomRenderer {
 				Bomb b = new Bomb(getActivity(), 0.25f, 0.25f);
 				BombVector.add(b);
 				BombVector.lastElement().setPosition(new Point(converted.x, converted.y));
+				BombVector.lastElement().setVisible(true);
+				
+				bombPlantedMsg.setMessage((short)(BombVector.lastElement().getPosition().x/16), (short)(BombVector.lastElement().getPosition().y/16));
+				
+				try {
+					bombPlantedMsg.sendMessage();
+				} catch (MessageTypeMismatchException e) {
+					Log.e("Bomb", "Message Type Mismatch!");
+				}
 				
 			}
 
