@@ -111,7 +111,7 @@ public class GameRenderer extends CustomRenderer {
 					getActivity().runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							Toast.makeText(getActivity(), "+10 points", Toast.LENGTH_LONG).show();
+							Toast.makeText(getActivity(), "+10 points", Toast.LENGTH_SHORT).show();
 						}
 					});
 					gemMsg.setMessage((short)(GemArray.get(i).getPosition().x/16), (short)(GemArray.get(i).getPosition().y/16));
@@ -153,7 +153,7 @@ public class GameRenderer extends CustomRenderer {
 					getActivity().runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
-							Toast.makeText(getActivity(), "-10 points", Toast.LENGTH_LONG).show();
+							Toast.makeText(getActivity(), "-10 points", Toast.LENGTH_SHORT).show();
 						}
 					});
 					
