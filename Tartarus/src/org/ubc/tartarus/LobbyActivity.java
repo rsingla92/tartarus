@@ -53,7 +53,7 @@ public class LobbyActivity extends Activity {
 		}
 		
 		s += " player!"; 
-		Toast.makeText(getContext(), s, Toast.LENGTH_LONG).show();
+		Toast.makeText(this, s, Toast.LENGTH_LONG).show();
 
 		//Play Music here
 		AssetFileDescriptor afd;

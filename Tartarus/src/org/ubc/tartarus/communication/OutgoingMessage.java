@@ -17,7 +17,9 @@ public class OutgoingMessage {
 		MSG_SELECT_CHAR((byte) 3, 1),
 		MSG_DISCONNECT((byte) 4, 0),
 		MSG_GEM_ACK((byte) 5, 0),
-		MSG_GEM_PICKED((byte) 6, 4);
+		MSG_GEM_PICKED((byte) 6, 4),
+		MSG_BOMB_PLANTED((byte)7, 4),
+		MSG_BOMB_HIT((byte)8, 4);
 		
 		
 		private byte id;

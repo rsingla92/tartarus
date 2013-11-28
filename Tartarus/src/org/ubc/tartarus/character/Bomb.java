@@ -24,6 +24,7 @@ public class Bomb {
 	private float[] scaleMat;
 	private float[] modelMat;
 	private float[] mMVPMat;
+	private boolean visible;
 	
 	public static final Rectangle[] bombAnimation = {
 		new Rectangle(2, 950-67, 67, 950-3),		// bomb image
@@ -85,6 +86,7 @@ public class Bomb {
 		scaleMat = new float[16];
 		mHeight = height;
 		mWidth = width;
+		visible = false;
 		
 		this.currentAnimation = 0;
 		this.setRefFrame((int)(bombAnimation[2].topRight.x - bombAnimation[2].bottomLeft.x), 
@@ -96,6 +98,14 @@ public class Bomb {
 	
 	public void setCurrentAnimation(AnimTypes anim){
 		this.currentAnimation = anim.ordinal();
+	}
+	
+	public void setVisible(boolean p){
+		this.visible = p;
+	}
+	
+	public boolean isVisible() {
+		return visible;
 	}
 	
 	public void setRefFrame(int width, int height){
