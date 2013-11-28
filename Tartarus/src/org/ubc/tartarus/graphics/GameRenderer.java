@@ -123,43 +123,45 @@ public class GameRenderer extends CustomRenderer {
 			}
 		}
 		
-		if (BombVector.size() > 0 && !mPlayer.isCollision(BombVector.lastElement().getPosition().x, BombVector.lastElement().getPosition().y, 
-				BombVector.lastElement().getScaleDimensions().x , BombVector.lastElement().getScaleDimensions().y, 
-				mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
-				mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT)){
-
-			BombVector.lastElement().activateBomb();
-		}
-		
 		for (int i = 0; i < BombVector.size(); i ++ ){
 			Point pixelDimensions = BombVector.elementAt(i).getPixelDimensions(mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(),
 					VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
 			Log.i("BOMB", " "+ pixelDimensions.x + " " + pixelDimensions.y);
-			if (mPlayer.isCollision(BombVector.elementAt(i).getPosition().x, BombVector.elementAt(i).getPosition().y, 
-					pixelDimensions.x , pixelDimensions.y, 
-					mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
-					mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT) && BombVector.elementAt(i).isBombActivated()){
-				
-				BombVector.elementAt(i).explodeBomb();
-				BombVector.elementAt(i).setVisible(true);
-				
-				bombHitMsg.setMessage((short)(BombVector.elementAt(i).getPosition().x/16), (short)(BombVector.elementAt(i).getPosition().y/16));
-				
-				try {
-					bombHitMsg.sendMessage();
-				} catch (MessageTypeMismatchException e) {
-					Log.e("Bomb", "Message Type Mismatch!");
+			if (BombVector.elementAt(i).isVisible()){
+				BombVector.elementAt(i).drawBomb(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
+						mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);
+			}
+			if (BombVector.elementAt(i).whatTimeIsIt() > 0){
+				BombVector.elementAt(i).decrementTime();
+				if (BombVector.elementAt(i).whatTimeIsIt() == 0)
+					BombVector.elementAt(i).activateBomb();
+			}
+			else {
+				if (mPlayer.isCollision(BombVector.elementAt(i).getPosition().x, BombVector.elementAt(i).getPosition().y, 
+						pixelDimensions.x , pixelDimensions.y, 
+						mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
+						mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT) && BombVector.elementAt(i).isBombActivated()){
+					
+					BombVector.elementAt(i).explodeBomb();
+					BombVector.elementAt(i).setVisible(true);
+					
+					bombHitMsg.setMessage((short)(BombVector.elementAt(i).getPosition().x/16), (short)(BombVector.elementAt(i).getPosition().y/16));
+					
+					try {
+						bombHitMsg.sendMessage();
+					} catch (MessageTypeMismatchException e) {
+						Log.e("Bomb", "Message Type Mismatch!");
+					}
+					mPlayer.losePoints(10);
 				}
-				mPlayer.losePoints(10);
+				
+				if (BombVector.elementAt(i).isExploding()){
+					BombVector.elementAt(i).getCurrentAnimation().animate();
+				}
+				
+				if (BombVector.elementAt(i).getCurrentAnimation().getFrameNumber() >= 9)
+					BombVector.remove(i);
 			}
-			
-			if (BombVector.elementAt(i).isExploding()){
-				BombVector.elementAt(i).getCurrentAnimation().animate();
-			}
-			BombVector.elementAt(i).drawBomb(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
-					mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);
-			if (BombVector.elementAt(i).getCurrentAnimation().getFrameNumber() >= 9)
-				BombVector.remove(i);
 		}
 		
 		mPlayer.drawPlayer(getModelViewMatrix());
