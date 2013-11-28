@@ -38,6 +38,7 @@ import org.ubc.tartarus.utils.Point;
 import android.app.Activity;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Toast;
 
 public class GameRenderer extends CustomRenderer {
 
@@ -107,7 +108,12 @@ public class GameRenderer extends CustomRenderer {
 				mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT)) {
 				
 				if (playerID-1 == GemArray.get(i).getGemType().ordinal()) {
-
+					getActivity().runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							Toast.makeText(getActivity(), "+10 points", Toast.LENGTH_LONG).show();
+						}
+					});
 					gemMsg.setMessage((short)(GemArray.get(i).getPosition().x/16), (short)(GemArray.get(i).getPosition().y/16));
 					
 					try {
@@ -144,6 +150,12 @@ public class GameRenderer extends CustomRenderer {
 					
 					BombVector.elementAt(i).explodeBomb();
 					BombVector.elementAt(i).setVisible(true);
+					getActivity().runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							Toast.makeText(getActivity(), "-10 points", Toast.LENGTH_LONG).show();
+						}
+					});
 					
 					bombHitMsg.setMessage((short)(BombVector.elementAt(i).getPosition().x/16), (short)(BombVector.elementAt(i).getPosition().y/16));
 					
