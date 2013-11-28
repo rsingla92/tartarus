@@ -27,10 +27,6 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		ApplicationData app = (ApplicationData) getApplication();
-		
-		app.socketComm = new SocketComm(app);
-		app.socketComm.openSocket();
 		
 		surfaceView = new MenuView(this);
 		
@@ -53,12 +49,6 @@ public class MainActivity extends Activity {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		// Schedule the read task, using the socketComm in the Application so that it exist
-		// throughout all activities.
-		SocketComm.TCPReadTimerTask tcp_task = app.socketComm.new TCPReadTimerTask();
-		Timer tcp_timer = new Timer();
-		tcp_timer.schedule(tcp_task, 3000, 500);
 	}
 	
 	@Override

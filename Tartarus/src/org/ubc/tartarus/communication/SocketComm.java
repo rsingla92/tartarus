@@ -9,23 +9,31 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.TimerTask;
 import org.ubc.tartarus.ApplicationData;
+import org.ubc.tartarus.MainActivity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
+import android.widget.Toast;
 
 public class SocketComm {
 
 	private ApplicationData mAppData;
 	private Handler socketMsgHandler;
 	private LinkedList<IncomingMessage> msgList; 
+	private String ip;
+	private Integer port;
+	private Activity socketActivity;
 	
-	public SocketComm(ApplicationData appData) {
+	public SocketComm(ApplicationData appData, Activity activity) {
 		mAppData = appData;
 		msgList = new LinkedList<IncomingMessage>();
-
+		socketActivity = activity;
+		
 		socketMsgHandler = new Handler(Looper.getMainLooper()) {
 			@Override
 			public void handleMessage(Message msg) {
@@ -34,6 +42,14 @@ public class SocketComm {
 				msgList.addFirst(incoming);
 			}
 		};
+	}
+	
+	public void setIp(String newIP) {
+		ip = newIP;
+	}
+	
+	public void setPort(Integer newPort) {
+		port = newPort;
 	}
 	
 	public Socket getSock() {
@@ -106,15 +122,14 @@ public class SocketComm {
 		@Override
 		protected Socket doInBackground(Void... voids) {
 			Socket sock = null;
-			String ip = "192.168.1.101";
 			
 			Log.i("TestSocket", "Trying to connect!");
 			try {
-				sock = new Socket(ip, 50002);
+				sock = new Socket(ip, port);
 			} catch (UnknownHostException e) {
-				e.printStackTrace();
+				Log.e("TestSocket", "Unknown Host.");
 			} catch (IOException e) {
-				e.printStackTrace();
+				Log.e("TestSocket", "IOException when connecting to socket.");
 			}
 			
 			if (sock == null) {
@@ -127,6 +142,13 @@ public class SocketComm {
 		
 		protected void onPostExecute(Socket s) {
 			mAppData.sock = s;
+			
+			if (mAppData.sock != null && mAppData.sock.isConnected()) {
+				Intent mainMenuIntent = new Intent(socketActivity, MainActivity.class); 
+				socketActivity.startActivity(mainMenuIntent);
+			} else {
+				Toast.makeText(socketActivity, "Could not connect. Check your IP address and port.", Toast.LENGTH_LONG).show();
+			}
 		}
 	}
 	
