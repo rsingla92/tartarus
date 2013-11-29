@@ -132,7 +132,7 @@ public class GameRenderer extends CustomRenderer {
 		for (int i = 0; i < BombVector.size(); i ++ ){
 			Point pixelDimensions = BombVector.elementAt(i).getPixelDimensions(mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(),
 					VIEW_HEIGHT*getAspectRatio(), VIEW_HEIGHT);
-			Log.i("BOMB", " "+ pixelDimensions.x + " " + pixelDimensions.y);
+			//Log.i("BOMB", " "+ pixelDimensions.x + " " + pixelDimensions.y);
 			if (BombVector.elementAt(i).isVisible()){
 				BombVector.elementAt(i).drawBomb(getModelViewMatrix(), mWorldMap.getViewportX(), mWorldMap.getViewportY(), 
 						mWorldMap.getViewportWidth(), mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float)VIEW_HEIGHT);
@@ -227,14 +227,19 @@ public class GameRenderer extends CustomRenderer {
 			short bombY = (short)(bb.getShort() & 0xFFFF);
 			Point p = new Point (bombX, bombY);
 			if (bombCreate == 1){
+				Log.i("GameRenderer", "Created bomb at " + bombX + ", " + bombY);
 				Bomb b = new Bomb (getActivity(),0.25f, 0.25f);
 				b.setPosition(p);
+				b.setVisible(true);
 				BombVector.add(b);
 			}
 			else if (bombCreate == 0){
 				for (int i = 0; i < BombVector.size(); i++){
-					if (BombVector.elementAt(i).getPosition() == p)
+					if (BombVector.elementAt(i).getPosition().x == p.x && 
+							BombVector.elementAt(i).getPosition().y == p.y) {
+						Log.i("GameRenderer", "Destroyed bomb at " + p.toString());
 						BombVector.remove(i);
+					}
 				}
 			}
 			
