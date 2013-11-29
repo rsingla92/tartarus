@@ -9,7 +9,7 @@ import android.app.Activity;
 import android.util.Log;
 
 public class OutMsgBombHit extends OutgoingMessage{
-	private short row, column;
+	private short x, y;
 	private boolean newMsg;
 	
 	public OutMsgBombHit(Activity activity) {
@@ -21,17 +21,17 @@ public class OutMsgBombHit extends OutgoingMessage{
 		if (!newMsg) return; // No need to send if there is no new message ready.
 		
 		ByteBuffer buffer = ByteBuffer.allocate(4);
-		buffer.putShort(column);
-		buffer.putShort(row);
+		buffer.putShort(x);
+		buffer.putShort(y);
 		byte buf[] = buffer.array();
-		Log.i("TestSocket", "Sent row: " + row + ", Sent col: + " + column);
+		Log.i("TestSocket", "Sent x: " + x + ", Sent y: + " + y);
 		sendMessage(OutMessageType.MSG_BOMB_HIT, buf);
 		newMsg = false; 
 	}
 	
-	public void setMessage(short row, short col) {
-			this.row = row;
-			this.column = col;
+	public void setMessage(short x, short y) {
+			this.x = x;
+			this.y = y;
 			this.newMsg = true;
 		}
 }

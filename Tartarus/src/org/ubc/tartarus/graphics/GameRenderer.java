@@ -167,7 +167,7 @@ public class GameRenderer extends CustomRenderer {
 					}
 					);
 					
-					bombHitMsg.setMessage((short)(BombVector.elementAt(i).getPosition().x/16), (short)(BombVector.elementAt(i).getPosition().y/16));
+					bombHitMsg.setMessage((short)(BombVector.elementAt(i).getPosition().x), (short)(BombVector.elementAt(i).getPosition().y));
 					
 					try {
 						bombHitMsg.sendMessage();
@@ -366,7 +366,7 @@ public class GameRenderer extends CustomRenderer {
 				BombVector.lastElement().setPosition(new Point(converted.x, converted.y));
 				BombVector.lastElement().setVisible(true);
 				
-				bombPlantedMsg.setMessage((short)(BombVector.lastElement().getPosition().x/16), (short)(BombVector.lastElement().getPosition().y/16));
+				bombPlantedMsg.setMessage((short)(BombVector.lastElement().getPosition().x), (short)(BombVector.lastElement().getPosition().y));
 				
 				try {
 					bombPlantedMsg.sendMessage();
