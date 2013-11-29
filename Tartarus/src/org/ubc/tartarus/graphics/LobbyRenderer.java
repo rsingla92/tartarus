@@ -29,6 +29,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.opengl.Matrix;
 import android.util.Log;
+import android.widget.Toast;
 
 public class LobbyRenderer extends CustomRenderer {
 	
@@ -257,7 +258,13 @@ public class LobbyRenderer extends CustomRenderer {
 			// Transition to the game
 			mParticleSystem.makeSpiralSystem();
 			mParticleSystem.beginSpawning();
-			Log.i("LobbyRenderer", "Got a MSG_START!");
+			getActivity().runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+					Toast.makeText(getActivity(), "Starting game!", Toast.LENGTH_SHORT).show();
+				}
+			}); 
+
 			hitReady = true;
 		} else if (msg.getID() == IncomingMessageParser.InMessageType.MSG_CHAR_CHOSEN.getId()) {
 			// Character chosen handling -- make the character un-selectable.

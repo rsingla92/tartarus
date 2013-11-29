@@ -435,8 +435,8 @@ public class Player {
 			playerCol[2] = 1.0f;
 		} else {
 			playerCol[0] = 1.0f;
-			playerCol[1] = 0.0f;
-			playerCol[2] = 1.0f;
+			playerCol[1] = 1.0f;
+			playerCol[2] = 0.0f;
 		}
 		
 		return playerCol;
