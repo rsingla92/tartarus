@@ -258,12 +258,6 @@ public class LobbyRenderer extends CustomRenderer {
 			// Transition to the game
 			mParticleSystem.makeSpiralSystem();
 			mParticleSystem.beginSpawning();
-			getActivity().runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-					Toast.makeText(getActivity(), "Starting game!", Toast.LENGTH_SHORT).show();
-				}
-			}); 
 
 			hitReady = true;
 		} else if (msg.getID() == IncomingMessageParser.InMessageType.MSG_CHAR_CHOSEN.getId()) {
@@ -494,6 +488,13 @@ public class LobbyRenderer extends CustomRenderer {
 					
 					try {
 						readyMsg.sendMessage();
+						
+						getActivity().runOnUiThread(new Runnable() {
+							@Override
+							public void run() {
+								Toast.makeText(getActivity(), "Starting game!", Toast.LENGTH_SHORT).show();
+							}
+						}); 
 					} catch (MessageTypeMismatchException e) {
 						Log.e("LobbyRenderer", "Could not send Ready Message.");
 					}
