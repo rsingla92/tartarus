@@ -147,15 +147,25 @@ public class GameRenderer extends CustomRenderer {
 						pixelDimensions.x , pixelDimensions.y, 
 						mWorldMap.getViewportX(), mWorldMap.getViewportY(), mWorldMap.getViewportWidth(), 
 						mWorldMap.getViewportHeight(), VIEW_HEIGHT*getAspectRatio(), (float) VIEW_HEIGHT) && BombVector.elementAt(i).isBombActivated()){
-					
 					BombVector.elementAt(i).explodeBomb();
 					BombVector.elementAt(i).setVisible(true);
+
+				}
+				
+				if (BombVector.elementAt(i).isExploding()){
+					BombVector.elementAt(i).getCurrentAnimation().animate();
+				}
+				
+				if (BombVector.elementAt(i).getCurrentAnimation().getFrameNumber() >= 9){
+					
 					getActivity().runOnUiThread(new Runnable() {
 						@Override
 						public void run() {
 							Toast.makeText(getActivity(), "-10 points", Toast.LENGTH_SHORT).show();
+							Log.i("toast", "run");
 						}
-					});
+					}
+					);
 					
 					bombHitMsg.setMessage((short)(BombVector.elementAt(i).getPosition().x/16), (short)(BombVector.elementAt(i).getPosition().y/16));
 					
@@ -165,22 +175,13 @@ public class GameRenderer extends CustomRenderer {
 						Log.e("Bomb", "Message Type Mismatch!");
 					}
 					mPlayer.losePoints(10);
-				}
-				
-				if (BombVector.elementAt(i).isExploding()){
-					BombVector.elementAt(i).getCurrentAnimation().animate();
-				}
-				
-				if (BombVector.elementAt(i).getCurrentAnimation().getFrameNumber() >= 9)
 					BombVector.remove(i);
+				}
+				
 			}
 		}
 		
 		mPlayer.drawPlayer(getModelViewMatrix());
-		
-		//Particles should be used for special events.
-	//	mParticleSystem.updateParticleSystem(getFingerX(), getFingerY(), 0, getAspectRatio());
-	//	mParticleSystem.drawParticles(getModelViewMatrix());
 		
 		try {
 			while (true) {
