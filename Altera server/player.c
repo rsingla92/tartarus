@@ -17,8 +17,8 @@ sPlayer playerDevTable[MAX_PLAYERS] =
 {
 		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, 0, {0xff, 0, 0}, {-1, -1, -1, -1}},
 		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0xff, 0}, {-1, -1, -1, -1}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0, 0xff}, {-1, -1, -1, -1}},
-		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, 0, {0xe3, 0xff, 0x42}, {-1, -1, -1, -1}}
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, 0, {0, 0xff, 0xff}, {-1, -1, -1, -1}},
+		{NOT_CONNECTED, 0, 0, 0, 0, 0, 0, 0, 0, {0xff, 0xff, 0}, {-1, -1, -1, -1}}
 };
 
 unsigned char doesPlayerExist(int player)
@@ -91,13 +91,13 @@ short getViewportY(int player)
 	}
 }
 
-unsigned char addPlayer(int deviceId)
+int addPlayer(int deviceId)
 {
 	if (numPlayers >= MAX_PLAYERS || numPlayers < 0) return -1;
 
-	unsigned char oldId = findPlayerByDevice(deviceId);
+	int oldId = findPlayerByDevice(deviceId);
 
-	if (oldId != -1 && playerDevTable[oldId].state != NOT_CONNECTED) return -1;
+	if (oldId != -1 && playerDevTable[oldId].state != NOT_CONNECTED) return -2;
 
 	unsigned char playerId;
 
@@ -257,11 +257,6 @@ void generateGems(unsigned char player)
 		playerDevTable[player].gemList[i] = getRandomPoint(quad);
 		printf("Gem %d: (%d, %d), ", i, playerDevTable[player].gemList[i].x, playerDevTable[player].gemList[i].y);
 	    // TODO: Remove
-		colour col;
-		col.r = 0xff;
-		col.g = 0;
-		col.b = 0xff;
-		draw_pixel(playerDevTable[player].gemList[i].x, playerDevTable[player].gemList[i].y, col);
 	}
 }
 

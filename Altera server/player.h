@@ -19,7 +19,7 @@
 
 #define POINTS_PER_GEM      10
 // Testing:
-#define MAX_POINTS          100
+#define MAX_POINTS          30
 
 // for testing:
 #define NUM_GEMS_PER_PLAYER_PER_QUAD	10
@@ -52,7 +52,7 @@ short getStoredX(int player);
 void setStoredY(int player, int y);
 void setStoredX(int player, int x);
 
-unsigned char addPlayer(int deviceId);
+int addPlayer(int deviceId);
 void removePlayer(int deviceId);
 int setPlayerReady(int player);
 int findPlayerByDevice(unsigned char deviceId);

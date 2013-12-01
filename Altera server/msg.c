@@ -63,9 +63,11 @@ int parseJoinMsg(GenericMsg* msg)
 {
 	// JOIN message from a player attempting to join the game.
 	// The data is just four-bytes: The integer for the device ID.
-	printf("Join Message\n");
-	unsigned char playerID = addPlayer(msg->clientID_);
+	printf("Join Message from client %d\n", msg->clientID_);
+	int playerID = addPlayer(msg->clientID_);
 	unsigned char response = 1;
+
+	if (playerID == -2) sendJoinResponse(findPlayerByDevice(msg->clientID_), response, msg->clientID_);
 
 	if (playerID == -1)
 	{
@@ -81,6 +83,7 @@ int parseJoinMsg(GenericMsg* msg)
 	}
 
 	sendJoinResponse(playerID, response, msg->clientID_);
+	return 0;
 }
 
 int parseDisconnectMsg(GenericMsg *msg)

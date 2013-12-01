@@ -15,6 +15,7 @@
 #include "serialport.h"
 #include "Map.h"
 #include <errno.h>
+#include <fcntl.h>
 
 #define NUM_FILES 0
 
@@ -53,15 +54,7 @@ static int readSocket(FILE* uart)
 	// first byte
 	readSerialData(uart, &clientID);
 
-	if (errno == EWOULDBLOCK) return 0;
-
 	printf("Dat: %d\n", clientID);
-
-	// If nothing to read, return.
-	if (clientID == EOF) {
-		printf("Got an EOF!!\n");
-		return 0;
-	}
 
 	// Read size
 	readSerialData(uart, &lengthMSB);
@@ -74,6 +67,16 @@ static int readSocket(FILE* uart)
 	newElement->clientID_ = clientID;
 	newElement->next = NULL;
 
+	// TESTING:
+
+	newElement->msgLength_ = packetLength - 1;
+	unsigned char* full_buffer = (byte*) malloc(sizeof(newElement->msgLength_ + 1));
+	newElement->msg_ = full_buffer + 1;
+	//newElement->msgID_ = fgetc(uart_dev);
+	fread(full_buffer, 1, newElement->msgLength_ + 1, uart_dev);
+	newElement->msgID_ = *full_buffer;
+
+	/*
 	newElement->msgLength_ = packetLength--;
 	printf("Length: %d, ", newElement->msgLength_);
 
@@ -90,7 +93,7 @@ static int readSocket(FILE* uart)
 		readSerialData(uart, &(newElement->msg_[j]));
 		printf("%x, ", newElement->msg_[j]);
 	}
-
+*/
 	// If it is the first element then the queue is not set up
 	if( !msgHead )
 	{
@@ -171,7 +174,7 @@ static void parseNextMessage()
 
 		// clean up the msg struct
 		tmp = msgHead->next;
-		free(msgHead->msg_);
+		free(msgHead->msg_ - 1);
 		free(msgHead);
 		msgHead = tmp;
 
@@ -186,7 +189,8 @@ int main(void) {
 
 	// Set it to non-blocking
 	// 4 is the SET_FLAGS constant, and 0x4000 is non_blocking
-	fcntl(uart_dev, 4, 0x4000);
+	int flags = fcntl(uart_dev, F_GETFL, 0);
+	fcntl(uart_dev, F_SETFL, flags | O_NONBLOCK);
 
 	alt_timestamp_start();
 	sdcard_handle *sd_dev = init_sdcard(); //TODO: REMOVE COMMENT
